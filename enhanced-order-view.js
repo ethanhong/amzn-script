@@ -101,10 +101,6 @@ let qrcode;
         }
     }
 
-    //create a container for new elements
-    let container = document.createElement('div');
-    container.setAttribute('id', 'new_container');
-
     //create a container for qrcode
     let qr = document.createElement('div');
     qr.setAttribute('id', 'qrcode_container');
@@ -113,20 +109,18 @@ let qrcode;
     let qrText = document.createElement('div');
     qrText.setAttribute('id', 'qr_text');
 
+    //create a container for qrcode_container + qr_text
     let qrcodeWithText = document.createElement('div');
+    qrcodeWithText.setAttribute('id', 'qrcode_with_text');
     qrcodeWithText.appendChild(qr);
-    //qrcodeWithText.appendChild(document.createElement('br'));
     qrcodeWithText.appendChild(qrText);
-
-    //put new elements into the container
-    container.appendChild(myTable);
-    container.appendChild(qrcodeWithText);
 
     //put whole container into body
     let b = document.body;
     b.insertBefore(document.createElement('br'), b.childNodes[4]);
     b.insertBefore(document.createElement('br'), b.childNodes[4]);
-    b.insertBefore(container, b.childNodes[4]);
+    b.insertBefore(qrcodeWithText, b.childNodes[4]);
+    b.insertBefore(myTable, b.childNodes[4]);
 
 }());
 
@@ -156,13 +150,11 @@ GM_addStyle(`
     }
 
     #myTable {
+        display: inline-block;
         border-collapse: collapse;
         font-family: monospace;
         font-size: 18px;
-        min-width: 1100px;
-        max-width: calc(100vw - 600px);
         margin-right: 100px;
-        flex: 1;
     }
 
     #myTable tr:nth-child(odd) {
@@ -183,22 +175,8 @@ GM_addStyle(`
         padding: 12px;
      }
 
-    .last-row {
-    height: auto;
+    #qrcode_with_text {
+        display: inline-block;
+        font-family: monospace;
     }
-
-    #new_container {
-        display: flex;
-        flex-flow: row wrap;
-        align-items: flex-start;
-    }
-
-    #qrcode_container {
-        flex: 1;
-    }
-
-    #qr_text {
-        margin-bottom: 5px;
-    }
-
 `);
