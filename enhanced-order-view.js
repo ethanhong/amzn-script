@@ -155,6 +155,7 @@ GM_addStyle(`
         font-family: monospace;
         font-size: 18px;
         margin-right: 100px;
+        vertical-align: top;
     }
 
     #myTable tr:nth-child(odd) {
@@ -178,5 +179,6 @@ GM_addStyle(`
     #qrcode_with_text {
         display: inline-block;
         font-family: monospace;
+        vertical-align: top;
     }
 `);
