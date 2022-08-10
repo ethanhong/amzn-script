@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Enhance Order View
-// @namespace    http://tampermonkey.net/
+// @namespace    mailto:py.hong@gmail.com
 // @version      0.1
 // @description  enhance order view
 // @author       Pei
