@@ -14,11 +14,7 @@
     'use strict';
 
     const PICKLIST_ID = 'table.a-bordered:nth-child(5) > tbody:nth-child(1) > tr > td:nth-child(13)';
-
-    let picklistUrl = 'https://aftlite-na.amazon.com/picklist/pack_by_picklist?picklist_id=';
-    if (window.location.href.indexOf('aftlite-portal') > -1) {
-        picklistUrl = 'https://aftlite-portal.amazon.com/picklist/pack_by_picklist?picklist_id=';
-    }
+    const PICKLIST_URL = 'https:/picklist/pack_by_picklist?picklist_id=';
 
     // calulate window hour
     let currentTime = new Date();
@@ -52,7 +48,7 @@
         }
 
         // picklist id is valid, start to fetch
-        fetch(picklistUrl + picklistId)
+        fetch(PICKLIST_URL + picklistId)
             .then(function (response) {
                 return response.text();
             })
