@@ -5,7 +5,6 @@
 // @description  Mark totes with current pull time
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
-// @match        https://aftlite-na.amazon.com/labor_tracking/lookup_history?user_name=*
 // @grant        GM_addStyle
 // ==/UserScript==
 
