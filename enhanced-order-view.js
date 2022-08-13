@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Enhance Order View
-// @namespace    mailto:py.hong@gmail.com
+// @namespace    https://github.com/ethanhong/amzn-script
 // @version      0.1
 // @description  enhance order view
 // @author       Pei
