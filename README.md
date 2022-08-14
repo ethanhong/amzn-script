@@ -1,4 +1,4 @@
-# Amazon-Tampermonkey-Script
+# amzn-script
 Tampermonkey script to enhance Amazon working flow.
 
 
