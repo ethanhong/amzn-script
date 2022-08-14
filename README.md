@@ -9,6 +9,10 @@ Tampermonkey script to enhance Amazon working flow.
 - Generate **QRcode** for tracking and spoo number by click it from integrated table.
 
 
+### [auto-indirect-labor-tracking](https://github.com/ethanhong/Amazon-Tampermonkey-Script/blob/main/auto-indirect-labor-tracking.js)
+- Auto sign in to OBindirect every period of time.
+
+
 ### [Tote Time Marker](https://github.com/ethanhong/Amazon-Tampermonkey-Script/blob/main/tote-time-marker.js)
 - Mark totes have the same pull time with the same color.
 - Show pull up time before Spoo.
