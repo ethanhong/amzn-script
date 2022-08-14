@@ -18,6 +18,9 @@
         var login = document.getElementsByTagName("span")[0].innerHTML.match(/\(([^)]+)\)/)[1];
         document.getElementsByName("name")[0].value = login;
         document.getElementsByName("code")[0].value = code1;
+
+        var d = new Date();
+        console.log(d.toLocaleString(), code1);
     };
 
     document.getElementsByTagName("form")[0].appendChild(button1);
