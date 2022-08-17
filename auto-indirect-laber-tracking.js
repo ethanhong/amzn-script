@@ -10,22 +10,23 @@
 
 (function () {
 
-    let code1 = "OBINDIRECT";
+    const code1 = "OBINDIRECT";
+    const interval = 420000; // 7 minutes
 
-    var button1 = document.createElement("button");
+
+    const button1 = document.createElement("button");
     button1.innerHTML = code1;
     button1.onclick = function () {
-        var login = document.getElementsByTagName("span")[0].innerHTML.match(/\(([^)]+)\)/)[1];
+        const login = document.getElementsByTagName("span")[0].innerHTML.match(/\(([^)]+)\)/)[1];
         document.getElementsByName("name")[0].value = login;
         document.getElementsByName("code")[0].value = code1;
-
-        var d = new Date();
-        console.log(d.toLocaleString(), code1);
+        // tha page will auto reload after this point
     };
 
     document.getElementsByTagName("form")[0].appendChild(button1);
 
-    button1.click();
-    setInterval(() => button1.click(), 420000);
+    setInterval(function () {
+        button1.click()
+    }, interval);
 
 })();
