@@ -51,19 +51,26 @@
     const info = {
       cpt: '',
       completionTime: '',
+      status: '',
     };
 
     const timeRe = /\d{1,2}:\d{1,2}/;
+    const statusRe = /\((\w+)\)/;
     const html = new DOMParser().parseFromString(page, 'text/html');
     // extract CPT
-    let result = html.querySelector('#main-content > div:nth-child(12)').textContent.match(timeRe);
+    let result = html.querySelector('div.a-row:nth-child(12)').textContent.match(timeRe);
     if (result) {
       [info.cpt] = result;
     }
     // extract completion time
-    result = html.querySelector('#main-content > div:nth-child(10)').textContent.match(timeRe);
+    result = html.querySelector('div.a-row:nth-child(10)').textContent.match(timeRe);
     if (result) {
       [info.completionTime] = result;
+    }
+    // extract status
+    result = html.querySelector('div.a-row:nth-child(6)').textContent.match(statusRe);
+    if (result) {
+      [, info.status] = result;
     }
     return info;
   }
@@ -108,6 +115,9 @@
 
         // add completion time
         row.cells[7].textContent = toteInfo.completionTime;
+
+        // add status
+        row.cells[10].textContent = toteInfo.status;
 
         // add CPT
         row.cells[8].textContent = toteInfo.cpt;
