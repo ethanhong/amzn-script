@@ -20,10 +20,10 @@
   let fetchURL;
   if (urlParser.hostname === 'aftlite-na.amazon.com') {
     tableSelector = 'body > div.resultSet > table';
-    fetchURL = 'https:/wms/pack_by_picklist?picklist_id=';
+    fetchURL = 'https:/wms/view_picklist_history?picklist_id=';
   } else if (urlParser.hostname === 'aftlite-portal.amazon.com') {
     tableSelector = '#main-content > table';
-    fetchURL = 'https:/picklist/pack_by_picklist?picklist_id=';
+    fetchURL = '/picklist/view_picklist_history?picklist_id=';
   } else {
     return;
   }
@@ -32,11 +32,11 @@
     const tbl = document.querySelector(tableSelector);
     if (tbl == null) return;
     if (urlParser.hostname === 'aftlite-portal.amazon.com') {
-      // remove table a-vertical-stripes color setting
+      // remove table a-vertical-stripes class name
       tbl.classList.remove('a-vertical-stripes');
     }
     // change ExpDate title to Pull Time
-    tbl.rows[0].cells[8].textContent = 'Pull Time';
+    tbl.rows[0].cells[8].textContent = 'CPT';
     // change Cart title to Aisle
     tbl.rows[0].cells[10].textContent = 'Aisle';
   }
@@ -45,65 +45,60 @@
     return [...document.querySelector(tableSelector).rows].slice(1);
   }
 
-  function convertTime(timeStr) {
-    // convert from 12hr to 24hr, ex: 2:00pm to 14:00
-    let [hour] = timeStr.split(':00');
-    const [, modifier] = timeStr.split(':00');
-    if (hour === '12') {
-      hour = '00';
-    }
-    if (modifier === 'pm') {
-      hour = parseInt(hour, 10) + 12;
-    }
-    return `${hour}:00`;
-  }
-
   function extractToteInfo(page) {
     const info = {};
-    [info.pullTime] = /\d{1,2}:00[a,p]m/.exec(page);
-    info.pullTime = convertTime(info.pullTime);
+    const timeRe = /\d{1,2}:\d{1,2}/;
+    const parcer = new DOMParser();
+    const html = parcer.parseFromString(page, 'text/html');
+    [info.cpt] = html.querySelector('#main-content > div:nth-child(12)').textContent.match(timeRe);
     return info;
   }
 
-  async function fetchTotePage(spoo) {
-    return fetch(`${fetchURL}${encodeURIComponent(spoo)}`).then((res) => res.text());
+  async function fetchPicklistHistoryByID(id) {
+    if (/^\d{7}$/.test(id)) {
+      // id should be a 7-digit number
+      return fetch(`${fetchURL}${encodeURIComponent(id)}`).then((res) => res.text());
+    }
+    return null;
   }
 
   // calulate window hour
   const now = new Date();
   const pullTimeStyle = new Map([
-    [`${(now.getHours() + 1) % 24}:00`, 'late-window'],
-    [`${(now.getHours() + 2) % 24}:00`, 'current-window'],
-    [`${(now.getHours() + 3) % 24}:00`, 'next-window'],
+    [`${(now.getHours() + 1) % 24}:15`, 'late-window'],
+    [`${(now.getHours() + 2) % 24}:15`, 'current-window'],
+    [`${(now.getHours() + 3) % 24}:15`, 'next-window'],
   ]);
 
   async function totePainter() {
     preparePage();
 
     const allRows = getRows();
+
+    // fetch picklist info by picklist id
     const savedInfo = new Map();
     for (const row of allRows) {
-      const spoo = row.cells[9].textContent.trim();
-      if (!spoo) {
-        row.cells[10].textContent = `${row.cells[1].textContent}/${row.cells[2].textContent}`;
-      } else {
-        let toteInfo;
-        if (savedInfo.has(spoo)) {
-          toteInfo = savedInfo.get(spoo);
+      if (row.cells[1].textContent.trim() === 'pack') {
+        const id = row.cells[12].textContent.trim();
+        let toteInfo = {};
+        if (savedInfo.has(id)) {
+          toteInfo = savedInfo.get(id);
         } else {
           // eslint-disable-next-line no-await-in-loop
-          const page = await fetchTotePage(spoo);
-          toteInfo = extractToteInfo(page);
-          savedInfo.set(spoo, toteInfo);
+          const page = await fetchPicklistHistoryByID(id);
+          if (page) {
+            toteInfo = extractToteInfo(page);
+            savedInfo.set(id, toteInfo);
+          }
         }
 
-        // add pull time value
-        row.cells[8].textContent = toteInfo.pullTime;
+        // add CPT
+        row.cells[8].textContent = toteInfo.cpt;
 
-        // add window class name for css styling
+        // add css styling by CPT
         let style = 'less-important';
-        if (pullTimeStyle.has(toteInfo.pullTime)) {
-          style = pullTimeStyle.get(toteInfo.pullTime);
+        if (pullTimeStyle.has(toteInfo.cpt)) {
+          style = pullTimeStyle.get(toteInfo.cpt);
         }
         row.cells[8].classList.add(style);
         row.cells[9].classList.add(style);
