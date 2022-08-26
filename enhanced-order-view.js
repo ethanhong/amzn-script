@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Enhance Order View
 // @namespace    https://github.com/ethanhong/amzn-script
-// @version      0.1
+// @version      1.1
 // @description  enhance order view
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order/*
