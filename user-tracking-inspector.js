@@ -35,7 +35,9 @@
       // remove table a-vertical-stripes class name
       tbl.classList.remove('a-vertical-stripes');
     }
-    // change ExpDate title to Pull Time
+    // change Previous/Exp.Date title to Competion Time
+    tbl.rows[0].cells[7].textContent = 'Completion Time';
+    // change ExpDate title to CPT
     tbl.rows[0].cells[8].textContent = 'CPT';
     // change Cart title to Status
     tbl.rows[0].cells[10].textContent = 'Status';
@@ -46,11 +48,23 @@
   }
 
   function extractToteInfo(page) {
-    const info = {};
+    const info = {
+      cpt: '',
+      completionTime: '',
+    };
+
     const timeRe = /\d{1,2}:\d{1,2}/;
-    const parcer = new DOMParser();
-    const html = parcer.parseFromString(page, 'text/html');
-    [info.cpt] = html.querySelector('#main-content > div:nth-child(12)').textContent.match(timeRe);
+    const html = new DOMParser().parseFromString(page, 'text/html');
+    // extract CPT
+    let result = html.querySelector('#main-content > div:nth-child(12)').textContent.match(timeRe);
+    if (result) {
+      [info.cpt] = result;
+    }
+    // extract completion time
+    result = html.querySelector('#main-content > div:nth-child(10)').textContent.match(timeRe);
+    if (result) {
+      [info.completionTime] = result;
+    }
     return info;
   }
 
@@ -91,6 +105,9 @@
             savedInfo.set(id, toteInfo);
           }
         }
+
+        // add completion time
+        row.cells[7].textContent = toteInfo.completionTime;
 
         // add CPT
         row.cells[8].textContent = toteInfo.cpt;
