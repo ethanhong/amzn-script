@@ -37,8 +37,8 @@
     }
     // change ExpDate title to Pull Time
     tbl.rows[0].cells[8].textContent = 'CPT';
-    // change Cart title to Aisle
-    tbl.rows[0].cells[10].textContent = 'Aisle';
+    // change Cart title to Status
+    tbl.rows[0].cells[10].textContent = 'Status';
   }
 
   function getRows() {
@@ -102,9 +102,6 @@
         }
         row.cells[8].classList.add(style);
         row.cells[9].classList.add(style);
-
-        // add aisle information
-        [row.cells[10].textContent] = /\w\d{3}/.exec(row.cells[4].textContent);
       }
     }
   }
