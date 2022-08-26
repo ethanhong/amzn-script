@@ -18,11 +18,20 @@
 
   let tableSelector = {};
   let fetchURL;
+  let cptSelector;
+  let statusSelector;
+  let completionTimeSelector;
   if (urlParser.hostname === 'aftlite-na.amazon.com') {
     tableSelector = 'body > div.resultSet > table';
+    cptSelector = 'div.a-row:nth-child(12)';
+    completionTimeSelector = 'div.a-row:nth-child(10)';
+    statusSelector = 'div.a-row:nth-child(6)';
     fetchURL = 'https:/wms/view_picklist_history?picklist_id=';
   } else if (urlParser.hostname === 'aftlite-portal.amazon.com') {
     tableSelector = '#main-content > table';
+    cptSelector = 'div.a-row:nth-child(12)';
+    completionTimeSelector = 'div.a-row:nth-child(10)';
+    statusSelector = 'div.a-row:nth-child(6)';
     fetchURL = '/picklist/view_picklist_history?picklist_id=';
   } else {
     return;
@@ -58,17 +67,17 @@
     const statusRe = /\((\w+)\)/;
     const html = new DOMParser().parseFromString(page, 'text/html');
     // extract CPT
-    let result = html.querySelector('div.a-row:nth-child(12)').textContent.match(timeRe);
+    let result = html.querySelector(cptSelector).textContent.match(timeRe);
     if (result) {
       [info.cpt] = result;
     }
     // extract completion time
-    result = html.querySelector('div.a-row:nth-child(10)').textContent.match(timeRe);
+    result = html.querySelector(completionTimeSelector).textContent.match(timeRe);
     if (result) {
       [info.completionTime] = result;
     }
     // extract status
-    result = html.querySelector('div.a-row:nth-child(6)').textContent.match(statusRe);
+    result = html.querySelector(statusSelector).textContent.match(statusRe);
     if (result) {
       [, info.status] = result;
     }
