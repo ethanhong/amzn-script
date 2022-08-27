@@ -9,27 +9,45 @@
 // @grant        GM_addStyle
 // ==/UserScript==
 
-let tableSelector = 'body > div.resultSet > table';
-let statusSelector = 'div.a-row:nth-child(6)';
-let completionTimeSelector = 'div.a-row:nth-child(10)';
-let cptSelector = 'div.a-row:nth-child(12)';
+// variables for aftlite-na.amazon.com
+let tableSelector = '.reportLayout';
+let statusSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(2)';
+let completionTimeSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(6)';
+let cptSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(8))';
 let fetchURL = 'https:/wms/view_picklist_history?picklist_id=';
+let cellIndex = {
+  action: 1,
+  completionTime: 8,
+  cpt: 9,
+  toteSpoo: 10,
+  status: 11,
+  picklistId: 13,
+};
 
+// variables for aftlite-pertal.amazon.com
 if (window.location.hostname === 'aftlite-portal.amazon.com') {
   tableSelector = '#main-content > table';
   statusSelector = 'div.a-row:nth-child(6)';
   completionTimeSelector = 'div.a-row:nth-child(10)';
   cptSelector = 'div.a-row:nth-child(12)';
   fetchURL = '/picklist/view_picklist_history?picklist_id=';
+  cellIndex = {
+    action: 1,
+    completionTime: 7,
+    cpt: 8,
+    toteSpoo: 9,
+    status: 10,
+    picklistId: 12,
+  };
 }
 
 (() => {
   preparePage();
   const allRows = getRows();
   const checkedID = new Set();
-  allRows.forEach(async (row, i, rows) => {
-    const action = row.cells[1].textContent.trim();
-    const id = row.cells[12].textContent.trim();
+  allRows.forEach(async (row, _, rows) => {
+    const action = row.cells[cellIndex.action].textContent.trim();
+    const id = row.cells[cellIndex.picklistId].textContent.trim();
     if (action === 'pack' && !checkedID.has(id) && idIsValid(id)) {
       checkedID.add(id);
       const page = await fetch(`${fetchURL}${encodeURIComponent(id)}`).then((res) => res.text());
@@ -49,11 +67,11 @@ function preparePage() {
     tbl.classList.remove('a-vertical-stripes');
   }
   // change Previous/Exp.Date title to Competion Time
-  tbl.rows[0].cells[7].textContent = 'Completion Time';
+  tbl.rows[0].cells[cellIndex.completionTime].textContent = 'Completion Time';
   // change ExpDate title to CPT
-  tbl.rows[0].cells[8].textContent = 'CPT';
+  tbl.rows[0].cells[cellIndex.cpt].textContent = 'CPT';
   // change Cart title to Status
-  tbl.rows[0].cells[10].textContent = 'Status';
+  tbl.rows[0].cells[cellIndex.status].textContent = 'Status';
 }
 
 function getRows() {
@@ -72,19 +90,14 @@ function extractToteInfo(page) {
   const html = new DOMParser().parseFromString(page, 'text/html');
   // extract CPT
   let result = html.querySelector(cptSelector).textContent.match(timeRe);
-  if (result) {
-    [info.cpt] = result;
-  }
+  if (result) [info.cpt] = result;
   // extract completion time
   result = html.querySelector(completionTimeSelector).textContent.match(timeRe);
-  if (result) {
-    [info.completionTime] = result;
-  }
+  if (result) [info.completionTime] = result;
   // extract status
   result = html.querySelector(statusSelector).textContent.match(statusRe);
-  if (result) {
-    [, info.status] = result;
-  }
+  if (result) [, info.status] = result;
+
   return info;
 }
 
@@ -98,11 +111,11 @@ const pullTimeStyle = new Map([
 
 function changePageContent(id, toteInfo, rows) {
   rows.forEach((row) => {
-    const completionTimeCell = row.cells[7];
-    const cptCell = row.cells[8];
-    const toteSpooCell = row.cells[9];
-    const statusCell = row.cells[10];
-    const picklistIDCell = row.cells[12];
+    const completionTimeCell = row.cells[cellIndex.completionTime];
+    const cptCell = row.cells[cellIndex.cpt];
+    const toteSpooCell = row.cells[cellIndex.toteSpoo];
+    const statusCell = row.cells[cellIndex.status];
+    const picklistIDCell = row.cells[cellIndex.picklistId];
 
     if (picklistIDCell.textContent.trim() === id) {
       completionTimeCell.textContent = toteInfo.completionTime;
