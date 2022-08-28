@@ -9,48 +9,34 @@
 // @grant        GM_addStyle
 // ==/UserScript==
 
-// variables for aftlite-na.amazon.com
-let tableSelector = '.reportLayout';
-let statusSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(2)';
-let completionTimeSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(6)';
-let cptSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(8))';
-let fetchURL = 'https:/wms/view_picklist_history?picklist_id=';
-let cellIndex = {
-  action: 1,
-  completionTime: 8,
-  cpt: 9,
-  toteSpoo: 10,
-  status: 11,
-  picklistId: 13,
-};
+const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
+const cellIndex = {};
+[
+  cellIndex.action,
+  cellIndex.completionTime,
+  cellIndex.cpt,
+  cellIndex.toteSpoo,
+  cellIndex.status,
+  cellIndex.picklistId,
+] = isAftliteNa ? [1, 8, 9, 10, 11, 13] : [1, 7, 8, 9, 10, 12];
 
-// variables for aftlite-pertal.amazon.com
-if (window.location.hostname === 'aftlite-portal.amazon.com') {
-  tableSelector = '#main-content > table';
-  statusSelector = 'div.a-row:nth-child(6)';
-  completionTimeSelector = 'div.a-row:nth-child(10)';
-  cptSelector = 'div.a-row:nth-child(12)';
-  fetchURL = '/picklist/view_picklist_history?picklist_id=';
-  cellIndex = {
-    action: 1,
-    completionTime: 7,
-    cpt: 8,
-    toteSpoo: 9,
-    status: 10,
-    picklistId: 12,
-  };
-}
+(function main() {
+  const bigTable = isAftliteNa
+    ? document.querySelector('.reportLayout')
+    : document.querySelector('#main-content > table');
+  if (bigTable == null) return;
 
-(() => {
-  preparePage();
-  const allRows = getRows();
+  preparePage(bigTable);
+
+  const allRows = getRows(bigTable);
+
   const checkedID = new Set();
   allRows.forEach(async (row, _, rows) => {
     const action = row.cells[cellIndex.action].textContent.trim();
     const id = row.cells[cellIndex.picklistId].textContent.trim();
     if (action === 'pack' && !checkedID.has(id) && idIsValid(id)) {
       checkedID.add(id);
-      const page = await fetch(`${fetchURL}${encodeURIComponent(id)}`).then((res) => res.text());
+      const page = await fetchPicklistHistoryPage(id);
       if (page) {
         const toteInfo = extractToteInfo(page);
         changePageContent(id, toteInfo, rows);
@@ -59,23 +45,30 @@ if (window.location.hostname === 'aftlite-portal.amazon.com') {
   });
 })();
 
-function preparePage() {
-  const tbl = document.querySelector(tableSelector);
-  if (tbl == null) return;
-  if (window.location.hostname === 'aftlite-portal.amazon.com') {
+function preparePage(tbl) {
+  if (!isAftliteNa) {
     // remove table a-vertical-stripes class name
     tbl.classList.remove('a-vertical-stripes');
   }
-  // change Previous/Exp.Date title to Competion Time
-  tbl.rows[0].cells[cellIndex.completionTime].textContent = 'Completion Time';
-  // change ExpDate title to CPT
-  tbl.rows[0].cells[cellIndex.cpt].textContent = 'CPT';
-  // change Cart title to Status
-  tbl.rows[0].cells[cellIndex.status].textContent = 'Status';
+  // change titles
+  const completionTimeTitleCell = tbl.rows[0].cells[cellIndex.completionTime];
+  const cptTitleCell = tbl.rows[0].cells[cellIndex.cpt];
+  const statusTitleCell = tbl.rows[0].cells[cellIndex.status];
+  completionTimeTitleCell.textContent = 'Completion Time';
+  cptTitleCell.textContent = 'CPT';
+  statusTitleCell.textContent = 'Status';
 }
 
-function getRows() {
-  return [...document.querySelector(tableSelector).rows].slice(1);
+function getRows(bigTable) {
+  return [...bigTable.rows].slice(1);
+}
+
+async function fetchPicklistHistoryPage(id) {
+  const fetchURL = isAftliteNa
+    ? '/wms/view_picklist_history?picklist_id='
+    : '/picklist/view_picklist_history?picklist_id=';
+
+  return fetch(`${fetchURL}${encodeURIComponent(id)}`).then((res) => res.text());
 }
 
 function extractToteInfo(page) {
@@ -84,6 +77,15 @@ function extractToteInfo(page) {
     completionTime: '',
     status: '',
   };
+  const statusSelector = isAftliteNa
+    ? 'body > table:nth-child(6) > tbody > tr:nth-child(2)'
+    : 'div.a-row:nth-child(6)';
+  const completionTimeSelector = isAftliteNa
+    ? 'body > table:nth-child(6) > tbody > tr:nth-child(6)'
+    : 'div.a-row:nth-child(10)';
+  const cptSelector = isAftliteNa
+    ? 'body > table:nth-child(6) > tbody > tr:nth-child(8))'
+    : 'div.a-row:nth-child(12)';
 
   const timeRe = /\d{1,2}:\d{1,2}/;
   const statusRe = /\((\w+)\)/;
@@ -111,13 +113,13 @@ const pullTimeStyle = new Map([
 
 function changePageContent(id, toteInfo, rows) {
   rows.forEach((row) => {
-    const completionTimeCell = row.cells[cellIndex.completionTime];
-    const cptCell = row.cells[cellIndex.cpt];
-    const toteSpooCell = row.cells[cellIndex.toteSpoo];
-    const statusCell = row.cells[cellIndex.status];
     const picklistIDCell = row.cells[cellIndex.picklistId];
-
     if (picklistIDCell.textContent.trim() === id) {
+      const completionTimeCell = row.cells[cellIndex.completionTime];
+      const cptCell = row.cells[cellIndex.cpt];
+      const toteSpooCell = row.cells[cellIndex.toteSpoo];
+      const statusCell = row.cells[cellIndex.status];
+
       completionTimeCell.textContent = toteInfo.completionTime;
       statusCell.textContent = toteInfo.status;
       cptCell.textContent = toteInfo.cpt;
