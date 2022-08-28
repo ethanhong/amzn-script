@@ -17,3 +17,7 @@ Tampermonkey script to enhance Amazon working flow.
 
 - Show picklist status, CPT, completiont time on Look Up User page.
 - Paint picklist with the same CPT in same color.
+
+### [psolve-painter.js](https://github.com/ethanhong/amzn-script/blob/main/psolve-painter.js)
+
+- Color P-solve list accrding to pull time.
