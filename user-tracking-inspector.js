@@ -84,7 +84,7 @@ function extractToteInfo(page) {
     ? 'body > table:nth-child(6) > tbody > tr:nth-child(6)'
     : 'div.a-row:nth-child(10)';
   const cptSelector = isAftliteNa
-    ? 'body > table:nth-child(6) > tbody > tr:nth-child(8))'
+    ? 'body > table:nth-child(6) > tbody > tr:nth-child(8)'
     : 'div.a-row:nth-child(12)';
 
   const timeRe = /\d{1,2}:\d{1,2}/;
