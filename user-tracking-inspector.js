@@ -34,7 +34,7 @@ const cellIndex = {};
   allRows.forEach(async (row, _, rows) => {
     const action = row.cells[cellIndex.action].textContent.trim();
     const id = row.cells[cellIndex.picklistId].textContent.trim();
-    if (action === 'pack' && !checkedID.has(id) && idIsValid(id)) {
+    if (action === 'pack' && !checkedID.has(id) && isValidID(id)) {
       checkedID.add(id);
       const page = await fetchPicklistHistoryPage(id);
       if (page) {
@@ -134,7 +134,7 @@ function changePageContent(id, toteInfo, rows) {
   });
 }
 
-function idIsValid(id) {
+function isValidID(id) {
   // id should be a 7-digit number
   return /^\d{7}$/.test(id);
 }
