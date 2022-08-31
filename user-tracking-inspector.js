@@ -31,16 +31,14 @@ const cellIndex = {};
   const allRows = getRows(bigTable);
 
   const checkedID = new Set();
-  allRows.forEach(async (row, _, rows) => {
+  allRows.forEach((row, _, rows) => {
     const action = row.cells[cellIndex.action].textContent.trim();
     const id = row.cells[cellIndex.picklistId].textContent.trim();
     if (action === 'pack' && !checkedID.has(id) && isValidID(id)) {
       checkedID.add(id);
-      const page = await fetchPicklistHistoryPage(id);
-      if (page) {
-        const toteInfo = extractToteInfo(page);
-        changePageContent(id, toteInfo, rows);
-      }
+      fetchPicklistHistoryPage(id)
+        .then((page) => extractToteInfo(page))
+        .then((toteInfo) => changePageContent(id, toteInfo, rows));
     }
   });
 })();
