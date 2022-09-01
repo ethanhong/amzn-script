@@ -9,42 +9,15 @@
 // @grant        none
 // ==/UserScript==
 
+const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
+const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
+const code1 = 'OBINDIRECT';
+
 (function main() {
-  const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
-  const code1 = 'OBINDIRECT';
-  // const login = 'kauspenc';
-  // const code1 = 'testAction';
-
-  // create OBINDIRECT button
-  const button1 = document.createElement('button');
-  button1.innerHTML = code1;
-  button1.onclick = () => {
-    console.log('button clicked');
-    document.getElementsByName('name')[0].value = login;
-    document.getElementsByName('code')[0].value = code1;
-    // tha page will auto reload after this point
-    // const submitResponse = document.createElement('p');
-    // submitResponse.innerText = `submint ${login} to ${code1}`;
-    // document.querySelectorAll('form')[0].appendChild(submitResponse);
-  };
-  document.querySelectorAll('form')[0].appendChild(button1);
-
   wait(3 * 60 * 1000) // check every 3 mins
-    .then(() => fetchUserHistoryPage(login))
-    .then((html) => getLatestAction(html))
-    .then((latestAction) => {
-      console.log(latestAction);
-      if (latestAction === code1 || latestAction === 'BATCHING' || latestAction === 'EOS') {
-        // do nothing
-        console.log('do nothing');
-      } else if (latestAction === 'BRK') {
-        console.log('wait 10 min brk');
-        setTimeout(() => button1.click(), 10 * 60 * 1000); // 10 mimns
-      } else {
-        console.log('click right away');
-        button1.click();
-      }
-    })
+    .then(() => fetchUserHistoryPage())
+    .then((html) => getLastAction(html))
+    .then((lastAction) => makeNextActionAccordingTo(lastAction))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
@@ -54,16 +27,41 @@ function wait(ms) {
   });
 }
 
-async function fetchUserHistoryPage(login) {
-  console.log('func: fetchUserHistoryPage');
+async function fetchUserHistoryPage() {
+  console.log('func start: fetchUserHistoryPage');
   const url = '/labor_tracking/lookup_history?user_name=';
   const res = await fetch(`${url}${encodeURIComponent(login)}`);
   const txt = await res.text();
   return new DOMParser().parseFromString(txt, 'text/html');
 }
 
-function getLatestAction(html) {
-  console.log('func: getLatestAction');
-  const selector = 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)';
+function getLastAction(html) {
+  console.log('func start: getLatestAction');
+  const selector = isAftliteNa
+    ? 'selector for user latest action' // TODO: find out the selector of last action cell for aftlite-na
+    : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)';
   return html.querySelector(selector).textContent.trim();
+}
+
+// ? should add window.location.reload in this function?
+function makeNextActionAccordingTo(lastAction) {
+  const waiting = true;
+  if (lastAction === 'OBINDIRECT' || lastAction === 'BATCHING' || lastAction === 'EOS') {
+    // do nothing
+    console.log(`latest action is ${lastAction}. No need to change.`);
+  } else if (lastAction === 'BRK') {
+    console.log(`latest action is ${lastAction}. Wait for 10 minutes.`);
+    setTimeout(() => checkIn(), 10 * 60 * 1000); // 10 mimns
+    return waiting;
+  } else {
+    console.log(`latest action is ${lastAction}. Check in now.`);
+    checkIn();
+  }
+  return !waiting;
+}
+
+function checkIn() {
+  console.log(`Check in ${login} to ${code1}`);
+  document.getElementsByName('name')[0].value = login;
+  document.getElementsByName('code')[0].value = code1;
 }
