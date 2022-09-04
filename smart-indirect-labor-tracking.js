@@ -14,11 +14,13 @@ const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+
 const code1 = 'OBINDIRECT';
 
 (function main() {
-  wait(3 * 60 * 1000) // check every 3 mins
+  const reloadNow = wait(3 * 60 * 1000) // check every 3 mins
     .then(() => fetchUserHistoryPage())
     .then((html) => getLastAction(html))
     .then((lastAction) => makeNextActionAccordingTo(lastAction))
+    .then((reload) => reload)
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
+  if (reloadNow) window.location.reload();
 })();
 
 function wait(ms) {
@@ -38,26 +40,27 @@ async function fetchUserHistoryPage() {
 function getLastAction(html) {
   console.log('func start: getLatestAction');
   const selector = isAftliteNa
-    ? 'selector for user latest action' // TODO: find out the selector of last action cell for aftlite-na
+    ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
     : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)';
   return html.querySelector(selector).textContent.trim();
 }
 
-// ? should add window.location.reload in this function?
 function makeNextActionAccordingTo(lastAction) {
-  const waiting = true;
+  const reload = true;
   if (lastAction === 'OBINDIRECT' || lastAction === 'BATCHING' || lastAction === 'EOS') {
     // do nothing
     console.log(`latest action is ${lastAction}. No need to change.`);
-  } else if (lastAction === 'BRK') {
+    return reload;
+  }
+  if (lastAction === 'BRK') {
     console.log(`latest action is ${lastAction}. Wait for 10 minutes.`);
     setTimeout(() => checkIn(), 10 * 60 * 1000); // 10 mimns
-    return waiting;
-  } else {
-    console.log(`latest action is ${lastAction}. Check in now.`);
-    checkIn();
+    return !reload;
   }
-  return !waiting;
+
+  console.log(`latest action is ${lastAction}. Check in now.`);
+  checkIn();
+  return reload;
 }
 
 function checkIn() {
