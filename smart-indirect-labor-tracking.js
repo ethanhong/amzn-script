@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Smart Indirect Labor Tracking
 // @namespace    https://github.com/ethanhong/amzn-script
-// @version      1.0
+// @version      2.0
 // @description  Sign in to OBindirect according to current action
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
@@ -11,8 +11,15 @@
 
 const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
 const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
-const code1 = 'OBINDIRECT';
+const activity = 'OBINDIRECT';
 
+(function main() {
+  fetchUserHistoryPage()
+    .then((html) => getLastAction(html))
+    .then((lastAction) => nextActionAccordingTo(lastAction))
+    .catch(() => console.error('[Smart Labot Tracking] Fail!'));
+})();
+/*
 (function main() {
   const reloadNow = wait(3 * 60 * 1000) // check every 3 mins
     .then(() => fetchUserHistoryPage())
@@ -22,7 +29,7 @@ const code1 = 'OBINDIRECT';
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
   if (reloadNow) window.location.reload();
 })();
-
+*/
 function wait(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -45,26 +52,25 @@ function getLastAction(html) {
   return html.querySelector(selector).textContent.trim();
 }
 
-function makeNextActionAccordingTo(lastAction) {
-  const reload = true;
+async function nextActionAccordingTo(lastAction) {
+  console.log('func start: nextActionAccordingTo');
   if (lastAction === 'OBINDIRECT' || lastAction === 'BATCHING' || lastAction === 'EOS') {
     // do nothing
     console.log(`latest action is ${lastAction}. No need to change.`);
-    return reload;
-  }
-  if (lastAction === 'BRK') {
+  } else if (lastAction === 'BRK') {
     console.log(`latest action is ${lastAction}. Wait for 10 minutes.`);
-    setTimeout(() => checkIn(), 10 * 60 * 1000); // 10 mimns
-    return !reload;
+    // checkin after 10 minutes
+    await wait(10 * 60 * 1000);
+    checkIn();
+  } else {
+    console.log(`latest action is ${lastAction}. Checkin now.`);
+    checkIn();
   }
-
-  console.log(`latest action is ${lastAction}. Check in now.`);
-  checkIn();
-  return reload;
+  return false;
 }
 
 function checkIn() {
-  console.log(`Check in ${login} to ${code1}`);
+  console.log(`Check in ${login} to ${activity}`);
   document.getElementsByName('name')[0].value = login;
-  document.getElementsByName('code')[0].value = code1;
+  document.getElementsByName('code')[0].value = activity;
 }
