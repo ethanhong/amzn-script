@@ -73,7 +73,7 @@ async function nextActionAccordingTo(lastAction) {
     // do nothing
     console.log(`latest action is ${lastAction}. Wait 3 minust to reload page.`);
     await wait(3 * 60 * 1000);
-    window.location.reload();
+    window.location = window.location;
   } else if (lastAction === 'BRK') {
     console.log(`latest action is ${lastAction}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
