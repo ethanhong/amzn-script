@@ -10,10 +10,13 @@
 // ==/UserScript==
 
 const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
-const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
+const login = isAftliteNa
+  ? document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
+  : 'your_login_here';
 const activity = 'OBINDIRECT';
 
 (function main() {
+  appendButton();
   fetchUserHistoryPage()
     .then((html) => getLastAction(html))
     .then((lastAction) => nextActionAccordingTo(lastAction))
@@ -30,6 +33,18 @@ const activity = 'OBINDIRECT';
   if (reloadNow) window.location.reload();
 })();
 */
+function appendButton() {
+  const btn = document.createElement('button');
+  btn.innerHTML = activity;
+  btn.onclick = () => {
+    document.getElementsByName('name')[0].value = login;
+    document.getElementsByName('code')[0].value = activity;
+    // tha page will auto reload after this point
+  };
+
+  document.getElementsByTagName('form')[0].appendChild(btn);
+}
+
 function wait(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -54,11 +69,13 @@ function getLastAction(html) {
 
 async function nextActionAccordingTo(lastAction) {
   console.log('func start: nextActionAccordingTo');
-  if (lastAction === 'OBINDIRECT' || lastAction === 'BATCHING' || lastAction === 'EOS') {
+  if (['OBINDIRECT', 'BATCHING', 'EOS'].includes(lastAction)) {
     // do nothing
-    console.log(`latest action is ${lastAction}. No need to change.`);
+    console.log(`latest action is ${lastAction}. Wait 3 minust to reload page.`);
+    await wait(3 * 60 * 1000);
+    window.location.reload();
   } else if (lastAction === 'BRK') {
-    console.log(`latest action is ${lastAction}. Wait for 10 minutes.`);
+    console.log(`latest action is ${lastAction}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
     await wait(10 * 60 * 1000);
     checkIn();
