@@ -17,11 +17,18 @@
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
-function appendButton() {
-  const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
-  const login = isAftliteNa
+function isNASite() {
+  return window.location.hostname === 'aftlite-na.amazon.com';
+}
+
+function getLogin() {
+  return isNASite()
     ? document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
-    : 'your_login_here';
+    : 'your_login';
+}
+
+function appendButton() {
+  const login = getLogin();
   const activity = 'OBINDIRECT';
   const btn = document.createElement('button');
   btn.innerHTML = activity;
@@ -43,6 +50,7 @@ function wait(ms) {
 async function fetchUserHistoryPage() {
   console.log('func start: fetchUserHistoryPage');
   const url = '/labor_tracking/lookup_history?user_name=';
+  const login = getLogin();
   const res = await fetch(`${url}${encodeURIComponent(login)}`);
   const txt = await res.text();
   return new DOMParser().parseFromString(txt, 'text/html');
@@ -50,7 +58,7 @@ async function fetchUserHistoryPage() {
 
 function getLastAction(html) {
   console.log('func start: getLatestAction');
-  const selector = isAftliteNa
+  const selector = isNASite()
     ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
     : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)';
   return html.querySelector(selector).textContent.trim();
@@ -68,18 +76,9 @@ async function nextActionAccordingTo(lastAction, checkinBtn) {
     // checkin after 10 minutes
     await wait(10 * 60 * 1000);
     checkinBtn.click();
-    // checkIn();
   } else {
     console.log(`latest action is ${lastAction}. Checkin now.`);
     checkinBtn.click();
-    // checkIn();
   }
   return false;
 }
-/*
-function checkIn() {
-  console.log(`Check in ${login} to ${activity}`);
-  document.getElementsByName('name')[0].value = login;
-  document.getElementsByName('code')[0].value = activity;
-}
-*/
