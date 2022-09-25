@@ -10,10 +10,11 @@
 // ==/UserScript==
 
 (function main() {
-  const checkinBtn = appendButton();
+  const checkinBtn = appendButton('OBINDIRECT');
+  const reloadBtn = appendButton('');
   fetchUserHistoryPage()
     .then((html) => getLastAction(html))
-    .then((lastAction) => nextActionAccordingTo(lastAction, checkinBtn))
+    .then((lastAction) => nextActionAccordingTo(lastAction, checkinBtn, reloadBtn))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
@@ -27,9 +28,8 @@ function getLogin() {
     : 'your_login';
 }
 
-function appendButton() {
+function appendButton(activity) {
   const login = getLogin();
-  const activity = 'OBINDIRECT';
   const btn = document.createElement('button');
   btn.innerHTML = activity;
   btn.onclick = () => {
@@ -64,13 +64,14 @@ function getLastAction(html) {
   return html.querySelector(selector).textContent.trim();
 }
 
-async function nextActionAccordingTo(lastAction, checkinBtn) {
+async function nextActionAccordingTo(lastAction, checkinBtn, reloadBtn) {
   console.log('func start: nextActionAccordingTo');
   if (['OBINDIRECT', 'BATCHING', 'EOS'].includes(lastAction)) {
     // do nothing
     console.log(`latest action is ${lastAction}. Wait 3 minust to reload page.`);
     await wait(3 * 60 * 1000);
-    window.location = window.location;
+    // window.location = window.location;
+    reloadBtn.click();
   } else if (lastAction === 'BRK') {
     console.log(`latest action is ${lastAction}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
