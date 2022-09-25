@@ -9,12 +9,15 @@
 // @grant        none
 // ==/UserScript==
 
+const login = ''; // type your login between quotation marks or the code will find one for you
+const targetActivity = 'OBINDIRECT';
+
 (function main() {
-  const checkinBtn = appendButton('OBINDIRECT');
-  const reloadBtn = appendButton('');
   fetchUserHistoryPage()
-    .then((html) => getLastAction(html))
-    .then((lastAction) => nextActionAccordingTo(lastAction, checkinBtn, reloadBtn))
+    .then(html => getlastActivity(html))
+    .then(lastActivity => nextActivity(lastActivity))
+    .then(activity => activity && checkin(activity))
+    .then(() => main()) // loop back
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
@@ -23,26 +26,11 @@ function isNASite() {
 }
 
 function getLogin() {
-  return isNASite()
-    ? document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
-    : 'your_login';
-}
-
-function appendButton(activity) {
-  const login = getLogin();
-  const btn = document.createElement('button');
-  btn.innerHTML = activity;
-  btn.onclick = () => {
-    document.getElementsByName('name')[0].value = login;
-    document.getElementsByName('code')[0].value = activity;
-    // tha page will reload after clicking button
-  };
-  document.getElementsByTagName('form')[0].appendChild(btn);
-  return btn;
+  return login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
 }
 
 function wait(ms) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
 }
@@ -50,13 +38,13 @@ function wait(ms) {
 async function fetchUserHistoryPage() {
   console.log('func start: fetchUserHistoryPage');
   const url = '/labor_tracking/lookup_history?user_name=';
-  const login = getLogin();
-  const res = await fetch(`${url}${encodeURIComponent(login)}`);
+  const user = getLogin();
+  const res = await fetch(`${url}${encodeURIComponent(user)}`);
   const txt = await res.text();
   return new DOMParser().parseFromString(txt, 'text/html');
 }
 
-function getLastAction(html) {
+function getlastActivity(html) {
   console.log('func start: getLatestAction');
   const selector = isNASite()
     ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
@@ -64,22 +52,29 @@ function getLastAction(html) {
   return html.querySelector(selector).textContent.trim();
 }
 
-async function nextActionAccordingTo(lastAction, checkinBtn, reloadBtn) {
+async function nextActivity(lastActivity) {
   console.log('func start: nextActionAccordingTo');
-  if (['OBINDIRECT', 'BATCHING', 'EOS'].includes(lastAction)) {
+  if (lastActivity === targetActivity) {
     // do nothing
-    console.log(`latest action is ${lastAction}. Wait 3 minust to reload page.`);
+    console.log(`latest action is ${lastActivity}. Wait 3 minust to check again.`);
     await wait(3 * 60 * 1000);
-    // window.location = window.location;
-    reloadBtn.click();
-  } else if (lastAction === 'BRK') {
-    console.log(`latest action is ${lastAction}. Wait 10 minutes to checkin.`);
+    return null;
+  }
+
+  if (lastActivity === 'BRK') {
+    console.log(`latest action is ${lastActivity}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
     await wait(10 * 60 * 1000);
-    checkinBtn.click();
-  } else {
-    console.log(`latest action is ${lastAction}. Checkin now.`);
-    checkinBtn.click();
   }
+
+  console.log(`latest action is ${lastActivity}. Checkin now.`);
+  return targetActivity;
+}
+
+function checkin(activity) {
+  const name = getLogin();
+  document.getElementsByName('name')[0].value = name;
+  document.getElementsByName('code')[0].value = activity;
+  document.getElementsByTagName('form')[0].submit();
   return false;
 }
