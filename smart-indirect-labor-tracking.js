@@ -65,6 +65,7 @@ async function nextActivity(lastActivity) {
     console.log(`latest action is ${lastActivity}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
     await wait(10 * 60 * 1000);
+    return targetActivity;
   }
 
   console.log(`latest action is ${lastActivity}. Checkin now.`);
