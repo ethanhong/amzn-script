@@ -20,7 +20,7 @@ const cellIndex = {};
   cellIndex.picklistId,
 ] = isAftliteNa ? [1, 8, 9, 10, 11, 13] : [1, 7, 8, 9, 10, 12];
 
-(function main() {
+function userTrackingInspector() {
   const bigTable = isAftliteNa
     ? document.querySelector('.reportLayout')
     : document.querySelector('#main-content > table');
@@ -41,7 +41,7 @@ const cellIndex = {};
         .then((toteInfo) => changePageContent(id, toteInfo, rows));
     }
   });
-})();
+};
 
 function preparePage(tbl) {
   if (!isAftliteNa) {
