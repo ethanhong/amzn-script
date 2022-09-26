@@ -16,8 +16,7 @@ const targetActivity = 'OBINDIRECT';
   fetchUserHistoryPage()
     .then(html => getlastActivity(html))
     .then(lastActivity => nextActivity(lastActivity))
-    .then(activity => activity && checkin(activity))
-    .then(() => main()) // loop back
+    .then(activity => checkin(activity))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
@@ -58,7 +57,7 @@ async function nextActivity(lastActivity) {
     // do nothing
     console.log(`latest action is ${lastActivity}. Wait 3 minust to check again.`);
     await wait(3 * 60 * 1000);
-    return null;
+    return '';
   }
 
   if (lastActivity === 'BRK') {
