@@ -37,11 +37,11 @@ function userTrackingInspector() {
     if (action === 'pack' && !checkedID.has(id) && isValidID(id)) {
       checkedID.add(id);
       fetchPicklistHistoryPage(id)
-        .then((page) => extractToteInfo(page))
-        .then((toteInfo) => changePageContent(id, toteInfo, rows));
+        .then(page => extractToteInfo(page))
+        .then(toteInfo => changePageContent(id, toteInfo, rows));
     }
   });
-};
+}
 
 function preparePage(tbl) {
   if (!isAftliteNa) {
@@ -66,7 +66,7 @@ async function fetchPicklistHistoryPage(id) {
     ? '/wms/view_picklist_history?picklist_id='
     : '/picklist/view_picklist_history?picklist_id=';
 
-  return fetch(`${fetchURL}${encodeURIComponent(id)}`).then((res) => res.text());
+  return fetch(`${fetchURL}${encodeURIComponent(id)}`).then(res => res.text());
 }
 
 function extractToteInfo(page) {
@@ -110,7 +110,7 @@ const pullTimeStyle = new Map([
 ]);
 
 function changePageContent(id, toteInfo, rows) {
-  rows.forEach((row) => {
+  rows.forEach(row => {
     const picklistIDCell = row.cells[cellIndex.picklistId];
     if (picklistIDCell.textContent.trim() === id) {
       const completionTimeCell = row.cells[cellIndex.completionTime];
