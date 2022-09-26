@@ -11,6 +11,7 @@
 
 const login = ''; // type your login between quotation marks or the code will find one for you
 const targetActivity = 'OBINDIRECT';
+const skipList = [targetActivity, 'EOS', 'ASM'];
 
 (function main() {
   fetchUserHistoryPage()
@@ -53,7 +54,7 @@ function getlastActivity(html) {
 
 async function nextActivity(lastActivity) {
   console.log('func start: nextActionAccordingTo');
-  if (lastActivity === targetActivity) {
+  if (skipList.includes(lastActivity)) {
     // do nothing
     console.log(`latest action is ${lastActivity}. Wait 3 minust to check again.`);
     await wait(3 * 60 * 1000);
