@@ -12,12 +12,13 @@
 const login = ''; // type your login between quotation marks or the code will find one for you
 const targetActivity = 'OBINDIRECT';
 const skipList = [targetActivity, 'EOS', 'ASM'];
+const checkPeriod = 3; // minutes
+const delayAfterBRK = 10; // minutes
 
 (function main() {
   fetchUserHistoryPage()
-    .then(html => getlastActivity(html))
-    .then(lastActivity => nextActivity(lastActivity))
-    .then(activity => checkin(activity))
+    .then(html => getCurrentActivity(html))
+    .then(currentActivity => nextAction(currentActivity))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 })();
 
@@ -44,7 +45,7 @@ async function fetchUserHistoryPage() {
   return new DOMParser().parseFromString(txt, 'text/html');
 }
 
-function getlastActivity(html) {
+function getCurrentActivity(html) {
   console.log('func start: getLatestAction');
   const selector = isNASite()
     ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
@@ -52,30 +53,32 @@ function getlastActivity(html) {
   return html.querySelector(selector).textContent.trim();
 }
 
-async function nextActivity(lastActivity) {
-  console.log('func start: nextActionAccordingTo');
+async function nextAction(lastActivity) {
   if (skipList.includes(lastActivity)) {
     // do nothing
     console.log(`latest action is ${lastActivity}. Wait 3 minust to check again.`);
-    await wait(3 * 60 * 1000);
-    return '';
+    await wait(checkPeriod * 60 * 1000);
+    checkin(''); // fake checkin just for page reload
+    return false;
   }
 
   if (lastActivity === 'BRK') {
     console.log(`latest action is ${lastActivity}. Wait 10 minutes to checkin.`);
     // checkin after 10 minutes
-    await wait(10 * 60 * 1000);
-    return targetActivity;
+    await wait(delayAfterBRK * 60 * 1000);
+    checkin(targetActivity);
+    return false;
   }
 
   console.log(`latest action is ${lastActivity}. Checkin now.`);
-  return targetActivity;
+  checkin(targetActivity);
+  return false;
 }
 
 function checkin(activity) {
   const name = getLogin();
+  console.log(`${name} is checked in to ${activity}`);
   document.getElementsByName('name')[0].value = name;
   document.getElementsByName('code')[0].value = activity;
   document.getElementsByTagName('form')[0].submit();
-  return false;
 }
