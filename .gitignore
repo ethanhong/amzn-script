@@ -1,3 +1,4 @@
 *.html
 /html/*
+material
 node_modules
