@@ -26,7 +26,7 @@ let qrcode;
   const allTotes = document.querySelectorAll(SELECTOR.totesTable);
 
   // categorize tote info, (Spoo, tracking, number of items)
-  allTotes.forEach((tote) => {
+  allTotes.forEach(tote => {
     const info = tote.innerText.split(/[\n:]+/);
     allSpoo.push(info[0]);
     allTracking.push(info[2]);
