@@ -1,0 +1,12 @@
+// ==UserScript==
+// @name         Colock
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      1.0
+// @description  clock
+// @author       Pei
+// @match        https://aftlite-portal.amazon.com/*
+// @match        https://aftlite-na.amazon.com/*
+// @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/*
+// @require      https://ethanhong.github.io/amzn-script/libs/clock.min.js
+// ==/UserScript==
+clock();
