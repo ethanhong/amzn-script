@@ -1,0 +1,10 @@
+// ==UserScript==
+// @name         P-solve Painter
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      1.0
+// @description  Color p-solves by pull time
+// @author       Pei
+// @match        https://aftlite-na.amazon.com/wms/view_dwell_time?type=status&value=problem-solve
+// @require      https://ethanhong.github.io/amzn-script/libs/psolvle-painter.min.js
+// ==/UserScript==
+psolvePainter();
