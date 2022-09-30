@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name         User Tracking Inspector
-// @namespace    https://github.com/ethanhong/amzn-script
-// @version      1.0
-// @description  add useful info in user look up page
-// @author       Pei
-// @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
-// @match        https://aftlite-na.amazon.com/labor_tracking/lookup_history?user_name=*
-// @grant        GM_addStyle
-// ==/UserScript==
-
 const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
 const cellIndex = {};
 [
@@ -20,7 +9,8 @@ const cellIndex = {};
   cellIndex.picklistId,
 ] = isAftliteNa ? [1, 8, 9, 10, 11, 13] : [1, 7, 8, 9, 10, 12];
 
-(function main() {
+// eslint-disable-next-line no-unused-vars
+function userTrackingInspector() {
   const bigTable = isAftliteNa
     ? document.querySelector('.reportLayout')
     : document.querySelector('#main-content > table');
@@ -41,7 +31,9 @@ const cellIndex = {};
         .then(toteInfo => changePageContent(id, toteInfo, rows));
     }
   });
-})();
+
+  addCSS();
+}
 
 function preparePage(tbl) {
   if (!isAftliteNa) {
@@ -137,22 +129,22 @@ function isValidID(id) {
   return /^\d{7}$/.test(id);
 }
 
-// --------------------------- CSS --------------------------- //
-// eslint-disable-next-line no-undef
-GM_addStyle(`
-.late-window {
-  background-color: Pink;
+function addCSS() {
+  const styles = `
+    .late-window {
+      background-color: Pink;
+    }
+    .current-window {
+      background-color: MediumAquaMarine;
+    }
+    .next-window {
+      background-color: SkyBlue;
+    }
+    .less-important {
+      background-color: LightGray;
+    }
+  `;
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
 }
-
-.current-window {
-  background-color: MediumAquaMarine;
-}
-
-.next-window {
-  background-color: SkyBlue;
-}
-
-.less-important {
-  background-color: LightGray;
-}
-`);
