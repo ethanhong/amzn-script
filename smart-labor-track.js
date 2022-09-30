@@ -12,7 +12,7 @@
 const login = ''; // type your login between quotation marks or the code will find one for you
 const targetActivity = 'OBINDIRECT';
 const skipList = [targetActivity, 'EOS', 'ASM', 'BATCHING'];
-const checkPeriod = 3; // minutes
+const checkPeriod = 5; // minutes
 const delayAfterBRK = 10; // minutes
 
 (function main() {
