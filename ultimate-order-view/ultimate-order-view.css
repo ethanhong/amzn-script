@@ -47,7 +47,7 @@ a {
 }
 
 #bag-table td {
-  padding: 0.6rem;
+  padding: 0.8rem 1rem;
   text-align: center;
   vertical-align: middle;
 }
@@ -62,13 +62,12 @@ a {
 
 #qrcode-text {
   width: 100%;
-  height: 0.8rem;
   font-size: 0.8rem;
+  line-height: 1.2rem;
   text-align: center;
   font-family: monospace;
-  padding-top: 0.5rem;
 }
 
 tr.search-target {
-  border: 3px solid red;
+  border: 2px solid firebrick;
 }
