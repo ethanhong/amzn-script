@@ -8,6 +8,6 @@
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js
-// @require      https://ethanhong.github.io/amzn-script/ultimate-order-view/ultimate-order-view.min.js
+// @require      https://ethanhong.github.io/amzn-script/libs/ultimate-order-view.min.js
 // ==/UserScript==
 ultimateOrderView();

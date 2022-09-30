@@ -6,86 +6,18 @@ const e = React.createElement;
 const SearchContext = React.createContext();
 const QRCodeContext = React.createContext();
 
-function injectCSS() {
-  const styles = `
-    :root,
-    body,
-    html {
-      box-sizing: border-box;
-    }
-    
-    div,
-    table,
-    thead,
-    tbody,
-    tr,
-    th,
-    td,
-    a {
-      margin: 0;
-      padding: 0;
-      border: 0;
-      outline: none;
-      font-size: 100%;
-      vertical-align: baseline;
-      background: transparent;
-    }
-    
-    #ultimateTable-container {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      margin: 0.5rem 0 1rem 0;
-    }
-    
-    #bag-table {
-      border-collapse: collapse;
-      font-family: monospace;
-      font-size: 1rem;
-      color: #101010;
-      margin-right: 1rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #888;
-      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    }
-    
-    #bag-table th {
-      background-color: #e8e8e8;
-      padding: 0.6rem;
-      text-align: center;
-      vertical-align: middle;
-    }
-    
-    #bag-table td {
-      padding: 0.8rem 1rem;
-      text-align: center;
-      vertical-align: middle;
-    }
-    
-    #bag-table tbody tr:nth-child(even) {
-      background-color: #e8e8e8;
-    }
-    
-    #bag-table tbody tr:hover {
-      background-color: #ccc;
-    }
-    
-    #qrcode-text {
-      width: 100%;
-      font-size: 0.8rem;
-      line-height: 1.2rem;
-      text-align: center;
-      font-family: monospace;
-    }
-    
-    tr.search-target {
-      border: 2px solid firebrick;
-    }
-  `;
+// eslint-disable-next-line no-unused-vars
+function ultimateOrderView() {
+  if (!isVerifiedUser(getLogin())) {
+    return;
+  }
 
-  const styleSheet = document.createElement('style');
-  styleSheet.innerText = styles;
-  document.head.appendChild(styleSheet);
+  const rootDiv = document.createElement('div');
+  rootDiv.setAttribute('id', 'root');
+  document.body.insertBefore(rootDiv, document.querySelector('#orders_form'));
+  ReactDOM.render(e(App), document.querySelector('#root'));
+
+  addCSS();
 }
 
 function getBags() {
@@ -314,16 +246,84 @@ function isVerifiedUser(user) {
   return true;
 }
 
-// eslint-disable-next-line no-unused-vars
-function ultimateOrderView() {
-  if (!isVerifiedUser(getLogin())) {
-    return;
-  }
+function addCSS() {
+  const styles = `
+    :root,
+    body,
+    html {
+      box-sizing: border-box;
+    }
+    
+    div,
+    table,
+    thead,
+    tbody,
+    tr,
+    th,
+    td,
+    a {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: none;
+      font-size: 100%;
+      vertical-align: baseline;
+      background: transparent;
+    }
+    
+    #ultimateTable-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin: 0.5rem 0 1rem 0;
+    }
+    
+    #bag-table {
+      border-collapse: collapse;
+      font-family: monospace;
+      font-size: 1rem;
+      color: #101010;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #888;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    }
+    
+    #bag-table th {
+      background-color: #e8e8e8;
+      padding: 0.6rem;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    #bag-table td {
+      padding: 0.8rem 1rem;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    #bag-table tbody tr:nth-child(even) {
+      background-color: #e8e8e8;
+    }
+    
+    #bag-table tbody tr:hover {
+      background-color: #ccc;
+    }
+    
+    #qrcode-text {
+      width: 100%;
+      font-size: 0.8rem;
+      line-height: 1.2rem;
+      text-align: center;
+      font-family: monospace;
+    }
+    
+    tr.search-target {
+      border: 2px solid firebrick;
+    }
+  `;
 
-  const rootDiv = document.createElement('div');
-  rootDiv.setAttribute('id', 'root');
-  document.body.insertBefore(rootDiv, document.querySelector('#orders_form'));
-  ReactDOM.render(e(App), document.querySelector('#root'));
-
-  injectCSS();
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
 }
