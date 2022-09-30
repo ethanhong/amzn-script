@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Smart Indirect Labor Tracking
+// @name         Smart Labor Track
 // @namespace    https://github.com/ethanhong/amzn-script
 // @version      2.0
 // @description  Sign in to OBindirect according to current action
@@ -11,7 +11,7 @@
 
 const login = ''; // type your login between quotation marks or the code will find one for you
 const targetActivity = 'OBINDIRECT';
-const skipList = [targetActivity, 'EOS', 'ASM'];
+const skipList = [targetActivity, 'EOS', 'ASM', 'BATCHING'];
 const checkPeriod = 3; // minutes
 const delayAfterBRK = 10; // minutes
 
