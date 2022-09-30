@@ -1,33 +1,27 @@
-// ==UserScript==
-// @name         Smart Labor Track
-// @namespace    https://github.com/ethanhong/amzn-script
-// @version      2.0
-// @description  Sign in to OBindirect according to current action
-// @author       Pei
-// @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
-// @match        https://aftlite-portal.amazon.com/indirect_action*
-// @grant        none
-// ==/UserScript==
+let targetActivity = '';
+let skipList = [];
+let checkPeriod = 5; // minutes
+let delayAfterBRK = 10; // minutes
 
-const login = ''; // type your login between quotation marks or the code will find one for you
-const targetActivity = 'OBINDIRECT';
-const skipList = [targetActivity, 'EOS', 'ASM', 'BATCHING'];
-const checkPeriod = 5; // minutes
-const delayAfterBRK = 10; // minutes
+// eslint-disable-next-line no-unused-vars
+function smartLaborTrack(activity, skip, period, brkDelay) {
+  targetActivity = activity;
+  skipList = [targetActivity, ...skip];
+  checkPeriod = period; // minutes
+  delayAfterBRK = brkDelay; // minutes
 
-(function main() {
   fetchUserHistoryPage()
     .then(html => getCurrentActivity(html))
     .then(currentActivity => nextAction(currentActivity))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
-})();
+}
 
 function isNASite() {
   return window.location.hostname === 'aftlite-na.amazon.com';
 }
 
 function getLogin() {
-  return login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
+  return document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
 }
 
 function wait(ms) {
