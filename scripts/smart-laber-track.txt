@@ -9,15 +9,15 @@
 // ==/UserScript==
 
 // activity which you'd like to be checked in
-const targetActivity = 'OBINDIRECT';
+const activity = 'OBINDIRECT';
 
 // activities which would be overwrite (targetActivity will always be skipped)
-const skipList = ['EOS', 'ASM', 'BATCHING'];
+const skip = ['EOS', 'ASM', 'BATCHING'];
 
 // period to check current status (in minutes)
-const checkPeriod = 5;
+const period = 5;
 
 // delay time after BRK (in minutes)
-const delayAfterBRK = 10;
+const brkTime = 10;
 
-smartLaborTrack(targetActivity, skipList, checkPeriod, delayAfterBRK);
+smartLaborTrack(activity, skip, period, brkTime);
