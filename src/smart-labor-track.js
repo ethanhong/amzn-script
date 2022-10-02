@@ -1,3 +1,12 @@
+// ==UserScript==
+// @name         Smart Labor Track
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      2.0
+// @description  Sign in to OBindirect according to current action
+// @author       Pei
+// @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
+// ==/UserScript==
+
 let targetActivity = '';
 let skipList = [];
 let checkPeriod = 5; // minutes

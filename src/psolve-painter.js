@@ -1,3 +1,12 @@
+// ==UserScript==
+// @name         P-solve Painter
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      1.0
+// @description  Color p-solves by pull time
+// @author       Pei
+// @match        https://aftlite-na.amazon.com/wms/view_dwell_time?type=status&value=problem-solve
+// ==/UserScript==
+
 // eslint-disable-next-line no-unused-vars
 function psolvePainter() {
   const deliveryDateSelector = '#wms_table_dwell_time > tbody:nth-child(2) > tr > td:nth-child(10)';

@@ -1,3 +1,13 @@
+// ==UserScript==
+// @name         User Tracking Inspector
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      1.0
+// @description  add useful info in user look up page
+// @author       Pei
+// @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
+// @match        https://aftlite-na.amazon.com/labor_tracking/lookup_history?user_name=*
+// ==/UserScript==
+
 const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
 const cellIndex = {};
 [
