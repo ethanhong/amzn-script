@@ -296,6 +296,7 @@ function addCSS() {
     }
     
     #bag-table {
+      flex-shrink: 0;
       border-collapse: collapse;
       font-family: monospace;
       font-size: 1rem;
