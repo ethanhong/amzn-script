@@ -81,20 +81,25 @@ function BagRow({ bag, completionTime }) {
   const { setQRCodeContent } = React.useContext(QRCodeContext);
 
   const handleOnClick = event => {
-    const value = event.target.textContent;
+    const node = event.target.nodeName === 'TD' ? event.target : event.target.parentNode;
+    const value = node.innerText;
     if (isValidCode(value)) {
       setQRCodeContent(value);
     }
   };
 
+  const formattedCode = isValidCode(bag.code)
+    ? e('span', null, [bag.code.slice(0, -4), e('b', null, bag.code.slice(-4))])
+    : bag.code;
   const pickerLik = e('a', { href: bag.pickerUrl }, `${bag.pickerLogin}`);
   const packLink = e('a', { href: bag.packUrl }, 'Pack');
+
   const rowCells = [
     e('td', null, bag.id),
     e('td', null, bag.zone),
     e('td', null, bag.status),
     e('td', null, completionTime),
-    e('td', { onClick: handleOnClick }, bag.code),
+    e('td', { onClick: handleOnClick }, formattedCode),
     e('td', { onClick: handleOnClick }, bag.spoo),
     e('td', null, pickerLik),
     e('td', null, `${bag.totalItem} items`),
@@ -106,7 +111,7 @@ function BagRow({ bag, completionTime }) {
   const bagSpoo = bag.spoo.toUpperCase();
   const trAttr =
     keyword && (containsKeyword(bagCode, keyword) || containsKeyword(bagSpoo, keyword))
-      ? { className: 'search-target' }
+      ? { className: 'target-bag' }
       : null;
 
   return e('tr', trAttr, rowCells);
@@ -330,7 +335,7 @@ function addCSS() {
       font-family: monospace;
     }
     
-    tr.search-target {
+    tr.target-bag {
       border: 2px solid firebrick;
     }
   `;
