@@ -30,6 +30,8 @@ function ultimateOrderView() {
   ReactDOM.render(e(App), document.querySelector('#root'));
 
   addCSS();
+
+  document.querySelector('#search_input').focus();
 }
 
 function getBags() {
@@ -76,7 +78,7 @@ function getBagTotalItem(spoo) {
   return contents[0] || '-';
 }
 
-function BagRow({ bag, completionTime }) {
+function BagRow({ bag, completionTime, allBags }) {
   const { searchTerm } = React.useContext(SearchContext);
   const { setQRCodeContent } = React.useContext(QRCodeContext);
 
@@ -106,19 +108,29 @@ function BagRow({ bag, completionTime }) {
     e('td', null, packLink),
   ];
 
-  const keyword = searchTerm.toUpperCase();
-  const bagCode = bag.code.toUpperCase();
-  const bagSpoo = bag.spoo.toUpperCase();
-  const trAttr =
-    keyword && (containsKeyword(bagCode, keyword) || containsKeyword(bagSpoo, keyword))
-      ? { className: 'target-bag' }
-      : null;
+  let trAttr = null;
+  trAttr = isRelatedBag(bag, searchTerm, allBags) ? { className: 'related-bag' } : trAttr;
+  trAttr = isTargetBag(bag, searchTerm) ? { className: 'target-bag' } : trAttr;
 
   return e('tr', trAttr, rowCells);
 }
 
 function containsKeyword(str, keyword) {
   return str.indexOf(keyword) > -1;
+}
+
+function isTargetBag(bag, searchTerm) {
+  const keyword = searchTerm.toUpperCase();
+  const bagCode = bag.code.toUpperCase();
+  const bagSpoo = bag.spoo.toUpperCase();
+  return keyword && (containsKeyword(bagCode, keyword) || containsKeyword(bagSpoo, keyword));
+}
+
+function isRelatedBag(currentBag, searchTerm, allBags) {
+  const targetBag = allBags.find(b => isTargetBag(b, searchTerm));
+  if (!targetBag) return false;
+  if (targetBag.zone === 'bigs') return false; // no need to mark related for bigs item
+  return targetBag.pickerLogin === currentBag.pickerLogin && targetBag.zone === currentBag.zone;
 }
 
 function BagTable() {
@@ -162,7 +174,9 @@ function BagTable() {
     }
   }, []);
 
-  const bagRows = bags.map((bag, i) => e(BagRow, { bag, completionTime: completionTimeArray[i] }));
+  const bagRows = bags.map((bag, i, allBags) =>
+    e(BagRow, { bag, completionTime: completionTimeArray[i], allBags })
+  );
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)]);
 }
 
@@ -200,6 +214,7 @@ function SearchBar() {
 
   return e('form', null, [
     e('input', {
+      id: 'search_input',
       type: 'text',
       placeholder: 'Search by tracking-code or spoo',
       size: '30',
@@ -320,10 +335,6 @@ function addCSS() {
       vertical-align: middle;
     }
     
-    #bag-table tbody tr:nth-child(even) {
-      background-color: #e8e8e8;
-    }
-    
     #bag-table tbody tr:hover {
       background-color: #ccc;
     }
@@ -338,6 +349,11 @@ function addCSS() {
     
     tr.target-bag {
       border: 2px solid firebrick;
+      background-color: rgb(34, 77, 23, 10%) !important;
+    }
+
+    tr.related-bag {
+      background-color: rgb(34, 77, 23, 10%) !important;
     }
   `;
 
