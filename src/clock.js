@@ -1,3 +1,14 @@
+// ==UserScript==
+// @name         Clock
+// @namespace    https://github.com/ethanhong/amzn-script
+// @version      1.0
+// @description  clock
+// @author       Pei
+// @match        https://aftlite-portal.amazon.com/*
+// @match        https://aftlite-na.amazon.com/*
+// @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/*
+// ==/UserScript==
+
 // eslint-disable-next-line no-unused-vars
 function clock() {
   const clockDiv = document.createElement('div');
@@ -42,6 +53,7 @@ function addCSS() {
       bottom: 1%;
       left: 50%;
       margin-left: -80px;
+      z-index: 99;
     }
   `;
 
