@@ -196,9 +196,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       setCPT(info[1]);
       setPackageStatus(info[2]);
       setOrderID(info[3]);
-      const colorClass = getTimeColorClass(info[1]);
-
-      setTimeColorClass(colorClass);
+      setTimeColorClass(getTimeColorClass(info[1]));
     });
   }, []);
 
