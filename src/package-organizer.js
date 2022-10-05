@@ -188,6 +188,11 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
   const orderViewUrl = isAftliteNa ? '/wms/view_order?id=' : '/orders/view_order?id=';
   rowDataClone[9] = orderID ? e('a', { href: `${orderViewUrl}${orderID}` }, orderID) : '-';
 
+  const packPicklistUrl = isAftliteNa
+    ? '/wms/view_order?id=' // todo
+    : '/picklist/pack_by_picklist?picklist_id=';
+  rowDataClone[11] = e('a', { href: `${packPicklistUrl}${rowData[12]}` }, rowData[12]);
+
   const rowCells = rowDataClone.map((cellData, index) =>
     e('td', { className: 'a-text-center', key: index }, cellData)
   );
