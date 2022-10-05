@@ -239,8 +239,13 @@ const MainTable = () => {
   );
 
   React.useEffect(() => {
-    for (let i = 1; i < allcompletionTime.length; i += 1) {
-      const topAttr = allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
+    for (let i = 0; i < allcompletionTime.length; i += 1) {
+      let topAttr;
+      if (i === 0) {
+        topAttr = 'table-top-border';
+      } else {
+        topAttr = allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
+      }
       setAllTopBorderClass(prev => prev.map((value, j) => (j === i ? topAttr : value)));
     }
   }, [allcompletionTime]);
