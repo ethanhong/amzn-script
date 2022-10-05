@@ -123,7 +123,7 @@ const getPackgeInfo = async pickListId => {
   const statusRe = /\((\w+)\)/;
   const orderIdRe = /\d{7}/;
 
-  return fetch(`${fetchURL}${encodeURIComponent(pickListId)}`)
+  return fetch(`${fetchURL}${pickListId}`)
     .then(res => res.text())
     .then(page => {
       const packageInfo = Array(4);
