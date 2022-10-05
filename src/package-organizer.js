@@ -127,7 +127,6 @@ const getUniquePackActions = () => {
     }
     return null;
   });
-  console.log(dataArray);
   return dataArray;
 };
 
