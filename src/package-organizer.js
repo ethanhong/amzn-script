@@ -51,7 +51,10 @@ const addCSS = () => {
       background-color: rgb(255, 233, 129, 10%) !important;
     }
     .next-window {
-      background-color: rgb(139, 241, 139, 20%) !important;
+      background-color: rgb(139, 241, 139, 10%) !important;
+    }
+    .p-solve {
+      color: firebrick;
     }
   `;
   const styleSheet = document.createElement('style');
@@ -120,7 +123,7 @@ const getPackgeInfo = async pickListId => {
     : 'div.a-row:nth-child(2)';
 
   const timeRe = /\d{1,2}:\d{1,2}/;
-  const statusRe = /\((\w+)\)/;
+  const statusRe = /\(([\w-]+)\)/;
   const orderIdRe = /\d{7}/;
 
   return fetch(`${fetchURL}${pickListId}`)
@@ -150,7 +153,7 @@ const getPackgeInfo = async pickListId => {
     });
 };
 
-const getTimeColorClass = cpt => {
+const getTimeStyle = cpt => {
   if (!cpt) {
     return '';
   }
@@ -173,11 +176,13 @@ const getTimeColorClass = cpt => {
   return '';
 };
 
+const getPsolveStyle = status => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
+
 const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTopBorderClass }) => {
   const [cpt, setCPT] = React.useState('');
   const [packageStatus, setPackageStatus] = React.useState('');
   const [orderID, setOrderID] = React.useState('');
-  const [timeColorClass, setTimeColorClass] = React.useState('');
+  const [style, setStyle] = React.useState('');
   const rowDataClone = [...rowData];
   rowDataClone.splice(5, 1); // remove 'FromQuantity' colunms
   rowDataClone[5] = packageStatus;
@@ -206,14 +211,11 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       setCPT(packageInfo[1]);
       setPackageStatus(packageInfo[2]);
       setOrderID(packageInfo[3]);
+      setStyle(`${getTimeStyle(packageInfo[1])} ${getPsolveStyle(packageInfo[2])}`);
     });
   }, []);
 
-  return e(
-    'tr',
-    { className: `${timeColorClass} ${allTopBorderClass[i]} table-side-border` },
-    rowCells
-  );
+  return e('tr', { className: `${style} ${allTopBorderClass[i]} table-side-border` }, rowCells);
 };
 
 const MainTable = () => {
