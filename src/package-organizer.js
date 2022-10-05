@@ -69,8 +69,8 @@ const getUniquePackActions = () => {
 
   actionRows.map(row => {
     const rowData = [...row.querySelectorAll('td')].map(cell => cell.textContent.trim());
-    const [action, spoo] = [rowData[1], rowData[9]];
-    if (action === 'pack' && !isPicked(spoo)) {
+    const [action, tool, spoo] = [rowData[1], rowData[2], rowData[9]];
+    if (action === 'pack' && tool === 'pack' && !isPicked(spoo)) {
       pickedSpoo.push(spoo);
       dataArray.push(rowData);
     }
