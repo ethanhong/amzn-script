@@ -191,12 +191,13 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 
   React.useEffect(() => {
     const pickListId = rowData[12];
-    getPackgeInfo(pickListId).then(info => {
-      setAllcompletionTime(prev => prev.map((preValue, j) => (j === i ? info[0] : preValue)));
-      setCPT(info[1]);
-      setPackageStatus(info[2]);
-      setOrderID(info[3]);
-      setTimeColorClass(getTimeColorClass(info[1]));
+    getPackgeInfo(pickListId).then(packageInfo => {
+      setAllcompletionTime(prev =>
+        prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue))
+      );
+      setCPT(packageInfo[1]);
+      setPackageStatus(packageInfo[2]);
+      setOrderID(packageInfo[3]);
     });
   }, []);
 
