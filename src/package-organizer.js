@@ -144,7 +144,10 @@ const getPackgeInfo = async pickListId => {
 
       return packageInfo;
     })
-    .catch(() => Array(4).fill('fetch error'));
+    .catch(err => {
+      console.log('[getPackgeInfo]Fetch error: ', err);
+      return Array(4).fill('-');
+    });
 };
 
 const getTimeColorClass = cpt => {
