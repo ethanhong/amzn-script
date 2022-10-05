@@ -31,8 +31,8 @@ const addCSS = () => {
       vertical-align: baseline;
       background: transparent;
     }
-    #main-table tr:nth-child(2) {
-      border-top: 2px solid firebrick;
+    #main-table tr {
+      background: transparent;
     }
     #main-table tr:nth-last-child(1) {
       border-bottom: 2px solid firebrick;
@@ -45,10 +45,10 @@ const addCSS = () => {
       border-top: 2px solid firebrick;
     }
     .late-window {
-      background-color: rgb(255, 85, 94, 20%) !important;
+      background-color: rgb(255, 85, 94, 10%) !important;
     }
     .current-window {
-      background-color: rgb(255, 233, 129, 20%) !important;
+      background-color: rgb(255, 233, 129, 10%) !important;
     }
     .next-window {
       background-color: rgb(139, 241, 139, 20%) !important;
