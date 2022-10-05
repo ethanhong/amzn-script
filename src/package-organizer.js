@@ -93,7 +93,7 @@ const TableHeader = () => {
     'Tote',
     'Order ID',
     'User',
-    'Picklist ID',
+    'Picklist \n ID',
   ];
   const tableHeaders = titles.map(title =>
     e('th', { className: 'a-text-center', style: { whiteSpace: 'pre-line' }, key: title }, title)
