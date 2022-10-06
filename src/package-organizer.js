@@ -269,6 +269,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
   const rowDataClone = [...rowData];
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
   if (isAftlitePortal) {
+    rowDataClone[3] = e('span', { className: 'monospace' }, rowData[3]);
     rowDataClone[5] = packageStatus;
     rowDataClone[6] = allcompletionTime[i];
     rowDataClone[7] = cpt;
@@ -286,6 +287,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 
     rowDataClone.splice(-1);
   } else {
+    rowDataClone[3] = e('span', { className: 'monospace' }, rowData[3]);
     rowDataClone[5] = packageStatus;
     rowDataClone[6] = allcompletionTime[i];
     rowDataClone[7] = cpt;
