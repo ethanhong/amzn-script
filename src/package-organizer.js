@@ -193,23 +193,17 @@ const TableHeader = () => {
   return e('tr', null, tableHeaders);
 };
 
-const getPackgeInfo = async pickListId => {
-  const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
-  const fetchURL = isAftliteNa
-    ? '/wms/view_picklist_history?picklist_id='
-    : '/picklist/view_picklist_history?picklist_id=';
-  const statusSelector = isAftliteNa
-    ? 'body > table:nth-child(6) > tbody > tr:nth-child(2)'
-    : 'div.a-row:nth-child(6)';
-  const completionTimeSelector = isAftliteNa
-    ? 'body > table:nth-child(6) > tbody > tr:nth-child(6)'
-    : 'div.a-row:nth-child(10)';
-  const cptSelector = isAftliteNa
-    ? 'body > table:nth-child(6) > tbody > tr:nth-child(8)'
-    : 'div.a-row:nth-child(12)';
-  const orderIdSelector = isAftliteNa
-    ? 'body > table:nth-child(4) > tbody > tr:nth-child(2)'
-    : 'div.a-row:nth-child(2)';
+const getPackageInfo = async pickListId => {
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+  const fetchURL = isAftlitePortal
+    ? '/picklist/view_picklist_history?picklist_id='
+    : '/wms/view_picklist_history?picklist_id=';
+  const statusSelector = isAftlitePortal
+    ? 'div.a-row:nth-child(6)'
+    : 'table:nth-child(6) tr:nth-child(2)';
+  const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)';
+  const cptSelector = isAftlitePortal ? 'div.a-row:nth-child(12)' : 'tr:nth-child(8)';
+  const orderIdSelector = isAftlitePortal ? 'div.a-row:nth-child(2)' : 'tr:nth-child(2)';
 
   const timeRe = /\d{1,2}:\d{1,2}/;
   const statusRe = /\(([\w-]+)\)/;
@@ -222,17 +216,17 @@ const getPackgeInfo = async pickListId => {
       const html = new DOMParser().parseFromString(page, 'text/html');
 
       // extract completion time
-      let matchedValue = html.querySelector(completionTimeSelector).textContent.match(timeRe);
-      packageInfo[0] = matchedValue ? matchedValue[0] : '-';
+      const completionTime = html.querySelector(completionTimeSelector).textContent.match(timeRe);
+      packageInfo[0] = completionTime ? completionTime[0] : '-';
       // extract CPT
-      matchedValue = html.querySelector(cptSelector).textContent.match(timeRe);
-      packageInfo[1] = matchedValue ? matchedValue[0] : '-';
+      const cpt = html.querySelector(cptSelector).textContent.match(timeRe);
+      packageInfo[1] = cpt ? cpt[0] : '-';
       // extract status
-      matchedValue = html.querySelector(statusSelector).textContent.match(statusRe);
-      packageInfo[2] = matchedValue ? matchedValue[1] : '-';
+      const status = html.querySelector(statusSelector).textContent.match(statusRe);
+      packageInfo[2] = status ? status[1] : '-';
       // extract orderId
-      matchedValue = html.querySelector(orderIdSelector).textContent.match(orderIdRe);
-      packageInfo[3] = matchedValue ? matchedValue[0] : '-';
+      const orderId = html.querySelector(orderIdSelector).textContent.match(orderIdRe);
+      packageInfo[3] = orderId ? orderId[0] : '-';
 
       return packageInfo;
     })
@@ -302,7 +296,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 
   React.useEffect(() => {
     const pickListId = rowData[12];
-    getPackgeInfo(pickListId).then(packageInfo => {
+    getPackageInfo(pickListId).then(packageInfo => {
       setAllcompletionTime(prev =>
         prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue))
       );
