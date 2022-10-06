@@ -45,17 +45,38 @@ const addCSSNa = () => {
     .table-top-border {
       border-top: 2px solid firebrick;
     }
-    .late-window {
-      background-color: rgb(255, 85, 94, 10%) !important;
-    }
-    .current-window {
-      background-color: rgb(255, 233, 129, 10%) !important;
-    }
-    .next-window {
-      background-color: rgb(139, 241, 139, 10%) !important;
-    }
+    // .late-window {
+    //   background-color: rgb(255, 85, 94, 10%) !important;
+    // }
+    // .current-window {
+    //   background-color: rgb(255, 233, 129, 10%) !important;
+    // }
+    // .next-window {
+    //   background-color: rgb(139, 241, 139, 10%) !important;
+    // }
     .p-solve {
       color: firebrick;
+    }
+    .monospace {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .spoo-dot {
+      height: 0.5rem;
+      width: 0.5rem;
+      background-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.2rem;
+    }
+    .late-window .spoo-dot {
+      background-color: rgb(255, 85, 94, 100%);
+    }
+    .current-window .spoo-dot {
+      background-color: rgb(255, 233, 129, 100%);
+    }
+    .next-window .spoo-dot {
+      background-color: rgb(139, 241, 139, 100%);
     }
   `;
   const styleSheet = document.createElement('style');
@@ -92,17 +113,38 @@ const addCSS = () => {
     .table-top-border {
       border-top: 2px solid firebrick;
     }
-    .late-window {
-      background-color: rgb(255, 85, 94, 10%) !important;
-    }
-    .current-window {
-      background-color: rgb(255, 233, 129, 10%) !important;
-    }
-    .next-window {
-      background-color: rgb(139, 241, 139, 10%) !important;
-    }
+    // .late-window {
+    //   background-color: rgb(255, 85, 94, 10%) !important;
+    // }
+    // .current-window {
+    //   background-color: rgb(255, 233, 129, 10%) !important;
+    // }
+    // .next-window {
+    //   background-color: rgb(139, 241, 139, 10%) !important;
+    // }
     .p-solve {
       color: firebrick;
+    }
+    .monospace {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .spoo-dot {
+      height: 0.5rem;
+      width: 0.5rem;
+      background-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.2rem;
+    }
+    .late-window .spoo-dot {
+      background-color: rgb(255, 85, 94, 100%);
+    }
+    .current-window .spoo-dot {
+      background-color: rgb(255, 233, 129, 100%);
+    }
+    .next-window .spoo-dot {
+      background-color: rgb(139, 241, 139, 100%);
     }
   `;
   const styleSheet = document.createElement('style');
@@ -236,16 +278,10 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
     rowDataClone[5] = packageStatus;
     rowDataClone[6] = allcompletionTime[i];
     rowDataClone[7] = cpt;
-    rowDataClone[8] = rowData[10];
-    rowDataClone[9] = orderID ? e('a', { href: `/wms/view_order?id=${orderID}` }, orderID) : '-';
-    rowDataClone[10] = rowData[12];
-    rowDataClone[11] = e('a', { href: `/wms/view_order?id=${rowData[13]}` }, rowData[13]);
-    rowDataClone.splice(-2);
-  } else {
-    rowDataClone[5] = packageStatus;
-    rowDataClone[6] = allcompletionTime[i];
-    rowDataClone[7] = cpt;
-    rowDataClone[8] = rowData[9];
+    rowDataClone[8] = e('div', null, [
+      e('span', { className: 'spoo-dot' }),
+      e('span', { className: 'monospace' }, rowData[9]),
+    ]);
     rowDataClone[9] = orderID ? e('a', { href: `/orders/view_order?id=${orderID}` }, orderID) : '-';
     rowDataClone[10] = rowData[11];
     rowDataClone[11] = e(
@@ -254,6 +290,10 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       rowData[12]
     );
     rowDataClone.splice(-1);
+    rowDataClone[8] = e('div', null, [
+      e('span', { className: 'spoo-dot' }),
+      e('span', { className: 'monospace' }, rowData[10]),
+    ]);
   }
 
   const rowCells = rowDataClone.map((cellData, index) =>
