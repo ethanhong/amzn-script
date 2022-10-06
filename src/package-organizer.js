@@ -84,7 +84,7 @@ const addCSSNa = () => {
   document.head.appendChild(styleSheet);
 };
 
-const addCSS = () => {
+const addCSSPortal = () => {
   const styles = `
     :root,
     body,
@@ -153,7 +153,7 @@ const addCSS = () => {
 };
 
 const getUniquePackActions = () => {
-  const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
   const dataArray = [];
   const pickedSpoo = [];
   const isPicked = spoo => pickedSpoo.includes(spoo);
@@ -162,7 +162,7 @@ const getUniquePackActions = () => {
   actionRows.map(row => {
     const rowData = [...row.querySelectorAll('td')].map(cell => cell.textContent.trim());
     const [action, tool] = [rowData[1], rowData[2]];
-    const spoo = isAftliteNa ? rowData[10] : rowData[9];
+    const spoo = isAftlitePortal ? rowData[9] : rowData[10];
     if (action === 'pack' && tool === 'pack' && !isPicked(spoo)) {
       pickedSpoo.push(spoo);
       dataArray.push(rowData);
@@ -183,9 +183,9 @@ const TableHeader = () => {
     'Completion \n Time',
     'CPT',
     'Tote',
-    'Order ID',
+    'Order',
+    'Picklist',
     'User',
-    'Picklist \n ID',
   ];
   const tableHeaders = titles.map(title =>
     e('th', { className: 'a-text-center', style: { whiteSpace: 'pre-line' }, key: title }, title)
@@ -267,8 +267,8 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
   const [orderID, setOrderID] = React.useState('');
   const [style, setStyle] = React.useState('');
   const rowDataClone = [...rowData];
-  const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
-  if (isAftliteNa) {
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+  if (isAftlitePortal) {
     rowDataClone[5] = packageStatus;
     rowDataClone[6] = allcompletionTime[i];
     rowDataClone[7] = cpt;
@@ -277,17 +277,26 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       e('span', { className: 'monospace' }, rowData[9]),
     ]);
     rowDataClone[9] = orderID ? e('a', { href: `/orders/view_order?id=${orderID}` }, orderID) : '-';
-    rowDataClone[10] = rowData[11];
-    rowDataClone[11] = e(
+    rowDataClone[10] = e(
       'a',
       { href: `/picklist/pack_by_picklist?picklist_id=${rowData[12]}` },
       rowData[12]
     );
+    rowDataClone[11] = rowData[11];
+
     rowDataClone.splice(-1);
+  } else {
+    rowDataClone[5] = packageStatus;
+    rowDataClone[6] = allcompletionTime[i];
+    rowDataClone[7] = cpt;
     rowDataClone[8] = e('div', null, [
       e('span', { className: 'spoo-dot' }),
       e('span', { className: 'monospace' }, rowData[10]),
     ]);
+    rowDataClone[9] = orderID ? e('a', { href: `/wms/view_order?id=${orderID}` }, orderID) : '-';
+    rowDataClone[10] = e('a', { href: `/wms/view_order?id=${rowData[13]}` }, rowData[13]);
+    rowDataClone[11] = rowData[12];
+    rowDataClone.splice(-2);
   }
 
   const rowCells = rowDataClone.map((cellData, index) =>
@@ -380,19 +389,16 @@ const App = () => {
 
 // eslint-disable-next-line no-unused-vars
 const packageSummarizer = () => {
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+
   const rootDiv = document.createElement('div');
-
-  const isAftliteNa = window.location.hostname === 'aftlite-na.amazon.com';
-  if (isAftliteNa) {
-    document.querySelector('div.resultSet').setAttribute('id', 'main-content');
-  }
-  document.querySelector('#main-content > table').before(rootDiv);
-
-  ReactDOM.createRoot(rootDiv).render(e(App));
-
-  if (isAftliteNa) {
-    addCSSNa();
+  if (isAftlitePortal) {
+    addCSSPortal();
   } else {
-    addCSS();
+    document.querySelector('div.resultSet').setAttribute('id', 'main-content');
+    addCSSNa();
   }
+
+  document.querySelector('#main-content > table').before(rootDiv);
+  ReactDOM.createRoot(rootDiv).render(e(App));
 };
