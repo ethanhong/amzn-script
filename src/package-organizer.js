@@ -70,13 +70,13 @@ const addCSSNa = () => {
       margin-right: 0.2rem;
     }
     .late-window .spoo-dot {
-      background-color: rgb(255, 85, 94, 100%);
+      background-color: rgb(184, 29, 19, 100%);
     }
     .current-window .spoo-dot {
-      background-color: rgb(255, 233, 129, 100%);
+      background-color: rgb(239, 183, 0, 100%);
     }
     .next-window .spoo-dot {
-      background-color: rgb(139, 241, 139, 100%);
+      background-color: rgb(0, 132, 80, 100%);
     }
   `;
   const styleSheet = document.createElement('style');
@@ -138,13 +138,13 @@ const addCSSPortal = () => {
       margin-right: 0.2rem;
     }
     .late-window .spoo-dot {
-      background-color: rgb(255, 85, 94, 100%);
+      background-color: rgb(184, 29, 19, 100%);
     }
     .current-window .spoo-dot {
-      background-color: rgb(255, 233, 129, 100%);
+      background-color: rgb(239, 183, 0, 100%);
     }
     .next-window .spoo-dot {
-      background-color: rgb(139, 241, 139, 100%);
+      background-color: rgb(0, 132, 80, 100%);
     }
   `;
   const styleSheet = document.createElement('style');
