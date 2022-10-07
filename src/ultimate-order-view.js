@@ -241,7 +241,9 @@ function UltimateTable() {
 
 function App() {
   const [searchTerm, setsearchTerm] = React.useState('');
-
+  React.useEffect(() => {
+    document.querySelector('#search_input').focus();
+  }, []);
   return e(SearchContext.Provider, { value: { searchTerm, setsearchTerm } }, [e(SearchBar), e(UltimateTable)]);
 }
 
