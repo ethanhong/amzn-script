@@ -155,14 +155,14 @@ const addCSSPortal = () => {
 const getActions = () => {
   const actionRows = [...document.querySelectorAll('#main-content > table > tbody > tr')];
   actionRows.shift(); // remove header
-  return actionRows.map(tr => [...tr.querySelectorAll('td')].map(td => td.textContent.trim()));
+  return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
 
-const filterUniquePackActions = actions => {
+const filterUniquePackActions = (actions) => {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
   const pickedSpoo = [];
 
-  return actions.filter(data => {
+  return actions.filter((data) => {
     const [action, tool] = [data[1], data[2]];
     const spoo = isAftlitePortal ? data[9] : data[10];
     if (action === 'pack' && tool === 'pack' && !pickedSpoo.includes(spoo)) {
@@ -188,13 +188,13 @@ const TableHeader = () => {
     'Picklist',
     'User',
   ];
-  const tableHeaders = titles.map(title =>
+  const tableHeaders = titles.map((title) =>
     e('th', { className: 'a-text-center', style: { whiteSpace: 'pre-line' }, key: title }, title)
   );
   return e('tr', null, tableHeaders);
 };
 
-const getPackageInfo = async pickListId => {
+const getPackageInfo = async (pickListId) => {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
   const fetchURL = isAftlitePortal
     ? '/picklist/view_picklist_history?picklist_id='
@@ -211,8 +211,8 @@ const getPackageInfo = async pickListId => {
   const orderIdRe = /\d{7}/;
 
   return fetch(`${fetchURL}${pickListId}`)
-    .then(res => res.text())
-    .then(page => {
+    .then((res) => res.text())
+    .then((page) => {
       const packageInfo = Array(4);
       const html = new DOMParser().parseFromString(page, 'text/html');
 
@@ -231,13 +231,13 @@ const getPackageInfo = async pickListId => {
 
       return packageInfo;
     })
-    .catch(err => {
+    .catch((err) => {
       console.log('[getPackgeInfo]Fetch error: ', err);
       return Array(4).fill('-');
     });
 };
 
-const getTimeStyle = cpt => {
+const getTimeStyle = (cpt) => {
   if (!cpt) {
     return '';
   }
@@ -260,7 +260,7 @@ const getTimeStyle = cpt => {
   return '';
 };
 
-const getPsolveStyle = status => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
+const getPsolveStyle = (status) => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
 
 const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTopBorderClass }) => {
   const [cpt, setCPT] = React.useState('');
@@ -307,8 +307,8 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 
   React.useEffect(() => {
     const pickListId = rowDataClone[10].props.children;
-    getPackageInfo(pickListId).then(packageInfo => {
-      setAllcompletionTime(prev =>
+    getPackageInfo(pickListId).then((packageInfo) => {
+      setAllcompletionTime((prev) =>
         prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue))
       );
       setCPT(packageInfo[1]);
@@ -350,7 +350,7 @@ const MainTable = () => {
       } else {
         topAttr = allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
       }
-      setAllTopBorderClass(prev => prev.map((value, j) => (j === i ? topAttr : value)));
+      setAllTopBorderClass((prev) => prev.map((value, j) => (j === i ? topAttr : value)));
     }
   }, [allcompletionTime]);
 
@@ -362,7 +362,7 @@ const MainTable = () => {
 };
 
 const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) => {
-  const handleTableChange = () => setIsOriginalTable(prev => !prev);
+  const handleTableChange = () => setIsOriginalTable((prev) => !prev);
   return e(
     'form',
     null,
