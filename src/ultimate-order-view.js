@@ -194,14 +194,14 @@ function SearchBar() {
   ]);
 }
 
-let qrcodeMaker = null;
 function UltimateTable() {
   const [qrcodeContent, setQRCodeContent] = React.useState('');
+  const [qrcodeMaker, setQRcodeMaker] = React.useState(null);
 
   React.useEffect(() => {
     if (!qrcodeContent) return;
-    if (qrcodeMaker === null) {
-      qrcodeMaker = makeQRCode(qrcodeContent);
+    if (!qrcodeMaker) {
+      setQRcodeMaker(makeQRCode(qrcodeContent));
     } else {
       qrcodeMaker.makeCode(qrcodeContent);
     }
