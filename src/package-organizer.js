@@ -152,24 +152,25 @@ const addCSSPortal = () => {
   document.head.appendChild(styleSheet);
 };
 
-const getUniquePackActions = () => {
-  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
-  const dataArray = [];
-  const pickedSpoo = [];
-  const isPicked = spoo => pickedSpoo.includes(spoo);
+const getActions = () => {
   const actionRows = [...document.querySelectorAll('#main-content > table > tbody > tr')];
   actionRows.shift(); // remove header
-  actionRows.map(row => {
-    const rowData = [...row.querySelectorAll('td')].map(cell => cell.textContent.trim());
-    const [action, tool] = [rowData[1], rowData[2]];
-    const spoo = isAftlitePortal ? rowData[9] : rowData[10];
-    if (action === 'pack' && tool === 'pack' && !isPicked(spoo)) {
+  return actionRows.map(tr => [...tr.querySelectorAll('td')].map(td => td.textContent.trim()));
+};
+
+const filterUniquePackActions = actions => {
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+  const pickedSpoo = [];
+
+  return actions.filter(data => {
+    const [action, tool] = [data[1], data[2]];
+    const spoo = isAftlitePortal ? data[9] : data[10];
+    if (action === 'pack' && tool === 'pack' && !pickedSpoo.includes(spoo)) {
       pickedSpoo.push(spoo);
-      dataArray.push(rowData);
+      return true;
     }
-    return null;
+    return false;
   });
-  return dataArray;
 };
 
 const TableHeader = () => {
@@ -284,7 +285,6 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       rowData[12]
     );
     rowDataClone[11] = rowData[11];
-
     rowDataClone.splice(-1);
   } else {
     rowDataClone[3] = e('span', { className: 'monospace' }, rowData[3]);
@@ -322,7 +322,8 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 };
 
 const MainTable = () => {
-  const allPackActions = getUniquePackActions();
+  const actions = getActions();
+  const allPackActions = filterUniquePackActions(actions);
   const [allcompletionTime, setAllcompletionTime] = React.useState(
     Array(allPackActions.length).fill('')
   );
