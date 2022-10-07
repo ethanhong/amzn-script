@@ -144,26 +144,18 @@ function BagTable() {
     for (let i = 0; i < bags.length; i += 1) {
       const bag = bags[i];
       const fetchURL = '/wms/view_picklist_history?picklist_id=';
-
-      fetch(`${fetchURL}${encodeURIComponent(bag.id)}`)
+      fetch(`${fetchURL}${bag.id}`)
         .then((res) => res.text())
-        .then((page) => extractCompletionTime(page))
-        .then((time) =>
-          setCompletionTimeArray((prevArray) => [...prevArray.slice(0, i), time, ...prevArray.slice(i + 1)])
-        );
+        .then((page) => {
+          const html = new DOMParser().parseFromString(page, 'text/html');
+          const completionTime = html.querySelector('tr:nth-child(6)').textContent.match(/\d{1,2}:\d{1,2}/);
+          setCompletionTimeArray((prevArray) => [...prevArray.slice(0, i), completionTime, ...prevArray.slice(i + 1)]);
+        });
     }
   }, []);
 
   const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, completionTime: completionTimeArray[i], allBags }));
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)]);
-}
-
-function extractCompletionTime(page) {
-  const completionTimeSelector = 'body > table:nth-child(6) > tbody > tr:nth-child(6)';
-  const timeRe = /\d{1,2}:\d{1,2}/;
-  const html = new DOMParser().parseFromString(page, 'text/html');
-  const completionTime = html.querySelector(completionTimeSelector).textContent.match(timeRe);
-  return completionTime || '-';
 }
 
 function makeQRCode(str) {
@@ -189,7 +181,6 @@ function QRCodeArea() {
 function SearchBar() {
   const { searchTerm, setsearchTerm } = React.useContext(SearchContext);
   const handleOnChange = (evt) => setsearchTerm(evt.target.value);
-
   return e('form', null, [
     e('input', {
       id: 'search_input',
@@ -200,12 +191,6 @@ function SearchBar() {
       onChange: handleOnChange,
       style: { lineHeight: '1.5rem' },
     }),
-    /*     e('input', {
-      type: 'checkbox',
-      checked: isStockOnly,
-      onChange: this.handleInStockChange,
-    }),
-    'Only show related packages', */
   ]);
 }
 
