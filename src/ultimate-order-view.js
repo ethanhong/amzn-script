@@ -25,13 +25,9 @@ function ultimateOrderView() {
   }
 
   const rootDiv = document.createElement('div');
-  rootDiv.setAttribute('id', 'root');
-  document.body.insertBefore(rootDiv, document.querySelector('#orders_form'));
-  ReactDOM.render(e(App), document.querySelector('#root'));
-
+  document.querySelector('#orders_form').before(rootDiv);
+  ReactDOM.createRoot(rootDiv).render(e(App));
   addCSS();
-
-  document.querySelector('#search_input').focus();
 }
 
 function getBags() {
