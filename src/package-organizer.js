@@ -260,7 +260,7 @@ const getTimeStyle = (cpt) => {
 
 const getPsolveStyle = (status) => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
 
-const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTopBorderClass }) => {
+const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime }) => {
   const [cpt, setCPT] = React.useState('');
   const [packageStatus, setPackageStatus] = React.useState('');
   const [orderID, setOrderID] = React.useState('');
@@ -308,14 +308,15 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
     });
   }, []);
 
-  return e('tr', { className: `${style} ${allTopBorderClass[i]} table-side-border` }, rowCells);
+  const topBorder = i === 0 || allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
+
+  return e('tr', { className: `${style} ${topBorder} table-side-border` }, rowCells);
 };
 
 const MainTable = () => {
   const actions = getActions();
   const allPackActions = filterUniquePackActions(actions);
   const [allcompletionTime, setAllcompletionTime] = React.useState(Array(allPackActions.length).fill(''));
-  const [allTopBorderClass, setAllTopBorderClass] = React.useState(Array(allPackActions.length).fill(''));
   const header = e(TableHeader, { key: 'main-table-header' });
   const rows = allPackActions.map((rowData, i) =>
     e(ActionRow, {
@@ -323,22 +324,9 @@ const MainTable = () => {
       i,
       allcompletionTime,
       setAllcompletionTime,
-      allTopBorderClass,
       key: rowData[9],
     })
   );
-
-  React.useEffect(() => {
-    for (let i = 0; i < allcompletionTime.length; i += 1) {
-      let topAttr;
-      if (i === 0) {
-        topAttr = 'table-top-border';
-      } else {
-        topAttr = allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
-      }
-      setAllTopBorderClass((prev) => prev.map((value, j) => (j === i ? topAttr : value)));
-    }
-  }, [allcompletionTime]);
 
   return e(
     'table',
