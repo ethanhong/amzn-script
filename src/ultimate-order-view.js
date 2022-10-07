@@ -40,8 +40,8 @@ function getBags() {
   const picklistsTableRows = [...document.querySelectorAll('#picklists_table > tbody > tr')];
   picklistsTableRows.shift(); // drop header row
 
-  const rowContents = picklistsTableRows.map(row => row.textContent.trim().split(/\s+/));
-  const packUrls = picklistsTableRows.map(row => row.querySelector('td:last-child > a'));
+  const rowContents = picklistsTableRows.map((row) => row.textContent.trim().split(/\s+/));
+  const packUrls = picklistsTableRows.map((row) => row.querySelector('td:last-child > a'));
 
   for (let i = 0; i < rowContents.length; i += 1) {
     const bag = {};
@@ -64,7 +64,7 @@ function getBagCode(spoo) {
   if (!isValidCode(spoo)) {
     return '-';
   }
-  const spooLink = [...document.querySelectorAll('a')].find(node => node.textContent === spoo);
+  const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo);
   const contents = spooLink.parentNode.childNodes[5].textContent.trim().split(/\s+/);
   return contents[1] || '-';
 }
@@ -73,7 +73,7 @@ function getBagTotalItem(spoo) {
   if (!isValidCode(spoo)) {
     return '-';
   }
-  const spooLink = [...document.querySelectorAll('a')].find(node => node.textContent === spoo);
+  const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo);
   const contents = spooLink.parentNode.childNodes[7].textContent.trim().split(/\s+/);
   return contents[0] || '-';
 }
@@ -82,7 +82,7 @@ function BagRow({ bag, completionTime, allBags }) {
   const { searchTerm } = React.useContext(SearchContext);
   const { setQRCodeContent } = React.useContext(QRCodeContext);
 
-  const handleOnClick = event => {
+  const handleOnClick = (event) => {
     const node = event.target.nodeName === 'TD' ? event.target : event.target.parentNode;
     const value = node.innerText;
     if (isValidCode(value)) {
@@ -127,34 +127,22 @@ function isTargetBag(bag, searchTerm) {
 }
 
 function isRelatedBag(currentBag, searchTerm, allBags) {
-  const targetBag = allBags.find(b => isTargetBag(b, searchTerm));
+  const targetBag = allBags.find((b) => isTargetBag(b, searchTerm));
   if (!targetBag) return false;
   if (targetBag.zone === 'bigs') return false; // no need to mark related for bigs item
   return targetBag.pickerLogin === currentBag.pickerLogin && targetBag.zone === currentBag.zone;
 }
 
 function BagTable() {
-  const headers = [
-    'ID',
-    'Zone',
-    'Status',
-    'Completion Time',
-    'Tracking Code',
-    'Spoo',
-    'Picker',
-    'Total Items',
-    '',
-  ];
+  const headers = ['ID', 'Zone', 'Status', 'Completion Time', 'Tracking Code', 'Spoo', 'Picker', 'Total Items', ''];
   const headerRow = e(
     'tr',
     null,
-    headers.map(header => e('th', null, `${header}`))
+    headers.map((header) => e('th', null, `${header}`))
   );
 
   const bags = getBags();
-  const [completionTimeArray, setCompletionTimeArray] = React.useState(
-    Array(bags.length).fill('-')
-  );
+  const [completionTimeArray, setCompletionTimeArray] = React.useState(Array(bags.length).fill('-'));
 
   React.useEffect(() => {
     for (let i = 0; i < bags.length; i += 1) {
@@ -162,21 +150,15 @@ function BagTable() {
       const fetchURL = '/wms/view_picklist_history?picklist_id=';
 
       fetch(`${fetchURL}${encodeURIComponent(bag.id)}`)
-        .then(res => res.text())
-        .then(page => extractCompletionTime(page))
-        .then(time =>
-          setCompletionTimeArray(prevArray => [
-            ...prevArray.slice(0, i),
-            time,
-            ...prevArray.slice(i + 1),
-          ])
+        .then((res) => res.text())
+        .then((page) => extractCompletionTime(page))
+        .then((time) =>
+          setCompletionTimeArray((prevArray) => [...prevArray.slice(0, i), time, ...prevArray.slice(i + 1)])
         );
     }
   }, []);
 
-  const bagRows = bags.map((bag, i, allBags) =>
-    e(BagRow, { bag, completionTime: completionTimeArray[i], allBags })
-  );
+  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, completionTime: completionTimeArray[i], allBags }));
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)]);
 }
 
@@ -210,7 +192,7 @@ function QRCodeArea() {
 
 function SearchBar() {
   const { searchTerm, setsearchTerm } = React.useContext(SearchContext);
-  const handleOnChange = evt => setsearchTerm(evt.target.value);
+  const handleOnChange = (evt) => setsearchTerm(evt.target.value);
 
   return e('form', null, [
     e('input', {
@@ -246,10 +228,7 @@ function UltimateTable() {
 
   const bagTable = e(BagTable);
   const qrcodeArea = e(QRCodeArea);
-  const ultimateTableContainer = e('div', { id: 'ultimateTable-container' }, [
-    bagTable,
-    qrcodeArea,
-  ]);
+  const ultimateTableContainer = e('div', { id: 'ultimateTable-container' }, [bagTable, qrcodeArea]);
 
   return e(
     QRCodeContext.Provider,
@@ -263,10 +242,7 @@ function UltimateTable() {
 function App() {
   const [searchTerm, setsearchTerm] = React.useState('');
 
-  return e(SearchContext.Provider, { value: { searchTerm, setsearchTerm } }, [
-    e(SearchBar),
-    e(UltimateTable),
-  ]);
+  return e(SearchContext.Provider, { value: { searchTerm, setsearchTerm } }, [e(SearchBar), e(UltimateTable)]);
 }
 
 function getLogin() {
