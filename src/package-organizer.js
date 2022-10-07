@@ -260,73 +260,86 @@ const getTimeStyle = (cpt) => {
 
 const getPsolveStyle = (status) => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
 
-const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime }) => {
-  const [cpt, setCPT] = React.useState('');
-  const [packageStatus, setPackageStatus] = React.useState('');
-  const [orderID, setOrderID] = React.useState('');
-  const [style, setStyle] = React.useState('');
-  const rowDataClone = [...rowData];
+const ActionRow = ({ action, i, allActions }) => {
+  const actionClone = [...action];
+  actionClone[3] = e('span', { className: 'monospace' }, action[3]);
+  actionClone[8] = e('div', null, [
+    e('span', { className: 'spoo-dot' }),
+    e('span', { className: 'monospace' }, action[8]),
+  ]);
+  actionClone[9] = e('a', { href: `/orders/view_order?id=${action[9]}` }, action[9]);
+  actionClone[10] = e('a', { href: `/picklist/pack_by_picklist?picklist_id=${action[10]}` }, action[10]);
+
+  const style = `${getTimeStyle(actionClone[7])} ${getPsolveStyle(actionClone[5])}`;
+  const topBorder = i === 0 || allActions[i][6] !== allActions[i - 1][6] ? 'table-top-border' : '';
+  const cells = actionClone.map((cell, index) => e('td', { className: 'a-text-center', key: index }, cell));
+
+  return e('tr', { className: `${style} ${topBorder} table-side-border` }, cells);
+};
+
+const transferToNewActions = (actions) => {
+  // convert old table data in to new table
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
-  if (isAftlitePortal) {
-    rowDataClone[3] = e('span', { className: 'monospace' }, rowData[3]);
-    rowDataClone[5] = packageStatus;
-    rowDataClone[6] = allcompletionTime[i];
-    rowDataClone[7] = cpt;
-    rowDataClone[8] = e('div', null, [
-      e('span', { className: 'spoo-dot' }),
-      e('span', { className: 'monospace' }, rowData[9]),
-    ]);
-    rowDataClone[9] = orderID ? e('a', { href: `/orders/view_order?id=${orderID}` }, orderID) : '-';
-    rowDataClone[10] = e('a', { href: `/picklist/pack_by_picklist?picklist_id=${rowData[12]}` }, rowData[12]);
-    rowDataClone[11] = rowData[11];
-    rowDataClone.splice(-1);
-  } else {
-    rowDataClone[3] = e('span', { className: 'monospace' }, rowData[3]);
-    rowDataClone[5] = packageStatus;
-    rowDataClone[6] = allcompletionTime[i];
-    rowDataClone[7] = cpt;
-    rowDataClone[8] = e('div', null, [
-      e('span', { className: 'spoo-dot' }),
-      e('span', { className: 'monospace' }, rowData[10]),
-    ]);
-    rowDataClone[9] = orderID ? e('a', { href: `/wms/view_order?id=${orderID}` }, orderID) : '-';
-    rowDataClone[10] = e('a', { href: `/wms/view_order?id=${rowData[13]}` }, rowData[13]);
-    rowDataClone[11] = rowData[12];
-    rowDataClone.splice(-2);
-  }
-
-  const rowCells = rowDataClone.map((cellData, index) => e('td', { className: 'a-text-center', key: index }, cellData));
-
-  React.useEffect(() => {
-    const pickListId = rowDataClone[10].props.children;
-    getPackageInfo(pickListId).then((packageInfo) => {
-      setAllcompletionTime((prev) => prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue)));
-      setCPT(packageInfo[1]);
-      setPackageStatus(packageInfo[2]);
-      setOrderID(packageInfo[3]);
-      setStyle(`${getTimeStyle(packageInfo[1])} ${getPsolveStyle(packageInfo[2])}`);
-    });
-  }, []);
-
-  const topBorder = i === 0 || allcompletionTime[i] !== allcompletionTime[i - 1] ? 'table-top-border' : '';
-
-  return e('tr', { className: `${style} ${topBorder} table-side-border` }, rowCells);
+  return actions.map((action) => {
+    const newActions = [];
+    if (isAftlitePortal) {
+      newActions[0] = action[0];
+      newActions[1] = action[1];
+      newActions[2] = action[2];
+      newActions[3] = action[3];
+      newActions[4] = action[4];
+      newActions[5] = ''; // status
+      newActions[6] = ''; // completion time
+      newActions[7] = ''; // cpt
+      newActions[8] = action[9];
+      newActions[9] = ''; // orderId
+      newActions[10] = action[12];
+      newActions[11] = action[11];
+    } else {
+      newActions[0] = action[0];
+      newActions[1] = action[1];
+      newActions[2] = action[2];
+      newActions[3] = action[3];
+      newActions[4] = action[4];
+      newActions[5] = ''; // status
+      newActions[6] = ''; // completion time
+      newActions[7] = ''; // cpt
+      newActions[8] = action[10];
+      newActions[9] = ''; // orderId
+      newActions[10] = action[13];
+      newActions[11] = action[12];
+    }
+    return newActions;
+  });
 };
 
 const MainTable = () => {
   const actions = getActions();
   const uniquePackActions = filterUniquePackActions(actions);
-  const [allcompletionTime, setAllcompletionTime] = React.useState(Array(uniquePackActions.length).fill(''));
+  const [newActions, setNewActions] = React.useState(transferToNewActions(uniquePackActions));
+
   const header = e(TableHeader, { key: 'main-table-header' });
-  const rows = uniquePackActions.map((rowData, i) =>
-    e(ActionRow, {
-      rowData,
-      i,
-      allcompletionTime,
-      setAllcompletionTime,
-      key: rowData[9],
-    })
-  );
+  const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
+
+  React.useEffect(() => {
+    const newActionsClone = [];
+    for (let i = 0; i < newActions.length; i += 1) {
+      newActionsClone[i] = newActions[i].slice();
+      const pickListId = newActionsClone[i][10];
+      getPackageInfo(pickListId).then((packageInfo) => {
+        setNewActions((prev) =>
+          prev.map((value, j) => {
+            if (i === j) {
+              const newValue = value.slice();
+              [newValue[6], newValue[7], newValue[5], newValue[9]] = packageInfo;
+              return newValue;
+            }
+            return value;
+          })
+        );
+      });
+    }
+  }, []);
 
   return e(
     'table',
