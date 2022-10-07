@@ -199,9 +199,7 @@ const getPackageInfo = async (pickListId) => {
   const fetchURL = isAftlitePortal
     ? '/picklist/view_picklist_history?picklist_id='
     : '/wms/view_picklist_history?picklist_id=';
-  const statusSelector = isAftlitePortal
-    ? 'div.a-row:nth-child(6)'
-    : 'table:nth-child(6) tr:nth-child(2)';
+  const statusSelector = isAftlitePortal ? 'div.a-row:nth-child(6)' : 'table:nth-child(6) tr:nth-child(2)';
   const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)';
   const cptSelector = isAftlitePortal ? 'div.a-row:nth-child(12)' : 'tr:nth-child(8)';
   const orderIdSelector = isAftlitePortal ? 'div.a-row:nth-child(2)' : 'tr:nth-child(2)';
@@ -279,11 +277,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
       e('span', { className: 'monospace' }, rowData[9]),
     ]);
     rowDataClone[9] = orderID ? e('a', { href: `/orders/view_order?id=${orderID}` }, orderID) : '-';
-    rowDataClone[10] = e(
-      'a',
-      { href: `/picklist/pack_by_picklist?picklist_id=${rowData[12]}` },
-      rowData[12]
-    );
+    rowDataClone[10] = e('a', { href: `/picklist/pack_by_picklist?picklist_id=${rowData[12]}` }, rowData[12]);
     rowDataClone[11] = rowData[11];
     rowDataClone.splice(-1);
   } else {
@@ -301,16 +295,12 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
     rowDataClone.splice(-2);
   }
 
-  const rowCells = rowDataClone.map((cellData, index) =>
-    e('td', { className: 'a-text-center', key: index }, cellData)
-  );
+  const rowCells = rowDataClone.map((cellData, index) => e('td', { className: 'a-text-center', key: index }, cellData));
 
   React.useEffect(() => {
     const pickListId = rowDataClone[10].props.children;
     getPackageInfo(pickListId).then((packageInfo) => {
-      setAllcompletionTime((prev) =>
-        prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue))
-      );
+      setAllcompletionTime((prev) => prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue)));
       setCPT(packageInfo[1]);
       setPackageStatus(packageInfo[2]);
       setOrderID(packageInfo[3]);
@@ -324,12 +314,8 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
 const MainTable = () => {
   const actions = getActions();
   const allPackActions = filterUniquePackActions(actions);
-  const [allcompletionTime, setAllcompletionTime] = React.useState(
-    Array(allPackActions.length).fill('')
-  );
-  const [allTopBorderClass, setAllTopBorderClass] = React.useState(
-    Array(allPackActions.length).fill('')
-  );
+  const [allcompletionTime, setAllcompletionTime] = React.useState(Array(allPackActions.length).fill(''));
+  const [allTopBorderClass, setAllTopBorderClass] = React.useState(Array(allPackActions.length).fill(''));
   const header = e(TableHeader, { key: 'main-table-header' });
   const rows = allPackActions.map((rowData, i) =>
     e(ActionRow, {
