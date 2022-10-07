@@ -306,7 +306,7 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime, allTop
   );
 
   React.useEffect(() => {
-    const pickListId = rowData[12];
+    const pickListId = rowDataClone[10].props.children;
     getPackageInfo(pickListId).then(packageInfo => {
       setAllcompletionTime(prev =>
         prev.map((preValue, j) => (j === i ? packageInfo[0] : preValue))
