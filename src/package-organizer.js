@@ -315,10 +315,10 @@ const ActionRow = ({ rowData, i, allcompletionTime, setAllcompletionTime }) => {
 
 const MainTable = () => {
   const actions = getActions();
-  const allPackActions = filterUniquePackActions(actions);
-  const [allcompletionTime, setAllcompletionTime] = React.useState(Array(allPackActions.length).fill(''));
+  const uniquePackActions = filterUniquePackActions(actions);
+  const [allcompletionTime, setAllcompletionTime] = React.useState(Array(uniquePackActions.length).fill(''));
   const header = e(TableHeader, { key: 'main-table-header' });
-  const rows = allPackActions.map((rowData, i) =>
+  const rows = uniquePackActions.map((rowData, i) =>
     e(ActionRow, {
       rowData,
       i,
