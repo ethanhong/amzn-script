@@ -318,19 +318,17 @@ const MainTable = ({ isAftlitePortal }) => {
   );
 };
 
-const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) => {
-  const handleTableChange = () => setIsOriginalTable((prev) => !prev);
-  return e(
+const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) =>
+  e(
     'form',
     null,
     e('input', {
       type: 'checkbox',
       checked: isOriginalTable,
-      onChange: handleTableChange,
+      onChange: () => setIsOriginalTable((prev) => !prev),
     }),
     ' Show original table'
   );
-};
 
 const App = ({ isAftlitePortal }) => {
   const [isOriginalTable, setIsOriginalTable] = React.useState(false);
