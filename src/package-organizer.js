@@ -15,119 +15,117 @@
 /* eslint-disable prefer-destructuring */
 
 const e = React.createElement;
-const styleNA = `
+
+const getCSS = (isAftlitePortal) => {
+  const styleNA = `
+    :root,
+    body,
+    html {
+      box-sizing: border-box;
+    }
+    #main-table
+    {
+      margin: 0;
+      padding: 0;
+      outline: none;
+      font-size: 100%;
+      vertical-align: baseline;
+      background: transparent;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    #main-table tr {
+      background: transparent;
+    }
+    #main-table tr:nth-last-child(1) {
+      border-bottom: 2px solid firebrick;
+    }
+    .table-side-border {
+      border-right: 2px solid firebrick;
+      border-left: 2px solid firebrick;
+    }
+    .table-top-border {
+      border-top: 2px solid firebrick;
+    }
+    .p-solve {
+      color: firebrick;
+    }
+    .monospace {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .spoo-dot {
+      height: 0.5rem;
+      width: 0.5rem;
+      background-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.2rem;
+    }
+    .late-window .spoo-dot {
+      background-color: rgb(184, 29, 19, 100%);
+    }
+    .current-window .spoo-dot {
+      background-color: rgb(239, 183, 0, 100%);
+    }
+    .next-window .spoo-dot {
+      background-color: rgb(0, 132, 80, 100%);
+    }
+  `;
+  const stylePortal = `
   :root,
   body,
-  html {
-    box-sizing: border-box;
-  }
-  #main-table
-  {
-    margin: 0;
-    padding: 0;
-    outline: none;
-    font-size: 100%;
-    vertical-align: baseline;
-    background: transparent;
-    border-collapse: collapse;
-    text-align: center;
-  }
-  #main-table tr {
-    background: transparent;
-  }
-  #main-table tr:nth-last-child(1) {
-    border-bottom: 2px solid firebrick;
-  }
-  .table-side-border {
-    border-right: 2px solid firebrick;
-    border-left: 2px solid firebrick;
-  }
-  .table-top-border {
-    border-top: 2px solid firebrick;
-  }
-  .p-solve {
-    color: firebrick;
-  }
-  .monospace {
-    font-family: monospace;
-    font-size: 0.9rem;
-  }
-  .spoo-dot {
-    height: 0.5rem;
-    width: 0.5rem;
-    background-color: transparent;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 0.2rem;
-  }
-  .late-window .spoo-dot {
-    background-color: rgb(184, 29, 19, 100%);
-  }
-  .current-window .spoo-dot {
-    background-color: rgb(239, 183, 0, 100%);
-  }
-  .next-window .spoo-dot {
-    background-color: rgb(0, 132, 80, 100%);
-  }
-`;
-const stylePortal = `
-:root,
-body,
-  html {
-    box-sizing: border-box;
-  }
-  #main-table
-  {
-    margin: 0;
-    padding: 0;
-    outline: none;
-    font-size: 100%;
-    vertical-align: baseline;
-    background: transparent;
-  }
-  #main-table tr {
-    background: transparent;
-  }
-  #main-table tr:nth-last-child(1) {
-    border-bottom: 2px solid firebrick;
-  }
-  .table-side-border {
-    border-right: 2px solid firebrick;
-    border-left: 2px solid firebrick;
-  }
-  .table-top-border {
-    border-top: 2px solid firebrick;
-  }
-  .p-solve {
-    color: firebrick;
-  }
-  .monospace {
-    font-family: monospace;
-    font-size: 0.9rem;
-  }
-  .spoo-dot {
-    height: 0.5rem;
-    width: 0.5rem;
-    background-color: transparent;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 0.2rem;
-  }
-  .late-window .spoo-dot {
-    background-color: rgb(184, 29, 19, 100%);
-  }
-  .current-window .spoo-dot {
-    background-color: rgb(239, 183, 0, 100%);
-  }
-  .next-window .spoo-dot {
-    background-color: rgb(0, 132, 80, 100%);
-  }
-`;
-
-const addCSS = (style) => {
-  const styleSheet = document.createElement('style');
-  styleSheet.innerText = style;
-  document.head.appendChild(styleSheet);
+    html {
+      box-sizing: border-box;
+    }
+    #main-table
+    {
+      margin: 0;
+      padding: 0;
+      outline: none;
+      font-size: 100%;
+      vertical-align: baseline;
+      background: transparent;
+    }
+    #main-table tr {
+      background: transparent;
+    }
+    #main-table tr:nth-last-child(1) {
+      border-bottom: 2px solid firebrick;
+    }
+    .table-side-border {
+      border-right: 2px solid firebrick;
+      border-left: 2px solid firebrick;
+    }
+    .table-top-border {
+      border-top: 2px solid firebrick;
+    }
+    .p-solve {
+      color: firebrick;
+    }
+    .monospace {
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .spoo-dot {
+      height: 0.5rem;
+      width: 0.5rem;
+      background-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.2rem;
+    }
+    .late-window .spoo-dot {
+      background-color: rgb(184, 29, 19, 100%);
+    }
+    .current-window .spoo-dot {
+      background-color: rgb(239, 183, 0, 100%);
+    }
+    .next-window .spoo-dot {
+      background-color: rgb(0, 132, 80, 100%);
+    }
+  `;
+  return isAftlitePortal ? stylePortal : styleNA;
 };
 
 const getActions = () => {
@@ -353,14 +351,18 @@ const App = ({ isAftlitePortal }) => {
 const packageSummarizer = () => {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
 
-  const rootDiv = document.createElement('div');
-  if (isAftlitePortal) {
-    addCSS(stylePortal);
-  } else {
+  // add stylesheet
+  const styleSheet = document.createElement('style');
+  styleSheet.innerText = getCSS(isAftlitePortal);
+  document.head.appendChild(styleSheet);
+
+  // add id for original table for easier access
+  if (!isAftlitePortal) {
     document.querySelector('div.resultSet').setAttribute('id', 'main-content');
-    addCSS(styleNA);
   }
 
+  // mount app
+  const rootDiv = document.createElement('div');
   document.querySelector('#main-content > table').before(rootDiv);
   ReactDOM.createRoot(rootDiv).render(e(App, { isAftlitePortal }));
 };
