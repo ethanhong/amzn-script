@@ -105,11 +105,10 @@ function BagRow({ bag, allBags }) {
     e('td', null, packLink),
   ];
 
-  let trAttr = null;
-  trAttr = isRelatedBag(bag, searchTerm, allBags) ? { className: 'related-bag' } : trAttr;
-  trAttr = isTargetBag(bag, searchTerm) ? { className: 'target-bag' } : trAttr;
+  const relatedClass = isRelatedBag(bag, searchTerm, allBags) ? 'related-bag' : '';
+  const targetClass = isTargetBag(bag, searchTerm) ? 'target-bag' : '';
 
-  return e('tr', trAttr, rowCells);
+  return e('tr', { className: `${targetClass} ${relatedClass}` }, rowCells);
 }
 
 function containsKeyword(str, keyword) {
@@ -278,7 +277,6 @@ function addCSS() {
     #bag-table {
       flex-shrink: 0;
       border-collapse: collapse;
-      font-family: monospace;
       font-size: 1rem;
       color: #101010;
       margin-right: 1rem;
@@ -295,6 +293,7 @@ function addCSS() {
     }
     
     #bag-table td {
+      font-family: monospace;
       padding: 0.8rem 1rem;
       text-align: center;
       vertical-align: middle;
@@ -314,7 +313,6 @@ function addCSS() {
     
     tr.target-bag {
       border: 2px solid firebrick;
-      background-color: rgb(34, 77, 23, 10%) !important;
     }
 
     tr.related-bag {
