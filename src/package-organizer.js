@@ -15,140 +15,118 @@
 /* eslint-disable prefer-destructuring */
 
 const e = React.createElement;
+const styleNA = `
+  :root,
+  body,
+  html {
+    box-sizing: border-box;
+  }
+  #main-table
+  {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+    border-collapse: collapse;
+    text-align: center;
+  }
+  #main-table tr {
+    background: transparent;
+  }
+  #main-table tr:nth-last-child(1) {
+    border-bottom: 2px solid firebrick;
+  }
+  .table-side-border {
+    border-right: 2px solid firebrick;
+    border-left: 2px solid firebrick;
+  }
+  .table-top-border {
+    border-top: 2px solid firebrick;
+  }
+  .p-solve {
+    color: firebrick;
+  }
+  .monospace {
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  .spoo-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    background-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.2rem;
+  }
+  .late-window .spoo-dot {
+    background-color: rgb(184, 29, 19, 100%);
+  }
+  .current-window .spoo-dot {
+    background-color: rgb(239, 183, 0, 100%);
+  }
+  .next-window .spoo-dot {
+    background-color: rgb(0, 132, 80, 100%);
+  }
+`;
+const stylePortal = `
+:root,
+body,
+  html {
+    box-sizing: border-box;
+  }
+  #main-table
+  {
+    margin: 0;
+    padding: 0;
+    outline: none;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+  }
+  #main-table tr {
+    background: transparent;
+  }
+  #main-table tr:nth-last-child(1) {
+    border-bottom: 2px solid firebrick;
+  }
+  .table-side-border {
+    border-right: 2px solid firebrick;
+    border-left: 2px solid firebrick;
+  }
+  .table-top-border {
+    border-top: 2px solid firebrick;
+  }
+  .p-solve {
+    color: firebrick;
+  }
+  .monospace {
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  .spoo-dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    background-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.2rem;
+  }
+  .late-window .spoo-dot {
+    background-color: rgb(184, 29, 19, 100%);
+  }
+  .current-window .spoo-dot {
+    background-color: rgb(239, 183, 0, 100%);
+  }
+  .next-window .spoo-dot {
+    background-color: rgb(0, 132, 80, 100%);
+  }
+`;
 
-const addCSSNa = () => {
-  const styles = `
-    :root,
-    body,
-    html {
-      box-sizing: border-box;
-    }
-    #main-table
-    {
-      margin: 0;
-      padding: 0;
-      outline: none;
-      font-size: 100%;
-      vertical-align: baseline;
-      background: transparent;
-    }
-    #main-table tr {
-      background: transparent;
-    }
-    #main-table tr:nth-last-child(1) {
-      border-bottom: 2px solid firebrick;
-    }
-    .table-side-border {
-      border-right: 2px solid firebrick;
-      border-left: 2px solid firebrick;
-    }
-    .table-top-border {
-      border-top: 2px solid firebrick;
-    }
-    // .late-window {
-    //   background-color: rgb(255, 85, 94, 10%) !important;
-    // }
-    // .current-window {
-    //   background-color: rgb(255, 233, 129, 10%) !important;
-    // }
-    // .next-window {
-    //   background-color: rgb(139, 241, 139, 10%) !important;
-    // }
-    .p-solve {
-      color: firebrick;
-    }
-    .monospace {
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-    .spoo-dot {
-      height: 0.5rem;
-      width: 0.5rem;
-      background-color: transparent;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 0.2rem;
-    }
-    .late-window .spoo-dot {
-      background-color: rgb(184, 29, 19, 100%);
-    }
-    .current-window .spoo-dot {
-      background-color: rgb(239, 183, 0, 100%);
-    }
-    .next-window .spoo-dot {
-      background-color: rgb(0, 132, 80, 100%);
-    }
-  `;
+const addCSS = (style) => {
   const styleSheet = document.createElement('style');
-  styleSheet.innerText = styles;
-  document.head.appendChild(styleSheet);
-};
-
-const addCSSPortal = () => {
-  const styles = `
-    :root,
-    body,
-    html {
-      box-sizing: border-box;
-    }
-    #main-table
-    {
-      margin: 0;
-      padding: 0;
-      outline: none;
-      font-size: 100%;
-      vertical-align: baseline;
-      background: transparent;
-    }
-    #main-table tr {
-      background: transparent;
-    }
-    #main-table tr:nth-last-child(1) {
-      border-bottom: 2px solid firebrick;
-    }
-    .table-side-border {
-      border-right: 2px solid firebrick;
-      border-left: 2px solid firebrick;
-    }
-    .table-top-border {
-      border-top: 2px solid firebrick;
-    }
-    // .late-window {
-    //   background-color: rgb(255, 85, 94, 10%) !important;
-    // }
-    // .current-window {
-    //   background-color: rgb(255, 233, 129, 10%) !important;
-    // }
-    // .next-window {
-    //   background-color: rgb(139, 241, 139, 10%) !important;
-    // }
-    .p-solve {
-      color: firebrick;
-    }
-    .monospace {
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-    .spoo-dot {
-      height: 0.5rem;
-      width: 0.5rem;
-      background-color: transparent;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 0.2rem;
-    }
-    .late-window .spoo-dot {
-      background-color: rgb(184, 29, 19, 100%);
-    }
-    .current-window .spoo-dot {
-      background-color: rgb(239, 183, 0, 100%);
-    }
-    .next-window .spoo-dot {
-      background-color: rgb(0, 132, 80, 100%);
-    }
-  `;
-  const styleSheet = document.createElement('style');
-  styleSheet.innerText = styles;
+  styleSheet.innerText = style;
   document.head.appendChild(styleSheet);
 };
 
@@ -158,10 +136,8 @@ const getActions = () => {
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
 
-const filterUniquePackActions = (actions) => {
-  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+const filterUniquePackActions = (actions, isAftlitePortal) => {
   const pickedSpoo = [];
-
   return actions.filter((data) => {
     const [action, tool] = [data[1], data[2]];
     const spoo = isAftlitePortal ? data[9] : data[10];
@@ -194,8 +170,7 @@ const TableHeader = () => {
   return e('tr', null, tableHeaders);
 };
 
-const getPackageInfo = async (pickListId) => {
-  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
+const getPackageInfo = async (pickListId, isAftlitePortal) => {
   const fetchURL = isAftlitePortal
     ? '/picklist/view_picklist_history?picklist_id='
     : '/wms/view_picklist_history?picklist_id=';
@@ -277,10 +252,9 @@ const ActionRow = ({ action, i, allActions }) => {
   return e('tr', { className: `${style} ${topBorder} table-side-border` }, cells);
 };
 
-const transferToNewActions = (actions) => {
+const transferToNewActions = (actions, isAftlitePortal) =>
   // convert old table data in to new table
-  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
-  return actions.map((action) => {
+  actions.map((action) => {
     const newActions = [];
     if (isAftlitePortal) {
       newActions[0] = action[0];
@@ -311,12 +285,11 @@ const transferToNewActions = (actions) => {
     }
     return newActions;
   });
-};
 
-const MainTable = () => {
+const MainTable = ({ isAftlitePortal }) => {
   const actions = getActions();
-  const uniquePackActions = filterUniquePackActions(actions);
-  const [newActions, setNewActions] = React.useState(transferToNewActions(uniquePackActions));
+  const uniquePackActions = filterUniquePackActions(actions, isAftlitePortal);
+  const [newActions, setNewActions] = React.useState(transferToNewActions(uniquePackActions, isAftlitePortal));
 
   const header = e(TableHeader, { key: 'main-table-header' });
   const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
@@ -326,7 +299,7 @@ const MainTable = () => {
     for (let i = 0; i < newActions.length; i += 1) {
       newActionsClone[i] = newActions[i].slice();
       const pickListId = newActionsClone[i][10];
-      getPackageInfo(pickListId).then((packageInfo) => {
+      getPackageInfo(pickListId, isAftlitePortal).then((packageInfo) => {
         setNewActions((prev) =>
           prev.map((value, j) => {
             if (i === j) {
@@ -362,9 +335,9 @@ const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) => {
   );
 };
 
-const App = () => {
+const App = ({ isAftlitePortal }) => {
   const [isOriginalTable, setIsOriginalTable] = React.useState(false);
-  const mainTable = e(MainTable, { key: 'main-table' });
+  const mainTable = e(MainTable, { isAftlitePortal, key: 'main-table' });
   const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, key: 'table-switch' });
 
   React.useEffect(() => {
@@ -383,12 +356,12 @@ const packageSummarizer = () => {
 
   const rootDiv = document.createElement('div');
   if (isAftlitePortal) {
-    addCSSPortal();
+    addCSS(stylePortal);
   } else {
     document.querySelector('div.resultSet').setAttribute('id', 'main-content');
-    addCSSNa();
+    addCSS(styleNA);
   }
 
   document.querySelector('#main-content > table').before(rootDiv);
-  ReactDOM.createRoot(rootDiv).render(e(App));
+  ReactDOM.createRoot(rootDiv).render(e(App, { isAftlitePortal }));
 };
