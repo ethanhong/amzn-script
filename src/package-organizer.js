@@ -134,17 +134,6 @@ const getActions = () => {
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
 
-const filterActions = (actions, isAftlitePortal) => {
-  const spoos = actions.map((act) => (isAftlitePortal ? act[9] : act[10]));
-  return actions.filter((data, index) => {
-    const [action, tool] = [data[1], data[2]];
-    const spoo = isAftlitePortal ? data[9] : data[10];
-    const isPackUniqeSpoo = action === 'pack' && tool === 'pack' && spoos.indexOf(spoo) === index;
-    const isIndirect = tool === 'indirect';
-    return isPackUniqeSpoo || isIndirect;
-  });
-};
-
 const TableHeader = () => {
   const titles = [
     'Timestamp',
@@ -249,44 +238,54 @@ const ActionRow = ({ action, i, allActions }) => {
   return e('tr', { className: `${psolveStyle} ${timeWindowStyle} ${topBorderStyle}` }, cells);
 };
 
-const mapToNewActions = (actions, isAftlitePortal) =>
+const mapToNewAction = (action, isAftlitePortal) => {
   // convert old table data in to new table
-  actions.map((action) => {
-    const newActions = [];
-    if (isAftlitePortal) {
-      newActions[0] = action[0];
-      newActions[1] = action[1];
-      newActions[2] = action[2];
-      newActions[3] = action[3];
-      newActions[4] = action[4];
-      newActions[5] = ''; // status
-      newActions[6] = ''; // completion time
-      newActions[7] = ''; // cpt
-      newActions[8] = action[9];
-      newActions[9] = ''; // orderId
-      newActions[10] = action[12];
-      newActions[11] = action[11];
-    } else {
-      newActions[0] = action[0];
-      newActions[1] = action[1];
-      newActions[2] = action[2];
-      newActions[3] = action[3];
-      newActions[4] = action[4];
-      newActions[5] = ''; // status
-      newActions[6] = ''; // completion time
-      newActions[7] = ''; // cpt
-      newActions[8] = action[10];
-      newActions[9] = ''; // orderId
-      newActions[10] = action[13];
-      newActions[11] = action[12];
-    }
-    return newActions;
-  });
+  const newAction = [];
+  if (isAftlitePortal) {
+    newAction[0] = action[0];
+    newAction[1] = action[1];
+    newAction[2] = action[2];
+    newAction[3] = action[3];
+    newAction[4] = action[4];
+    newAction[5] = ''; // status
+    newAction[6] = ''; // completion time
+    newAction[7] = ''; // cpt
+    newAction[8] = action[9];
+    newAction[9] = ''; // orderId
+    newAction[10] = action[12];
+    newAction[11] = action[11];
+  } else {
+    newAction[0] = action[0];
+    newAction[1] = action[1];
+    newAction[2] = action[2];
+    newAction[3] = action[3];
+    newAction[4] = action[4];
+    newAction[5] = ''; // status
+    newAction[6] = ''; // completion time
+    newAction[7] = ''; // cpt
+    newAction[8] = action[10];
+    newAction[9] = ''; // orderId
+    newAction[10] = action[13];
+    newAction[11] = action[12];
+  }
+  return newAction;
+};
+
+const isActionToKeep = (action, index, allActions, isAftlitePortal) => {
+  const allSpoos = allActions.map((act) => (isAftlitePortal ? act[9] : act[10]));
+  const [actionCell, toolCell] = [action[1], action[2]];
+  const spooCell = isAftlitePortal ? action[9] : action[10];
+  const isPackUniqeSpoo = actionCell === 'pack' && toolCell === 'pack' && allSpoos.indexOf(spooCell) === index;
+  const isIndirect = toolCell === 'indirect';
+  return isPackUniqeSpoo || isIndirect;
+};
 
 const MainTable = ({ isAftlitePortal }) => {
-  const actions = getActions();
-  const filteredActions = filterActions(actions, isAftlitePortal);
-  const [newActions, setNewActions] = React.useState(mapToNewActions(filteredActions, isAftlitePortal));
+  const [newActions, setNewActions] = React.useState(
+    getActions()
+      .filter((action, index, allActions) => isActionToKeep(action, index, allActions, isAftlitePortal))
+      .map((action) => mapToNewAction(action, isAftlitePortal))
+  );
 
   const header = e(TableHeader, { key: 'main-table-header' });
   const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
