@@ -37,12 +37,12 @@ const getCSS = (isAftlitePortal) => {
     #main-table tr {
       background: transparent;
     }
-    #main-table tr:nth-last-child(1) {
-      border-bottom: 2px solid firebrick;
-    }
-    .table-side-border {
+    #main-table tr:not(:first-child) {
       border-right: 2px solid firebrick;
       border-left: 2px solid firebrick;
+    }
+    #main-table tr:nth-last-child(1) {
+      border-bottom: 2px solid firebrick;
     }
     .table-top-border {
       border-top: 2px solid firebrick;
@@ -90,12 +90,12 @@ const getCSS = (isAftlitePortal) => {
     #main-table tr {
       background: transparent;
     }
-    #main-table tr:nth-last-child(1) {
-      border-bottom: 2px solid firebrick;
-    }
-    .table-side-border {
+    #main-table tr:not(:first-child) {
       border-right: 2px solid firebrick;
       border-left: 2px solid firebrick;
+    }
+    #main-table tr:nth-last-child(1) {
+      border-bottom: 2px solid firebrick;
     }
     .table-top-border {
       border-top: 2px solid firebrick;
@@ -208,17 +208,18 @@ const getPackageInfo = async (pickListId, isAftlitePortal) => {
     });
 };
 
-const getTimeStyle = (cpt) => {
-  if (!cpt) {
+const getTimeStyle = (timeStamp, cpt, currentTime) => {
+  if (!timeStamp || !cpt) {
     return '';
   }
 
-  const currentTime = new Date();
+  const isToday = Number.parseInt(timeStamp.split(/[\s-]/)[2], 10) === currentTime.getDate();
+  if (!isToday) return '';
+
   const lateWindow = (currentTime.getHours() + 1) % 24;
   const currentWindow = (currentTime.getHours() + 2) % 24;
   const nextWindow = (currentTime.getHours() + 3) % 24;
   const startHour = parseInt(cpt.split(':')[0], 10);
-
   if (startHour === lateWindow) {
     return 'late-window';
   }
@@ -231,8 +232,6 @@ const getTimeStyle = (cpt) => {
   return '';
 };
 
-const getPsolveStyle = (status) => (status === 'problem-solve' ? 'p-solve' : '');
-
 const ActionRow = ({ action, i, allActions }) => {
   const newAction = action.map((ele, j) => {
     if (j === 3) return e('span', { className: 'monospace' }, ele);
@@ -243,11 +242,13 @@ const ActionRow = ({ action, i, allActions }) => {
     return ele;
   });
 
-  const style = `${getTimeStyle(newAction[7])} ${getPsolveStyle(newAction[5])}`;
-  const topBorder = i === 0 || allActions[i][6] !== allActions[i - 1][6] ? 'table-top-border' : '';
+  const psolveStyle = newAction[5] === 'problem-solve' ? 'p-solve' : '';
+  const timeWindowStyle = getTimeStyle(newAction[0], newAction[7], new Date());
+  const topBorderStyle = i === 0 || allActions[i][6] !== allActions[i - 1][6] ? 'table-top-border' : '';
+
   const cells = newAction.map((cell, index) => e('td', { className: 'a-text-center', key: index }, cell));
 
-  return e('tr', { className: `${style} ${topBorder} table-side-border` }, cells);
+  return e('tr', { className: `${psolveStyle} ${timeWindowStyle} ${topBorderStyle}` }, cells);
 };
 
 const transferToNewActions = (actions, isAftlitePortal) =>
