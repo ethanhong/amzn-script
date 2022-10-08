@@ -234,18 +234,18 @@ const getTimeStyle = (cpt) => {
 const getPsolveStyle = (status) => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
 
 const ActionRow = ({ action, i, allActions }) => {
-  const actionClone = [...action];
-  actionClone[3] = e('span', { className: 'monospace' }, action[3]);
-  actionClone[8] = e('div', null, [
-    e('span', { className: 'spoo-dot' }),
-    e('span', { className: 'monospace' }, action[8]),
-  ]);
-  actionClone[9] = e('a', { href: `/orders/view_order?id=${action[9]}` }, action[9]);
-  actionClone[10] = e('a', { href: `/picklist/pack_by_picklist?picklist_id=${action[10]}` }, action[10]);
+  const newAction = action.map((ele, j) => {
+    if (j === 3) return e('span', { className: 'monospace' }, ele);
+    if (j === 8)
+      return e('div', null, [e('span', { className: 'spoo-dot' }), e('span', { className: 'monospace' }, ele)]);
+    if (j === 9) return e('a', { href: `/orders/view_order?id=${ele}` }, ele);
+    if (j === 10) return e('a', { href: `/picklist/pack_by_picklist?picklist_id=${ele}` }, ele);
+    return ele;
+  });
 
-  const style = `${getTimeStyle(actionClone[7])} ${getPsolveStyle(actionClone[5])}`;
+  const style = `${getTimeStyle(newAction[7])} ${getPsolveStyle(newAction[5])}`;
   const topBorder = i === 0 || allActions[i][6] !== allActions[i - 1][6] ? 'table-top-border' : '';
-  const cells = actionClone.map((cell, index) => e('td', { className: 'a-text-center', key: index }, cell));
+  const cells = newAction.map((cell, index) => e('td', { className: 'a-text-center', key: index }, cell));
 
   return e('tr', { className: `${style} ${topBorder} table-side-border` }, cells);
 };
