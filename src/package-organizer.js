@@ -134,16 +134,14 @@ const getActions = () => {
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
 
-const filterUniquePackActions = (actions, isAftlitePortal) => {
-  const pickedSpoo = [];
-  return actions.filter((data) => {
+const filterActions = (actions, isAftlitePortal) => {
+  const spoos = actions.map((act) => (isAftlitePortal ? act[9] : act[10]));
+  return actions.filter((data, index) => {
     const [action, tool] = [data[1], data[2]];
     const spoo = isAftlitePortal ? data[9] : data[10];
-    if (action === 'pack' && tool === 'pack' && !pickedSpoo.includes(spoo)) {
-      pickedSpoo.push(spoo);
-      return true;
-    }
-    return false;
+    const isPackUniqeSpoo = action === 'pack' && tool === 'pack' && spoos.indexOf(spoo) === index;
+    const isIndirect = tool === 'indirect';
+    return isPackUniqeSpoo || isIndirect;
   });
 };
 
@@ -251,7 +249,7 @@ const ActionRow = ({ action, i, allActions }) => {
   return e('tr', { className: `${psolveStyle} ${timeWindowStyle} ${topBorderStyle}` }, cells);
 };
 
-const transferToNewActions = (actions, isAftlitePortal) =>
+const mapToNewActions = (actions, isAftlitePortal) =>
   // convert old table data in to new table
   actions.map((action) => {
     const newActions = [];
@@ -287,8 +285,8 @@ const transferToNewActions = (actions, isAftlitePortal) =>
 
 const MainTable = ({ isAftlitePortal }) => {
   const actions = getActions();
-  const uniquePackActions = filterUniquePackActions(actions, isAftlitePortal);
-  const [newActions, setNewActions] = React.useState(transferToNewActions(uniquePackActions, isAftlitePortal));
+  const filteredActions = filterActions(actions, isAftlitePortal);
+  const [newActions, setNewActions] = React.useState(mapToNewActions(filteredActions, isAftlitePortal));
 
   const header = e(TableHeader, { key: 'main-table-header' });
   const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
@@ -296,6 +294,7 @@ const MainTable = ({ isAftlitePortal }) => {
   React.useEffect(() => {
     newActions.map((na) => {
       const pickListId = na[10];
+      if (!pickListId) return null;
       getPackageInfo(pickListId, isAftlitePortal).then((packageInfo) => {
         setNewActions((prev) =>
           prev.map((value) => {
