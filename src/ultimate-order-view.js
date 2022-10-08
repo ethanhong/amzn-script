@@ -47,6 +47,7 @@ function getBags() {
     bag.packUrl = packUrls[i].href;
     bag.code = getBagCode(bag.spoo);
     bag.totalItem = getBagTotalItem(bag.spoo);
+    bag.completionTime = '-';
     bags.push(bag);
   }
   return bags;
@@ -74,7 +75,7 @@ function getBagTotalItem(spoo) {
   return contents[0] || '-';
 }
 
-function BagRow({ bag, completionTime, allBags }) {
+function BagRow({ bag, allBags }) {
   const { searchTerm } = React.useContext(SearchContext);
   const { setQRCodeContent } = React.useContext(QRCodeContext);
 
@@ -96,7 +97,7 @@ function BagRow({ bag, completionTime, allBags }) {
     e('td', null, bag.id),
     e('td', null, bag.zone),
     e('td', null, bag.status),
-    e('td', null, completionTime),
+    e('td', null, bag.completionTime),
     e('td', { onClick: handleOnClick }, formattedCode),
     e('td', { onClick: handleOnClick }, bag.spoo),
     e('td', null, pickerLik),
@@ -136,9 +137,7 @@ function BagTable() {
     null,
     headers.map((header) => e('th', null, `${header}`))
   );
-
-  const bags = getBags();
-  const [completionTimeArray, setCompletionTimeArray] = React.useState(Array(bags.length).fill('-'));
+  const [bags, setBags] = React.useState(getBags());
 
   React.useEffect(() => {
     for (let i = 0; i < bags.length; i += 1) {
@@ -149,12 +148,19 @@ function BagTable() {
         .then((page) => {
           const html = new DOMParser().parseFromString(page, 'text/html');
           const completionTime = html.querySelector('tr:nth-child(6)').textContent.match(/\d{1,2}:\d{1,2}/);
-          setCompletionTimeArray((prevArray) => [...prevArray.slice(0, i), completionTime, ...prevArray.slice(i + 1)]);
+          return completionTime;
+        })
+        .then((cTime) => {
+          setBags((prevArray) => {
+            const newBag = prevArray[i];
+            newBag.completionTime = cTime;
+            return [...prevArray.slice(0, i), newBag, ...prevArray.slice(i + 1)];
+          });
         });
     }
   }, []);
 
-  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, completionTime: completionTimeArray[i], allBags }));
+  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, allBags, key: i }));
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)]);
 }
 
