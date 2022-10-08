@@ -231,7 +231,7 @@ const getTimeStyle = (cpt) => {
   return '';
 };
 
-const getPsolveStyle = (status) => (['problem-solve', 'skipped'].includes(status) ? 'p-solve' : '');
+const getPsolveStyle = (status) => (status === 'problem-solve' ? 'p-solve' : '');
 
 const ActionRow = ({ action, i, allActions }) => {
   const newAction = action.map((ele, j) => {
