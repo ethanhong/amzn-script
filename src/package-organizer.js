@@ -134,21 +134,7 @@ const getActions = () => {
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
 
-const TableHeader = () => {
-  const titles = [
-    'Timestamp',
-    'Action',
-    'Tool',
-    'Asin',
-    'Bin',
-    'Status',
-    'Completion \n Time',
-    'CPT',
-    'Tote',
-    'Order',
-    'Picklist',
-    'User',
-  ];
+const TableHeader = ({ titles }) => {
   const tableHeaders = titles.map((title) =>
     e('th', { className: 'a-text-center', style: { whiteSpace: 'pre-line' }, key: title }, title)
   );
@@ -281,13 +267,28 @@ const isActionToKeep = (action, index, allActions, isAftlitePortal) => {
 };
 
 const MainTable = ({ isAftlitePortal }) => {
+  const titles = [
+    'Timestamp',
+    'Action',
+    'Tool',
+    'Asin',
+    'Bin',
+    'Status',
+    'Completion \n Time',
+    'CPT',
+    'Tote',
+    'Order',
+    'Picklist',
+    'User',
+  ];
+
   const [newActions, setNewActions] = React.useState(
     getActions()
       .filter((action, index, allActions) => isActionToKeep(action, index, allActions, isAftlitePortal))
       .map((action) => mapToNewAction(action, isAftlitePortal))
   );
 
-  const header = e(TableHeader, { key: 'main-table-header' });
+  const header = e(TableHeader, { titles, key: 'main-table-header' });
   const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
 
   React.useEffect(() => {
