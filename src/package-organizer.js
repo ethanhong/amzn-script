@@ -292,18 +292,18 @@ const MainTable = ({ isAftlitePortal }) => {
   const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
 
   React.useEffect(() => {
-    newActions.map((na) => {
-      const pickListId = na[10];
+    newActions.map((v, i) => {
+      const pickListId = v[10];
       if (!pickListId) return null;
       getPackageInfo(pickListId, isAftlitePortal).then((packageInfo) => {
         setNewActions((prev) =>
-          prev.map((value) => {
-            if (value[10] === pickListId) {
-              const newValue = value.slice();
+          prev.map((w, j) => {
+            if (j === i) {
+              const newValue = w.slice();
               [newValue[6], newValue[7], newValue[5], newValue[9]] = packageInfo;
               return newValue;
             }
-            return value;
+            return w;
           })
         );
       });
