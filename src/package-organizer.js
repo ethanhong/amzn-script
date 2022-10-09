@@ -33,9 +33,13 @@ const getCSS = (isAftlitePortal) => {
       background: transparent;
       border-collapse: collapse;
       text-align: center;
+      white-space: nowrap;
     }
     #main-table tr {
       background: transparent;
+    }
+    #main-table th {
+      white-space: pre-line;
     }
     #main-table tr:not(:first-child) {
       border-right: 2px solid firebrick;
@@ -86,9 +90,13 @@ const getCSS = (isAftlitePortal) => {
       font-size: 100%;
       vertical-align: baseline;
       background: transparent;
+      white-space: nowrap;
     }
     #main-table tr {
       background: transparent;
+    }
+    #main-table th {
+      white-space: pre-line;
     }
     #main-table tr:not(:first-child) {
       border-right: 2px solid firebrick;
@@ -135,9 +143,7 @@ const getActions = () => {
 };
 
 const TableHeader = ({ titles }) => {
-  const tableHeaders = titles.map((title) =>
-    e('th', { className: 'a-text-center', style: { whiteSpace: 'pre-line' }, key: title }, title)
-  );
+  const tableHeaders = titles.map((title) => e('th', { className: 'a-text-center', key: title }, title));
   return e('tr', null, tableHeaders);
 };
 
@@ -274,7 +280,7 @@ const MainTable = ({ isAftlitePortal }) => {
     'Asin',
     'Bin',
     'Status',
-    'Completion \n Time',
+    'Completion Time',
     'CPT',
     'Tote',
     'Order',
