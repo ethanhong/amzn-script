@@ -73,7 +73,7 @@ const App = ({ rows }) => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const startFindBag = () => {
+const startBagFinder = () => {
   // add stylesheet
   const styleSheet = document.createElement('style');
   styleSheet.innerText = getCSS();
