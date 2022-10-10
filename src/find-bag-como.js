@@ -1,10 +1,11 @@
 // ==UserScript==
-// @name         Package Organizer
+// @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzntools
 // @version      1.0
-// @description  remove useless package information
+// @description  find bag tool - como part
 // @author       Pei
-// @match        file:///C:/Users/pyhon/git/ethanhong/amzntools-src/material/UFF%20Dashboard%20Package.html
+// @match        file:///C:/Users/pyhon/git/ethanhong/amzntools-src/material/como-package.html
+// @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*/packages
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // ==/UserScript==
