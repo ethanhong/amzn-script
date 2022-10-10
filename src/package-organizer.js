@@ -263,15 +263,6 @@ const mapToNewAction = (action, isAftlitePortal) => {
   return newAction;
 };
 
-const isActionToKeep = (action, index, allActions, isAftlitePortal) => {
-  const allSpoos = allActions.map((act) => (isAftlitePortal ? act[9] : act[10]));
-  const [actionCell, toolCell] = [action[1], action[2]];
-  const spooCell = isAftlitePortal ? action[9] : action[10];
-  const isPackUniqeSpoo = actionCell === 'pack' && toolCell === 'pack' && allSpoos.indexOf(spooCell) === index;
-  const isIndirect = toolCell === 'indirect';
-  return isPackUniqeSpoo || isIndirect;
-};
-
 const MainTable = ({ oldTable, isAftlitePortal }) => {
   const titles = [
     'Timestamp',
@@ -288,9 +279,19 @@ const MainTable = ({ oldTable, isAftlitePortal }) => {
     'User',
   ];
 
+  const isPack = (action) => action[1] === 'pack' && action[2] === 'pack';
+  const isIndirect = (action) => action[2] === 'indirect';
+  const isUniqueSpoo = (action, i, allActions) => {
+    const spooCell = isAftlitePortal ? action[9] : action[10];
+    const allSpoos = allActions.map((act) => (isAftlitePortal ? act[9] : act[10]));
+    if (!spooCell) return true;
+    return allSpoos.indexOf(spooCell) === i;
+  };
+
   const [newActions, setNewActions] = React.useState(
     getActions(oldTable)
-      .filter((action, index, allActions) => isActionToKeep(action, index, allActions, isAftlitePortal))
+      .filter((action) => isPack(action) || isIndirect(action))
+      .filter((action, i, allActions) => isUniqueSpoo(action, i, allActions))
       .map((action) => mapToNewAction(action, isAftlitePortal))
   );
 
