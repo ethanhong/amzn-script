@@ -211,7 +211,7 @@ const getTimeStyle = (timeStamp, cpt, currentTime) => {
   return '';
 };
 
-const ActionRow = ({ action, i, allActions }) => {
+const ActionRow = ({ action, isFirstPackage }) => {
   const newAction = action.map((ele, j) => {
     if (j === 3) return e('span', { className: 'monospace' }, ele);
     if (j === 8)
@@ -223,7 +223,7 @@ const ActionRow = ({ action, i, allActions }) => {
 
   const psolveStyle = newAction[5] === 'problem-solve' ? 'p-solve' : '';
   const timeWindowStyle = getTimeStyle(newAction[0], newAction[7], new Date());
-  const topBorderStyle = i === 0 || allActions[i][6] !== allActions[i - 1][6] ? 'table-top-border' : '';
+  const topBorderStyle = isFirstPackage ? 'table-top-border' : '';
 
   const cells = newAction.map((cell, index) => e('td', { className: 'a-text-center', key: index }, cell));
 
@@ -295,7 +295,10 @@ const MainTable = ({ isAftlitePortal }) => {
   );
 
   const header = e(TableHeader, { titles, key: 'main-table-header' });
-  const rows = newActions.map((action, i, allActions) => e(ActionRow, { action, i, allActions, key: action[8] }));
+  const rows = newActions.map((action, i, allActions) => {
+    const isFirstPackage = i === 0 || allActions[i][6] !== allActions[i - 1][6];
+    return e(ActionRow, { action, isFirstPackage, key: action[8] });
+  });
 
   React.useEffect(() => {
     newActions.map((v, i) => {
