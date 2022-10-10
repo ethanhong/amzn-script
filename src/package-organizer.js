@@ -192,9 +192,6 @@ const getTimeStyle = (timeStamp, cpt, currentTime) => {
     return '';
   }
 
-  const isToday = Number.parseInt(timeStamp.split(/[\s-]/)[2], 10) === currentTime.getDate();
-  if (!isToday) return '';
-
   const lateWindow = (currentTime.getHours() + 1) % 24;
   const currentWindow = (currentTime.getHours() + 2) % 24;
   const nextWindow = (currentTime.getHours() + 3) % 24;
