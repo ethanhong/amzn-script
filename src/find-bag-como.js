@@ -37,6 +37,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, rows }) => {
   const handleOnChange = (evt) => {
     const searchValue = evt.target.value;
     setSearchTerm(searchValue);
+    rows.map((row) => row.classList.remove('hide'));
     rows
       .filter((row) => !searchValue.includes(row.textContent.trim().split(/[\n\s]+/)[0]))
       .map((row) => row.classList.add('hide'));
