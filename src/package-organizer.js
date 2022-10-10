@@ -136,8 +136,8 @@ const getCSS = (isAftlitePortal) => {
   return isAftlitePortal ? stylePortal : styleNA;
 };
 
-const getActions = () => {
-  const actionRows = [...document.querySelectorAll('#main-content > table > tbody > tr')];
+const getActions = (oldTable) => {
+  const actionRows = [...oldTable.querySelectorAll('tbody > tr')];
   actionRows.shift(); // remove header
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
@@ -272,7 +272,7 @@ const isActionToKeep = (action, index, allActions, isAftlitePortal) => {
   return isPackUniqeSpoo || isIndirect;
 };
 
-const MainTable = ({ isAftlitePortal }) => {
+const MainTable = ({ oldTable, isAftlitePortal }) => {
   const titles = [
     'Timestamp',
     'Action',
@@ -289,7 +289,7 @@ const MainTable = ({ isAftlitePortal }) => {
   ];
 
   const [newActions, setNewActions] = React.useState(
-    getActions()
+    getActions(oldTable)
       .filter((action, index, allActions) => isActionToKeep(action, index, allActions, isAftlitePortal))
       .map((action) => mapToNewAction(action, isAftlitePortal))
   );
@@ -339,9 +339,9 @@ const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) =>
     ' Show original table'
   );
 
-const App = ({ isAftlitePortal }) => {
+const App = ({ oldTable, isAftlitePortal }) => {
   const [isOriginalTable, setIsOriginalTable] = React.useState(false);
-  const mainTable = e(MainTable, { isAftlitePortal, key: 'main-table' });
+  const mainTable = e(MainTable, { oldTable, isAftlitePortal, key: 'main-table' });
   const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, key: 'table-switch' });
 
   React.useEffect(() => {
@@ -370,6 +370,7 @@ const packageSummarizer = () => {
 
   // mount app
   const rootDiv = document.createElement('div');
-  document.querySelector('#main-content > table').before(rootDiv);
-  ReactDOM.createRoot(rootDiv).render(e(App, { isAftlitePortal }));
+  const oldTable = document.querySelector('#main-content > table');
+  oldTable.before(rootDiv);
+  ReactDOM.createRoot(rootDiv).render(e(App, { oldTable, isAftlitePortal }));
 };
