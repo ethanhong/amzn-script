@@ -353,7 +353,7 @@ const App = ({ oldTable, isAftlitePortal }) => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const packageSummarizer = () => {
+const createNewTable = () => {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com';
 
   // add stylesheet
