@@ -147,8 +147,8 @@ const getCSS = (isAftlitePortal) => {
   return isAftlitePortal ? stylePortal : styleNA;
 };
 
-const getActions = (oldTable) => {
-  const actionRows = [...oldTable.querySelectorAll('tbody > tr')];
+const getActions = (table) => {
+  const actionRows = [...table.querySelectorAll('tbody > tr')];
   actionRows.shift(); // remove header
   return actionRows.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim()));
 };
