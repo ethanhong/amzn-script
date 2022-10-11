@@ -370,6 +370,7 @@ const SearchBar = ({ isOriginalTable, setIsOriginalTable }) => {
     }));
 
     const final = [];
+    setProgress([0, relatedInfo.length]);
     for (let i = 0; i < relatedInfo.length; i += 1) {
       const info = relatedInfo[i];
       // eslint-disable-next-line no-await-in-loop
