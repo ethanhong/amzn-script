@@ -380,9 +380,12 @@ const SearchBar = ({ isOriginalTable, setIsOriginalTable }) => {
         .then((res) => final.push(res));
       setProgress([i + 1, relatedInfo.length]);
     }
+    if (final.length === 0) {
+      alert("Can't find any related bag.");
+    } else {
     await wait(500);
-    // eslint-disable-next-line no-alert
-    prompt('Copy and paste to the search bar in COMO', final);
+      prompt('Copy and paste to the search bar in COMO package tab.', final);
+    }
   };
 
   const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, id: 'table-switch', key: 'table-switch' });
