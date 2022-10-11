@@ -13,6 +13,7 @@
 /* global React */
 /* global ReactDOM */
 /* eslint-disable prefer-destructuring */
+/* eslint-disable no-alert */
 
 const e = React.createElement;
 
@@ -383,7 +384,7 @@ const SearchBar = ({ isOriginalTable, setIsOriginalTable }) => {
     if (final.length === 0) {
       alert("Can't find any related bag.");
     } else {
-    await wait(500);
+      await wait(500);
       prompt('Copy and paste to the search bar in COMO package tab.', final);
     }
   };
