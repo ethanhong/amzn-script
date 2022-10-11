@@ -24,6 +24,9 @@ const getCSS = (isAftlitePortal) => {
     html {
       box-sizing: border-box;
     }
+    #search-bar {
+      margin: 0.3rem 0rem;
+    }
     #main-table
     {
       margin: 0;
@@ -31,13 +34,14 @@ const getCSS = (isAftlitePortal) => {
       outline: none;
       font-size: 100%;
       vertical-align: baseline;
-      background: transparent;
+      background-color: transparent;
       border-collapse: collapse;
       text-align: center;
       white-space: nowrap;
     }
     #main-table tr {
-      background: transparent;
+      background-color: transparent;
+      border: 1px solid #f6f6f6;
     }
     #main-table th {
       white-space: pre-line;
@@ -49,8 +53,11 @@ const getCSS = (isAftlitePortal) => {
     #main-table tr:nth-last-child(1) {
       border-bottom: 2px solid firebrick;
     }
+    #main-table tr:hover {
+      background-color: #f6f6f6;
+    }
     .table-top-border {
-      border-top: 2px solid firebrick;
+      border-top: 2px solid firebrick !important;
     }
     .p-solve {
       color: firebrick;
@@ -90,11 +97,11 @@ const getCSS = (isAftlitePortal) => {
       outline: none;
       font-size: 100%;
       vertical-align: baseline;
-      background: transparent;
+      background-color: transparent;
       white-space: nowrap;
     }
     #main-table tr {
-      background: transparent;
+      background-color: transparent;
     }
     #main-table th {
       white-space: pre-line;
@@ -105,6 +112,9 @@ const getCSS = (isAftlitePortal) => {
     }
     #main-table tr:nth-last-child(1) {
       border-bottom: 2px solid firebrick;
+    }
+    #main-table tr:hover {
+      background-color: #f6f6f6;
     }
     .table-top-border {
       border-top: 2px solid firebrick;
