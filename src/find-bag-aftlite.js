@@ -271,6 +271,44 @@ const mapToNewAction = (action, isAftlitePortal) => {
   return newAction;
 };
 
+const doRecursiveFetch = async (urlArray, spooArray, startIndex, setProgress) => {
+  const url = urlArray[startIndex];
+  const spoo = spooArray[startIndex];
+  if (!url || !spoo) return [];
+
+  const fetchPercentage = (startIndex / urlArray.length) * 100;
+  setProgress(fetchPercentage ? fetchPercentage.toFixed(1) : 0);
+  let currResult;
+  await fetch(url)
+    .then((res) => res.text())
+    .then((res) => {
+      [currResult] = res.slice(res.indexOf(spoo) + 20).match(/[\w\d]{20}/);
+    });
+
+  return [currResult, ...(await doRecursiveFetch(urlArray, spooArray, startIndex + 1, setProgress))];
+};
+
+const fetchTrackCode = async (searchTerm, setProgress, isAftlitePortal) => {
+  if (!searchTerm) return [];
+  const allActions = getActions(document.querySelector('#main-table'));
+  const [targetAction] = allActions.filter((a) => a[8] === searchTerm);
+  const relatedActions = allActions
+    .filter((a) => a[6] === targetAction[6] && a[7] === targetAction[7]) // same completion time && same cpt
+    .filter((a) => !(a[8] === targetAction[8])); // excludes target itself
+
+  if (relatedActions.length === 0) {
+    alert("Can't find any related bag.");
+    return [];
+  }
+
+  const orderUrl = isAftlitePortal ? '/orders/view_order?id=' : '/orders/view_order?id='; // todo: go here to find orderId link /wms/view_picklist_history?picklist_id=
+  const urls = relatedActions.map((a) => `${orderUrl}${a[9]}`);
+  const spoos = relatedActions.map((a) => a[8]);
+  const codes = await doRecursiveFetch(urls, spoos, 0, setProgress);
+  setProgress(100);
+  return codes;
+};
+
 const MainTable = ({ oldTable, isAftlitePortal }) => {
   const titles = [
     'Timestamp',
