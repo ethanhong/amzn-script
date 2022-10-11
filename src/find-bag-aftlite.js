@@ -309,6 +309,42 @@ const fetchTrackCode = async (searchTerm, setProgress, isAftlitePortal) => {
   return codes;
 };
 
+const SearchBar = ({ isAftlitePortal }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [progress, setProgress] = React.useState(0);
+
+  const handleOnChange = (evt) => setSearchTerm(evt.target.value);
+
+  const handleOnClick = async () => {
+    const codes = await fetchTrackCode(searchTerm, setProgress, isAftlitePortal);
+    if (!codes) return;
+    setTimeout(() => {
+      prompt('Copy and paste to the search bar in COMO package tab.', codes);
+      setProgress(0);
+    }, 500);
+  };
+
+  const searchForm = e('form', { id: 'search-form' }, [
+    e('input', {
+      id: 'search-input',
+      type: 'text',
+      placeholder: 'Search bags ...',
+      size: '30',
+      value: searchTerm,
+      onChange: handleOnChange,
+    }),
+    e('input', {
+      id: 'search-btn',
+      type: 'button',
+      value: 'Search',
+      onClick: handleOnClick,
+    }),
+    ` ( ${progress} % )`,
+  ]);
+
+  return e('div', { id: 'search-bar' }, [searchForm]);
+};
+
 const MainTable = ({ oldTable, isAftlitePortal }) => {
   const titles = [
     'Timestamp',
@@ -367,11 +403,13 @@ const MainTable = ({ oldTable, isAftlitePortal }) => {
     });
   }, []);
 
-  return e(
+  const searchBar = e(SearchBar, { isAftlitePortal, key: 'search-bar' });
+  const newTable = e(
     'table',
     { id: 'main-table', className: 'a-bordered a-spacing-top-large reportLayout' },
     e('tbody', null, [header, ...rows])
   );
+  return e('div', null, [searchBar, newTable]);
 };
 
 const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) =>
@@ -386,83 +424,10 @@ const TableSwitch = ({ isOriginalTable, setIsOriginalTable }) =>
     ' Show original table'
   );
 
-const getActionCell = (action, index) => [...action.querySelectorAll('td')][index];
-function wait(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-const SearchBar = ({ isOriginalTable, setIsOriginalTable }) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [progress, setProgress] = React.useState([0, 0]);
-
-  const handleOnChange = (evt) => setSearchTerm(evt.target.value);
-
-  const handleOnClick = async () => {
-    const allActions = [...document.querySelectorAll('#main-table tr')];
-    const [targetAction] = allActions.filter((v) => {
-      const spoo = getActionCell(v, 8) ? getActionCell(v, 8).textContent : '';
-      return spoo === searchTerm;
-    });
-    const relatedActions = allActions
-      .filter((v) => {
-        const targetCompletion = getActionCell(targetAction, 6).textContent;
-        const targetCPT = getActionCell(targetAction, 7).textContent;
-        const completion = getActionCell(v, 6) ? getActionCell(v, 6).textContent : '';
-        const cpt = getActionCell(v, 7) ? getActionCell(v, 7).textContent : '';
-        return completion === targetCompletion && cpt === targetCPT;
-      })
-      .filter((v) => v !== targetAction);
-    const relatedInfo = relatedActions.map((v) => ({
-      orderIdUrl: getActionCell(v, 9).firstChild.href,
-      spoo: getActionCell(v, 8).textContent,
-    }));
-
-    const final = [];
-    setProgress([0, relatedInfo.length]);
-    for (let i = 0; i < relatedInfo.length; i += 1) {
-      const info = relatedInfo[i];
-      // eslint-disable-next-line no-await-in-loop
-      await fetch(info.orderIdUrl)
-        .then((res) => res.text())
-        .then((page) => page.slice(page.indexOf(info.spoo) + 20).match(/[\w\d]{20}/))
-        .then((res) => final.push(res));
-      setProgress([i + 1, relatedInfo.length]);
-    }
-    if (final.length === 0) {
-      alert("Can't find any related bag.");
-    } else {
-      await wait(500);
-      prompt('Copy and paste to the search bar in COMO package tab.', final);
-    }
-  };
-
-  const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, id: 'table-switch', key: 'table-switch' });
-  const searchForm = e('form', { id: 'search-form' }, [
-    e('input', {
-      id: 'search-input',
-      type: 'text',
-      placeholder: 'Search bags ...',
-      size: '30',
-      value: searchTerm,
-      onChange: handleOnChange,
-    }),
-    e('input', {
-      id: 'search-btn',
-      type: 'button',
-      value: 'Search',
-      onClick: handleOnClick,
-    }),
-    ` ( ${progress[0]}/${progress[1]} )`,
-  ]);
-  return e('div', { id: 'search-bar' }, [searchForm, tableSwitch]);
-};
-
 const App = ({ oldTable, isAftlitePortal }) => {
   const [isOriginalTable, setIsOriginalTable] = React.useState(false);
   const mainTable = e(MainTable, { oldTable, isAftlitePortal, key: 'main-table' });
-  // const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, key: 'table-switch' });
-  const searchBar = e(SearchBar, { isOriginalTable, setIsOriginalTable, key: 'search-bar' });
+  const tableSwitch = e(TableSwitch, { isOriginalTable, setIsOriginalTable, key: 'table-switch' });
 
   React.useEffect(() => {
     const originalTable = document.querySelector('#main-content > table');
@@ -471,7 +436,7 @@ const App = ({ oldTable, isAftlitePortal }) => {
     newTable.style.display = isOriginalTable ? 'none' : 'table';
   }, [isOriginalTable]);
 
-  return e(React.Fragment, null, [searchBar, mainTable]);
+  return e(React.Fragment, null, [tableSwitch, mainTable]);
 };
 
 // eslint-disable-next-line no-unused-vars
