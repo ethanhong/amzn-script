@@ -30,13 +30,13 @@ const getCSS = (isAftlitePortal) => {
       outline: none;
       font-size: 100%;
       vertical-align: baseline;
-      background: transparent;
+      background-color: transparent;
       border-collapse: collapse;
       text-align: center;
       white-space: nowrap;
     }
     #main-table tr {
-      background: transparent;
+      background-color: transparent;
     }
     #main-table th {
       white-space: pre-line;
@@ -89,11 +89,11 @@ const getCSS = (isAftlitePortal) => {
       outline: none;
       font-size: 100%;
       vertical-align: baseline;
-      background: transparent;
+      background-color: transparent;
       white-space: nowrap;
     }
     #main-table tr {
-      background: transparent;
+      background-color: transparent;
     }
     #main-table th {
       white-space: pre-line;
