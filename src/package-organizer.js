@@ -208,13 +208,18 @@ const getTimeStyle = (timeStamp, cpt, currentTime) => {
   return '';
 };
 
-const ActionRow = ({ action, isFirstPackage }) => {
+const ActionRow = ({ action, isFirstPackage, isAftlitePortal }) => {
+  const orderviewUrl = isAftlitePortal ? '/orders/view_order?id=' : '/wms/view_order/';
+  const picklistUrl = isAftlitePortal
+    ? '/picklist/pack_by_picklist?picklist_id='
+    : '/wms/pack_by_picklist?picklist_id=';
+
   const newAction = action.map((ele, j) => {
     if (j === 3) return e('span', { className: 'monospace' }, ele);
     if (j === 8)
       return e('div', null, [e('span', { className: 'spoo-dot' }), e('span', { className: 'monospace' }, ele)]);
-    if (j === 9) return e('a', { href: `/orders/view_order?id=${ele}` }, ele);
-    if (j === 10) return e('a', { href: `/picklist/pack_by_picklist?picklist_id=${ele}` }, ele);
+    if (j === 9) return e('a', { href: `${orderviewUrl}${ele}` }, ele);
+    if (j === 10) return e('a', { href: `${picklistUrl}${ele}` }, ele);
     return ele;
   });
 
@@ -295,7 +300,7 @@ const MainTable = ({ oldTable, isAftlitePortal }) => {
   const header = e(TableHeader, { titles, key: 'main-table-header' });
   const rows = newActions.map((action, i, allActions) => {
     const isFirstPackage = i === 0 || allActions[i][6] !== allActions[i - 1][6];
-    return e(ActionRow, { action, isFirstPackage, key: action[8] });
+    return e(ActionRow, { action, isFirstPackage, isAftlitePortal, key: action[8] });
   });
 
   React.useEffect(() => {
