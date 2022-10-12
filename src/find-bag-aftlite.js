@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Package Organizer
+// @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzntools
 // @version      1.0
 // @description  remove useless package information
