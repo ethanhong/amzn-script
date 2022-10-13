@@ -24,18 +24,18 @@ async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayA
     )
     .textContent.trim();
 
+  if (currentAction === 'EOS') return;
+
   if (skipList.includes(currentAction)) {
     // do fake checkin after checkPeriod minutes to trigger reloading page
     console.log(`latest action is ${currentAction}. Wait ${checkPeriod} minust to check again.`);
-    setTimeout(() => checkin(name, ''), checkPeriod * 1000);
-    // setTimeout(() => checkin(name, ''), checkPeriod * 60 * 1000);
+    setTimeout(() => smartLaborTrack(targetActivity, skipList, checkPeriod, delayAfterBRK), checkPeriod * 60 * 1000);
     return;
   }
   if (currentAction === 'BRK') {
     // checkin after delayAfterBRK minutes
     console.log(`latest action is ${currentAction}. Wait ${delayAfterBRK} minutes to checkin.`);
-    setTimeout(() => checkin(name, targetActivity), delayAfterBRK * 1000);
-    // setTimeout(() => checkin(name, targetActivity), delayAfterBRK * 60 * 1000);
+    setTimeout(() => checkin(name, targetActivity), delayAfterBRK * 60 * 1000);
     return;
   }
   // checkin immediately
