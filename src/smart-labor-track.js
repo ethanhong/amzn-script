@@ -20,8 +20,8 @@ function smartLaborTrack(activity, skip, period, brkDelay) {
   delayAfterBRK = brkDelay; // minutes
 
   fetchUserHistoryPage()
-    .then(html => getCurrentActivity(html))
-    .then(currentActivity => nextAction(currentActivity))
+    .then((html) => getCurrentActivity(html))
+    .then((currentActivity) => nextAction(currentActivity))
     .catch(() => console.error('[Smart Labot Tracking] Fail!'));
 }
 
@@ -34,7 +34,7 @@ function getLogin() {
 }
 
 function wait(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
