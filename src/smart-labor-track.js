@@ -12,6 +12,7 @@ async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayA
   const isNASite = window.location.hostname === 'aftlite-na.amazon.com';
   const name = login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
   const url = '/labor_tracking/lookup_history?user_name=';
+  const skips = skipList.map((x) => x.toUpperCase());
 
   const currentAction = await fetch(`${url}${name}`)
     .then((res) => res.text())
@@ -24,6 +25,7 @@ async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayA
             : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)'
         )
         .textContent.trim()
+        .toUpperCase()
     );
 
   if (currentAction === 'EOS') {
@@ -31,7 +33,7 @@ async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayA
     return;
   }
 
-  if (skipList.includes(currentAction)) {
+  if (skips.includes(currentAction)) {
     // do fake checkin after checkPeriod minutes to trigger reloading page
     console.log(`Current action is ${currentAction}. Wait ${checkPeriod} minust to check again.`);
     setTimeout(() => smartLaborTrack(targetActivity, skipList, checkPeriod, delayAfterBRK), checkPeriod * 60 * 1000);
