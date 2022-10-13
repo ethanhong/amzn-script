@@ -8,42 +8,48 @@
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
-async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayAfterBRK = 10) {
+async function smartLaborTrack(targetActivity, skipList, checkPeriod = 5, delayAfterBRK = 10, login = '') {
   const isNASite = window.location.hostname === 'aftlite-na.amazon.com';
-  const name = isNASite ? document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1] : 'hongph';
+  const name = login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
   const url = '/labor_tracking/lookup_history?user_name=';
 
-  const response = await fetch(`${url}${name}`);
-  const text = await response.text();
-  const page = new DOMParser().parseFromString(text, 'text/html');
-  const currentAction = page
-    .querySelector(
-      isNASite
-        ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
-        : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)'
-    )
-    .textContent.trim();
+  const currentAction = await fetch(`${url}${name}`)
+    .then((res) => res.text())
+    .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
+    .then((page) =>
+      page
+        .querySelector(
+          isNASite
+            ? '.reportLayout > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2)'
+            : 'table.a-bordered > tbody > tr:nth-child(2) > td:nth-child(2) > p:nth-child(1)'
+        )
+        .textContent.trim()
+    );
 
-  if (currentAction === 'EOS') return;
+  if (currentAction === 'EOS') {
+    console.log(`Current action is ${currentAction}. Stop smart labor tracking.`);
+    return;
+  }
 
   if (skipList.includes(currentAction)) {
     // do fake checkin after checkPeriod minutes to trigger reloading page
-    console.log(`latest action is ${currentAction}. Wait ${checkPeriod} minust to check again.`);
+    console.log(`Current action is ${currentAction}. Wait ${checkPeriod} minust to check again.`);
     setTimeout(() => smartLaborTrack(targetActivity, skipList, checkPeriod, delayAfterBRK), checkPeriod * 60 * 1000);
     return;
   }
   if (currentAction === 'BRK') {
     // checkin after delayAfterBRK minutes
-    console.log(`latest action is ${currentAction}. Wait ${delayAfterBRK} minutes to checkin.`);
+    console.log(`Current action is ${currentAction}. Wait ${delayAfterBRK} minutes to checkin.`);
     setTimeout(() => checkin(name, targetActivity), delayAfterBRK * 60 * 1000);
     return;
   }
   // checkin immediately
-  console.log(`latest action is ${currentAction}. Checkin now.`);
+  console.log(`Current action is ${currentAction}. Checkin now.`);
   checkin(name, targetActivity);
 }
 
 function checkin(user, activity) {
+  console.log(`Checkin ${user} to ${activity}.`);
   console.log(`${user} is checked in to ${activity}`);
   document.getElementsByName('name')[0].value = user;
   document.getElementsByName('code')[0].value = activity;
