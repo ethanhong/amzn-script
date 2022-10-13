@@ -16,7 +16,7 @@
 
 const e = React.createElement;
 
-const getCSS = () => {
+function getCSS() {
   const style = `
   #search-bar {
     margin-bottom: 1rem;
@@ -26,65 +26,73 @@ const getCSS = () => {
     margin-right: 0.2rem;
   }
 
-  #search_input, #clear_btn {
+  #search_input, #find_btn {
     line-height: 2.5rem;
   }
+
   `;
   return style;
-};
+}
 
-const SearchBar = ({ searchTerm, setSearchTerm, rows }) => {
-  const handleOnChange = (evt) => {
-    const searchValue = evt.target.value;
-    setSearchTerm(searchValue);
-    rows.map((row) => row.classList.remove('hide'));
-    rows
-      .filter((row) => !searchValue.includes(row.textContent.trim().split(/[\n\s]+/)[0]))
-      .map((row) => row.classList.add('hide'));
-  };
-  const handleOnClear = () => {
-    setSearchTerm('');
-    rows.map((row) => row.classList.remove('hide'));
-  };
-  return e('form', null, [
-    e('input', {
-      id: 'search_input',
-      type: 'text',
-      placeholder: 'Search bags ...',
-      size: '100',
-      value: searchTerm,
-      onChange: handleOnChange,
-    }),
-    e('input', {
-      id: 'clear_btn',
-      type: 'button',
-      value: 'Clear',
-      onClick: handleOnClear,
-    }),
-  ]);
-};
+async function comoPackages() {
+  const STORE_ID = window.location.href.split('store/')[1].split('/')[0];
+  const response = await fetch(
+    `https://como-operations-dashboard-iad.iad.proxy.amazon.com/api/store/${STORE_ID}/packages`
+  );
+  const data = await response.json();
+  return data;
+}
 
-const App = ({ rows }) => {
+function App() {
   const [searchTerm, setSearchTerm] = React.useState('');
+
+  const handleOnClick = async () => {
+    const allBags = await comoPackages();
+    const [scannableMissing, ...scannableToFind] = searchTerm.trim().split(',');
+    const message = allBags
+      .filter((bag) => scannableToFind.includes(bag.scannableId))
+      .sort((a, b) => a.lastKnownLocation.localeCompare(b.lastKnownLocation))
+      .reduce(
+        (str, bag) => `${str}${bag.lastKnownLocation} ------ ${bag.scannableId.slice(-4)}\n`,
+        `Possible locations for scannable id ending in ${scannableMissing.slice(-4)}:\n`
+      );
+    // eslint-disable-next-line no-alert
+    alert(message);
+  };
+
   React.useEffect(() => {
     document.querySelector('#search_input').focus();
   }, []);
-  return e('div', { id: 'search-bar' }, e(SearchBar, { searchTerm, setSearchTerm, rows }));
-};
+
+  const searchBar = e('form', null, [
+    e('input', {
+      id: 'search_input',
+      type: 'text',
+      placeholder: 'Find bags ...',
+      size: '100',
+      value: searchTerm,
+      onChange: (evt) => setSearchTerm(evt.target.value),
+    }),
+    e('input', {
+      id: 'find_btn',
+      type: 'button',
+      value: 'Find',
+      onClick: handleOnClick,
+    }),
+  ]);
+  return e('div', { id: 'search-bar' }, searchBar);
+}
 
 // eslint-disable-next-line no-unused-vars
-const startBagFinder = () => {
+function startBagFinder() {
   // add stylesheet
   const styleSheet = document.createElement('style');
   styleSheet.innerText = getCSS();
   document.head.appendChild(styleSheet);
 
-  // data rows
-  const rows = [...document.querySelectorAll('div[role="rowgroup"]:nth-child(2) div.ui-grid-row')];
-
   // mount app
   const rootDiv = document.createElement('div');
   const countTextEle = document.querySelector('div.ng-scope > h2');
   countTextEle.after(rootDiv);
-  ReactDOM.createRoot(rootDiv).render(e(App, { rows }));
-};
+  ReactDOM.createRoot(rootDiv).render(e(App));
+}
