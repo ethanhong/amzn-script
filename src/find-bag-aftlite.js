@@ -367,11 +367,10 @@ function MainTable({ oldTable, isAftlitePortal }) {
 
   const isPack = (action) => action[1] === 'pack';
   const isIndirect = (action) => action[2] === 'indirect';
-  const isLatestSpoo = (_, i, allActions) => {
-    const getSpooCell = (act) => (isAftlitePortal ? act[9] : act[10]);
-    const allSpoos = allActions.map(getSpooCell);
-    const spooCell = allSpoos[i];
-    return spooCell ? allSpoos.indexOf(spooCell) === i : true;
+  const isLatestSpoo = (currAction, _, allActions) => {
+    const spooIdx = isAftlitePortal ? 9 : 10;
+    const firstMatch = allActions.find((x) => x[spooIdx] === currAction[spooIdx]);
+    return !firstMatch[spooIdx] || firstMatch === currAction;
   };
 
   const [newActions, setNewActions] = React.useState(
