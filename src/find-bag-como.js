@@ -79,12 +79,6 @@ function App() {
       value: 'Find',
       onClick: handleOnClick,
     }),
-    e('input', {
-      id: 'smart_btn',
-      type: 'button',
-      value: 'Smart Find',
-      onClick: smartFind,
-    }),
   ]);
   return e('div', { id: 'search-bar' }, searchBar);
 }
