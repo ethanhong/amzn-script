@@ -12,7 +12,7 @@ async function smartLaborTrack(targetAct, skip, period = 5, brkTime = 10, login 
   const isNASite = window.location.hostname === 'aftlite-na.amazon.com';
   const name = login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
   const url = '/labor_tracking/lookup_history?user_name=';
-  const skipCaps = skip.map((x) => x.toUpperCase());
+  const skipCaps = [targetAct, ...skip].map((x) => x.toUpperCase());
 
   const currentAct = await fetch(`${url}${name}`)
     .then((res) => res.text())
