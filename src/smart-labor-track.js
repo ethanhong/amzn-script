@@ -29,30 +29,29 @@ async function smartLaborTrack(targetAct, skip, period = 5, brkTime = 10, login 
     );
 
   if (currentAct === 'EOS') {
-    console.log(`Current action is ${currentAct}. Stop the script.`);
+    console.log(`Current activity is ${currentAct}. Stop the script.`);
     return;
   }
 
   if (skipCaps.includes(currentAct)) {
     // do fake checkin after ${period} minutes to trigger reloading page
-    console.log(`Current action is ${currentAct}. Wait ${period} minust to check again.`);
+    console.log(`Current activity is ${currentAct}. Wait ${period} minust to check again.`);
     setTimeout(() => smartLaborTrack(targetAct, skip, period, brkTime), period * 60 * 1000);
     return;
   }
   if (currentAct === 'BRK') {
     // checkin after ${brkTime} minutes
-    console.log(`Current action is ${currentAct}. Wait ${brkTime} minutes to checkin.`);
+    console.log(`Current activity is ${currentAct}. Wait ${brkTime} minutes to checkin.`);
     setTimeout(() => checkin(name, targetAct), brkTime * 60 * 1000);
     return;
   }
   // checkin immediately
-  console.log(`Current action is ${currentAct}. Checkin now.`);
+  console.log(`Current activity is ${currentAct}. Checkin now.`);
   checkin(name, targetAct);
 }
 
 function checkin(user, activity) {
   console.log(`Checkin ${user} to ${activity}.`);
-  console.log(`${user} is checked in to ${activity}`);
   document.getElementsByName('name')[0].value = user;
   document.getElementsByName('code')[0].value = activity;
   document.getElementsByTagName('form')[0].submit();
