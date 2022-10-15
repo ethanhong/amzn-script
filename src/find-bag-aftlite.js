@@ -269,27 +269,32 @@ function mapToNewAction(isAftlitePortal) {
   };
 }
 
-async function doRecursiveFetch(urlAndspoos, startIndex, setProgress) {
-  if (!urlAndspoos[startIndex]) return [];
-  const [url, spoo] = urlAndspoos[startIndex] ? urlAndspoos[startIndex] : [];
-  // start fetching
-  const response = await fetch(url);
-  const text = await response.text();
-  const [currResult] = text.slice(text.indexOf(spoo) + 20, text.indexOf(spoo) + 80).match(/[\w\d]{20}/) || [];
-  // set progress
-  const fetchPercentage = ((startIndex + 1) / urlAndspoos.length) * 100;
-  setProgress(fetchPercentage % 100 ? fetchPercentage.toFixed(1) : fetchPercentage); // no decimal point when 0 and 100
-
-  return [currResult, ...(await doRecursiveFetch(urlAndspoos, startIndex + 1, setProgress))];
+async function doSerialRecursion(array, fn, startIndex) {
+  if (!array[startIndex]) return [];
+  const currResult = await fn(array[startIndex], startIndex, array);
+  return [currResult, ...(await doSerialRecursion(array, fn, startIndex + 1))];
 }
 
 async function fetchTrackCode(actionToFetch, setProgress, isAftlitePortal) {
   const orderUrl = isAftlitePortal ? '/orders/view_order?id=' : '/wms/view_order/';
-  const getUrlAndSpoos = (action) => [`${orderUrl}${action[9]}`, action[8]];
-  const urlAndspoos = actionToFetch.map(getUrlAndSpoos);
+  const codes = await doSerialRecursion(
+    actionToFetch,
+    async (action, i) => {
+      const url = `${orderUrl}${action[9]}`;
+      const spoo = action[8];
+      // start fetching
+      const [currResult] = await fetch(url)
+        .then((response) => response.text())
+        .then((text) => text.slice(text.indexOf(spoo) + 20, text.indexOf(spoo) + 80).match(/[\w\d]{20}/) || []);
+      // set progress percentage
+      const fetchPercentage = ((i + 1) / actionToFetch.length) * 100;
+      setProgress(fetchPercentage % 100 ? fetchPercentage.toFixed(1) : fetchPercentage); // no decimal point when 0 and 100
 
-  const codes = await doRecursiveFetch(urlAndspoos, 0, setProgress);
-  return codes.filter((x) => Boolean(x)); // remove empty, ex: problem bags
+      return currResult;
+    },
+    0
+  );
+  return codes.filter((x) => Boolean(x)); // remove empty, ex: problem bags or not yet slammed bags
 }
 
 function getActionToFetch(searchTerm) {
