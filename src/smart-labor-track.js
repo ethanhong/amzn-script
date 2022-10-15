@@ -36,9 +36,10 @@ async function smartLaborTrack(targetAct, skip, period = 5, brkTime = 10, login 
   if (skipCaps.includes(currentAct)) {
     // do fake checkin after ${period} minutes to trigger reloading page
     console.log(`Current activity is ${currentAct}. Wait ${period} minust to check again.`);
-    setTimeout(() => smartLaborTrack(targetAct, skip, period, brkTime), period * 60 * 1000);
+    setTimeout(() => smartLaborTrack(targetAct, skip, period, brkTime, login), period * 60 * 1000);
     return;
   }
+
   if (currentAct === 'BRK') {
     // checkin after ${brkTime} minutes
     console.log(`Current activity is ${currentAct}. Wait ${brkTime} minutes to checkin.`);
