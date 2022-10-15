@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         Smart Labor Track
-// @namespace    https://github.com/ethanhong/amzn-script
+// @namespace    https://github.com/ethanhong/amzntools
 // @version      2.1
 // @description  Sign in to OBindirect according to current action
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
+// @match        https://aftlite-portal.amazon.com/indirect_action*
+// @require      file:///C:/Users/pyhon/git/ethanhong/amzntools-src/src/smart-labor-track.js
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
