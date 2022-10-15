@@ -292,7 +292,7 @@ async function fetchTrackCode(actionToFetch, setProgress, isAftlitePortal) {
   return codes.filter((x) => Boolean(x)); // remove empty, ex: problem bags
 }
 
-function getRelatedActions(searchTerm) {
+function getActionToFetch(searchTerm) {
   const allActions = getActions(document.querySelector('#main-table'));
 
   const isSearchTarget = (action) => action[8] === searchTerm;
@@ -313,7 +313,7 @@ function SearchBar({ isAftlitePortal }) {
 
   const handleOnClick = async () => {
     if (!searchTerm) return;
-    const actionToFetch = getRelatedActions(searchTerm);
+    const actionToFetch = getActionToFetch(searchTerm);
     const scannableId = await fetchTrackCode(actionToFetch, setProgress, isAftlitePortal);
     if (scannableId.length <= 1) {
       alert('No related bags found.');
