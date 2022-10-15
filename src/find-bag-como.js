@@ -49,7 +49,8 @@ function App() {
 
   const handleOnClick = async () => {
     const [scannableMissing, ...scannableToFind] = searchTerm.trim().split(',');
-    const message = await comoPackages()
+    const bags = await comoPackages();
+    const message = bags
       .filter((bag) => scannableToFind.includes(bag.scannableId))
       .sort((a, b) => a.lastKnownLocation.localeCompare(b.lastKnownLocation))
       .reduce(
