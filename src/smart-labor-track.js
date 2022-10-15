@@ -8,7 +8,7 @@
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
-async function smartLaborTrack(targetAct, skip, period = 5, brkTime = 10, login = '') {
+async function startLaborTrack(targetAct, skip, period = 5, brkTime = 10, login = '') {
   const isNASite = window.location.hostname === 'aftlite-na.amazon.com';
   const name = login || document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
   const url = '/labor_tracking/lookup_history?user_name=';
