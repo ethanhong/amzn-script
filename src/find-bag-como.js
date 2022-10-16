@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Find Bags [como]
-// @namespace    https://github.com/ethanhong/amzntools
-// @version      1.0
-// @description  find bag tool - como part
+// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
+// @version      2.0.1
+// @description  Return stage locations for given scannable codes
 // @author       Pei
-// @match        file:///C:/Users/pyhon/git/ethanhong/amzntools-src/material/como-package.html
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*/packages
+// @updateURL    https://ethanhong.github.io/amzntools-src/find-bag-como.user.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/find-bag-como.user.js
+// @supportURL   https://github.com/ethanhong/amzntools-src/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // ==/UserScript==
