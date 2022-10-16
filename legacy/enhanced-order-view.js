@@ -14,121 +14,120 @@
 const SELECTOR = {
   pickLists: '#picklists_table',
   totesTable: 'body > table > tbody > tr > td > table > tbody > tr > td',
-};
-const allSpoo = [];
-const allTracking = [];
-const allItemNo = [];
+}
+const allSpoo = []
+const allTracking = []
+const allItemNo = []
 
-let qrcode;
-
-(() => {
+let qrcode
+;(() => {
   // grab tote info
-  const allTotes = document.querySelectorAll(SELECTOR.totesTable);
+  const allTotes = document.querySelectorAll(SELECTOR.totesTable)
 
   // categorize tote info, (Spoo, tracking, number of items)
-  allTotes.forEach(tote => {
-    const info = tote.innerText.split(/[\n:]+/);
-    allSpoo.push(info[0]);
-    allTracking.push(info[2]);
-    allItemNo.push(info[3]);
-  });
+  allTotes.forEach((tote) => {
+    const info = tote.innerText.split(/[\n:]+/)
+    allSpoo.push(info[0])
+    allTracking.push(info[2])
+    allItemNo.push(info[3])
+  })
 
   // clone the table of picklists
-  const myTable = document.querySelector(SELECTOR.pickLists).cloneNode(true);
-  myTable.setAttribute('id', 'myTable');
+  const myTable = document.querySelector(SELECTOR.pickLists).cloneNode(true)
+  myTable.setAttribute('id', 'myTable')
 
   // manipulate myTable
   // get rows
-  const { rows } = myTable;
+  const { rows } = myTable
 
   // remove useless attributes in th
   for (let j = 0; j < rows[0].cells.length; j += 1) {
-    rows[0].cells[j].removeAttribute('width');
-    rows[0].cells[j].removeAttribute('align');
+    rows[0].cells[j].removeAttribute('width')
+    rows[0].cells[j].removeAttribute('align')
   }
 
   // modify some header text
-  rows[0].cells[0].textContent = 'Picklist';
-  rows[0].cells[1].textContent = 'Zone';
-  rows[0].cells[3].textContent = 'Totes';
-  rows[0].cells[4].textContent = 'Picker';
+  rows[0].cells[0].textContent = 'Picklist'
+  rows[0].cells[1].textContent = 'Zone'
+  rows[0].cells[3].textContent = 'Totes'
+  rows[0].cells[4].textContent = 'Picker'
 
   // remove and insert data
   for (let i = 0; i < rows.length; i += 1) {
     // remove unwanted columns
-    rows[i].deleteCell(6);
-    rows[i].deleteCell(5);
+    rows[i].deleteCell(6)
+    rows[i].deleteCell(5)
 
     // add useful columns
-    let newCell;
-    const spooIndex = allSpoo.indexOf(rows[i].cells[3].textContent.trim());
+    let newCell
+    const spooIndex = allSpoo.indexOf(rows[i].cells[3].textContent.trim())
     if (spooIndex === -1) {
       // add Tracking code
-      newCell = rows[i].insertCell(3);
-      newCell.outerHTML = '<th>Tracking</th>';
+      newCell = rows[i].insertCell(3)
+      newCell.outerHTML = '<th>Tracking</th>'
       // add number of items
-      newCell = rows[i].insertCell(-1); // last column
-      newCell.outerHTML = '<th></th>';
+      newCell = rows[i].insertCell(-1) // last column
+      newCell.outerHTML = '<th></th>'
     } else {
       // add Tracking code
-      newCell = rows[i].insertCell(3);
-      const normalText = allTracking[spooIndex].slice(0, -4);
-      const boldText = allTracking[spooIndex].slice(-4);
-      newCell.innerHTML = `${normalText}<b>${boldText}</b>`;
+      newCell = rows[i].insertCell(3)
+      const normalText = allTracking[spooIndex].slice(0, -4)
+      const boldText = allTracking[spooIndex].slice(-4)
+      newCell.innerHTML = `${normalText}<b>${boldText}</b>`
       newCell.addEventListener(
         'click',
         () => {
-          makeQRCode(allTracking[spooIndex]);
+          makeQRCode(allTracking[spooIndex])
         },
         false
-      );
+      )
       // add number of items
-      newCell = rows[i].insertCell(-1); // last column
-      newCell.appendChild(document.createTextNode(allItemNo[spooIndex]));
+      newCell = rows[i].insertCell(-1) // last column
+      newCell.appendChild(document.createTextNode(allItemNo[spooIndex]))
     }
 
     // remove link from spoo number
     if (i > 0) {
       // skip header
-      const spooCell = rows[i].cells[4];
-      const spooAnchorElement = spooCell.firstElementChild;
-      const spooTextNode = document.createTextNode(spooAnchorElement.textContent);
-      spooAnchorElement.textContent = '[open]';
-      spooAnchorElement.style.marginLeft = '5px';
-      spooCell.insertBefore(spooTextNode, spooAnchorElement);
+      const spooCell = rows[i].cells[4]
+      const spooAnchorElement = spooCell.firstElementChild
+      const spooTextNode = document.createTextNode(spooAnchorElement.textContent)
+      spooAnchorElement.textContent = '[open]'
+      spooAnchorElement.style.marginLeft = '5px'
+      spooCell.insertBefore(spooTextNode, spooAnchorElement)
 
       // add click to generate qrcode function
       spooCell.addEventListener(
         'click',
         () => {
-          makeQRCode(spooTextNode.nodeValue);
+          makeQRCode(spooTextNode.nodeValue)
         },
         false
-      );
+      )
     }
   }
 
   // create a container for qrcode
-  const qr = document.createElement('div');
-  qr.setAttribute('id', 'qrcode_container');
+  const qr = document.createElement('div')
+  qr.setAttribute('id', 'qrcode_container')
 
   // create a div showing qr_text and append to qrcode_container
-  const qrText = document.createElement('div');
-  qrText.setAttribute('id', 'qr_text');
+  const qrText = document.createElement('div')
+  qrText.setAttribute('id', 'qr_text')
 
   // create a container for qrcode_container + qr_text
-  const qrcodeWithText = document.createElement('div');
-  qrcodeWithText.setAttribute('id', 'qrcode_with_text');
-  qrcodeWithText.appendChild(qr);
-  qrcodeWithText.appendChild(qrText);
+  const qrcodeWithText = document.createElement('div')
+  qrcodeWithText.setAttribute('id', 'qrcode_with_text')
+  qrcodeWithText.appendChild(qr)
+  qrcodeWithText.appendChild(qrText)
 
   // put whole container into body
-  const b = document.body;
-  b.insertBefore(document.createElement('br'), b.childNodes[4]);
-  b.insertBefore(document.createElement('br'), b.childNodes[4]);
-  b.insertBefore(qrcodeWithText, b.childNodes[4]);
-  b.insertBefore(myTable, b.childNodes[4]);
-})();
+  const b = document.body
+  b.insertBefore(document.createElement('br'), b.childNodes[4])
+  b.insertBefore(document.createElement('br'), b.childNodes[4])
+  b.insertBefore(qrcodeWithText, b.childNodes[4])
+  b.insertBefore(myTable, b.childNodes[4])
+})()
 
 function makeQRCode(str) {
   // console.log('make code: ', str);
@@ -140,11 +139,11 @@ function makeQRCode(str) {
       colorDark: '#000000',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H,
-    });
+    })
   } else {
-    qrcode.makeCode(str);
+    qrcode.makeCode(str)
   }
-  document.getElementById('qr_text').innerText = str;
+  document.getElementById('qr_text').innerText = str
 }
 
 // --------------------------- CSS --------------------------- //
@@ -186,4 +185,4 @@ GM_addStyle(`
     font-family: monospace;
     vertical-align: top;
   }
-`);
+`)

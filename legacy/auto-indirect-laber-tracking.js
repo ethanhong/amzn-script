@@ -8,22 +8,22 @@
 // @grant        none
 // ==/UserScript==
 
-(() => {
-  const code1 = 'OBINDIRECT';
-  const interval = 420000; // 7 minutes
+;(() => {
+  const code1 = 'OBINDIRECT'
+  const interval = 420000 // 7 minutes
 
-  const button1 = document.createElement('button');
-  button1.innerHTML = code1;
+  const button1 = document.createElement('button')
+  button1.innerHTML = code1
   button1.onclick = () => {
-    const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1];
-    document.getElementsByName('name')[0].value = login;
-    document.getElementsByName('code')[0].value = code1;
+    const login = document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
+    document.getElementsByName('name')[0].value = login
+    document.getElementsByName('code')[0].value = code1
     // tha page will auto reload after this point
-  };
+  }
 
-  document.getElementsByTagName('form')[0].appendChild(button1);
+  document.getElementsByTagName('form')[0].appendChild(button1)
 
   setInterval(() => {
-    button1.click();
-  }, interval);
-})();
+    button1.click()
+  }, interval)
+})()
