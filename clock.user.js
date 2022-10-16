@@ -7,8 +7,8 @@
 // @match        https://aftlite-portal.amazon.com/*
 // @match        https://aftlite-na.amazon.com/*
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/*
-// @updateURL    https://ethanhong.github.io/amzntools-src/clock.js
-// @downloadURL  https://ethanhong.github.io/amzntools-src/clock.js
+// @updateURL    https://ethanhong.github.io/amzntools-src/clock.user.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/clock.user.js
 // @grant        GM_addStyle
 // ==/UserScript==
 
