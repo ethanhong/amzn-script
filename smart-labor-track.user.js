@@ -5,7 +5,6 @@
 // @description  Sign in to OBindirect according to current action
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
-// @match        https://aftlite-portal.amazon.com/indirect_action*
 // @updateURL    https://ethanhong.github.io/amzntools-src/smart-labor-track.user.js
 // @downloadURL  https://ethanhong.github.io/amzntools-src/smart-labor-track.user.js
 // @supportURL   https://github.com/ethanhong/amzntools-src/issues
