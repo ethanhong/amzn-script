@@ -7,6 +7,8 @@
 // @match        https://aftlite-portal.amazon.com/*
 // @match        https://aftlite-na.amazon.com/*
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/*
+// @updateURL    https://ethanhong.github.io/amzntools-src/clock.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/clock.js
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -33,20 +35,20 @@ function startTime() {
 
 // eslint-disable-next-line no-undef
 GM_addStyle(`
-    div#clock {
-      width: 160px;
-      height: 48px;
-      line-height: 48px;
-      font-size: 32px;
-      color: #ccc;
-      text-align: center;
-      background-color: rgb(60, 60, 60, 90%);
-      border: 2px solid rgb(60, 60, 60);;
-      border-radius: 5px;
-      position: fixed;
-      bottom: 1%;
-      left: 50%;
-      margin-left: -80px;
-      z-index: 99;
-    }
-  `);
+  div#clock {
+    width: 160px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 32px;
+    color: #ccc;
+    text-align: center;
+    background-color: rgb(60, 60, 60, 90%);
+    border: 2px solid rgb(60, 60, 60);;
+    border-radius: 5px;
+    position: fixed;
+    bottom: 1%;
+    left: 50%;
+    margin-left: -80px;
+    z-index: 99;
+  }
+`);
