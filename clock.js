@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Clock
-// @namespace    https://github.com/ethanhong/amzn-script
+// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
 // @version      1.0.2
 // @description  clock
 // @author       Pei
