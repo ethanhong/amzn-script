@@ -1,10 +1,14 @@
 // ==UserScript==
 // @name         P-solve Painter
-// @namespace    https://github.com/ethanhong/amzn-script
-// @version      1.0
+// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
+// @version      1.0.1
 // @description  Color p-solves by pull time
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_dwell_time?type=status&value=problem-solve
+// @updateURL    https://ethanhong.github.io/amzntools-src/psolve-painter.user.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/psolve-painter.user.js
+// @supportURL   https://github.com/ethanhong/amzntools-src/issues
+// @grant        GM_addStyle
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
