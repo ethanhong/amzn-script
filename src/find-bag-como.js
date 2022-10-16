@@ -14,7 +14,7 @@
 /* global ReactDOM */
 /* eslint-disable prefer-destructuring */
 
-const e = React.createElement;
+const e = React.createElement
 
 function getCSS() {
   const style = `
@@ -30,39 +30,39 @@ function getCSS() {
     line-height: 2.5rem;
   }
 
-  `;
-  return style;
+  `
+  return style
 }
 
 async function comoPackages() {
-  const STORE_ID = window.location.href.split('store/')[1].split('/')[0];
+  const STORE_ID = window.location.href.split('store/')[1].split('/')[0]
   const response = await fetch(
     `https://como-operations-dashboard-iad.iad.proxy.amazon.com/api/store/${STORE_ID}/packages`
-  );
-  const data = await response.json();
-  return data;
+  )
+  const data = await response.json()
+  return data
 }
 
 function App() {
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState('')
 
   const handleOnClick = async () => {
-    const [scannableMissing, ...scannableToFind] = searchTerm.trim().split(',');
-    const bags = await comoPackages();
+    const [scannableMissing, ...scannableToFind] = searchTerm.trim().split(',')
+    const bags = await comoPackages()
     const message = bags
       .filter((bag) => scannableToFind.includes(bag.scannableId))
       .sort((a, b) => a.lastKnownLocation.localeCompare(b.lastKnownLocation))
       .reduce(
         (str, bag) => `${str}${bag.lastKnownLocation} ------ ${bag.scannableId.slice(-4)}\n`,
         `Possible locations for scannable id ending in ${scannableMissing.slice(-4)}:\n`
-      );
+      )
     // eslint-disable-next-line no-alert
-    alert(message);
-  };
+    alert(message)
+  }
 
   React.useEffect(() => {
-    document.querySelector('#search_input').focus();
-  }, []);
+    document.querySelector('#search_input').focus()
+  }, [])
 
   const searchBar = e('form', null, [
     e('input', {
@@ -79,20 +79,20 @@ function App() {
       value: 'Find',
       onClick: handleOnClick,
     }),
-  ]);
-  return e('div', { id: 'search-bar' }, searchBar);
+  ])
+  return e('div', { id: 'search-bar' }, searchBar)
 }
 
 // eslint-disable-next-line no-unused-vars
 function startBagFinder() {
   // add stylesheet
-  const styleSheet = document.createElement('style');
-  styleSheet.innerText = getCSS();
-  document.head.appendChild(styleSheet);
+  const styleSheet = document.createElement('style')
+  styleSheet.innerText = getCSS()
+  document.head.appendChild(styleSheet)
 
   // mount app
-  const rootDiv = document.createElement('div');
-  const countTextEle = document.querySelector('div.ng-scope > h2');
-  countTextEle.after(rootDiv);
-  ReactDOM.createRoot(rootDiv).render(e(App));
+  const rootDiv = document.createElement('div')
+  const countTextEle = document.querySelector('div.ng-scope > h2')
+  countTextEle.after(rootDiv)
+  ReactDOM.createRoot(rootDiv).render(e(App))
 }
