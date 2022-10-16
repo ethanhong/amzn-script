@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
-// @namespace    https://github.com/ethanhong/amzntools
-// @version      1.0
-// @description  remove useless package information
+// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
+// @version      2.0.1
+// @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
 // @match        https://aftlite-na.amazon.com/labor_tracking/lookup_history?user_name=*
+// @updateURL    https://ethanhong.github.io/amzntools-src/find-bag-aftlite.user.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/find-bag-aftlite.user.js
+// @supportURL   https://github.com/ethanhong/amzntools-src/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // ==/UserScript==
