@@ -14,24 +14,24 @@
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
-(function clock() {
-  const clockDiv = document.createElement('div');
-  clockDiv.setAttribute('id', 'clock');
-  document.body.append(clockDiv);
-  startTime();
-})();
+;(function clock() {
+  const clockDiv = document.createElement('div')
+  clockDiv.setAttribute('id', 'clock')
+  document.body.append(clockDiv)
+  startTime()
+})()
 
 function startTime() {
-  const checkTime = (x) => (x < 10 ? `0${x}` : x);
-  const today = new Date();
-  let h = today.getHours();
-  let m = today.getMinutes();
-  let s = today.getSeconds();
-  h = checkTime(h);
-  m = checkTime(m);
-  s = checkTime(s);
-  document.getElementById('clock').innerHTML = `${h}:${m}:${s}`;
-  setTimeout(startTime, 1000);
+  const checkTime = (x) => (x < 10 ? `0${x}` : x)
+  const today = new Date()
+  let h = today.getHours()
+  let m = today.getMinutes()
+  let s = today.getSeconds()
+  h = checkTime(h)
+  m = checkTime(m)
+  s = checkTime(s)
+  document.getElementById('clock').innerHTML = `${h}:${m}:${s}`
+  setTimeout(startTime, 1000)
 }
 
 // eslint-disable-next-line no-undef
@@ -52,4 +52,4 @@ GM_addStyle(`
     margin-left: -80px;
     z-index: 99;
   }
-`);
+`)
