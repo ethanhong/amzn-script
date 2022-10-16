@@ -311,15 +311,18 @@ function getActionToFetch(searchTerm) {
 }
 
 function SearchBar({ isAftlitePortal }) {
-  const [searchTerm, setSearchTerm] = React.useState('');
   const [progress, setProgress] = React.useState(0);
-
-  const handleOnChange = (evt) => setSearchTerm(evt.target.value);
+  const searchInputRef = React.useRef(null);
+  const searchBtnRef = React.useRef(null);
 
   const handleOnClick = async () => {
-    if (!searchTerm) return;
-    const actionToFetch = getActionToFetch(searchTerm);
+    if (!searchInputRef.current.value) return;
+    // start fetching
+    searchBtnRef.current.disabled = true;
+    const actionToFetch = getActionToFetch(searchInputRef.current.value);
     const scannableId = await fetchTrackCode(actionToFetch, setProgress, isAftlitePortal);
+    searchBtnRef.current.disabled = false;
+    // display result
     if (scannableId.length <= 1) {
       alert('No related bags found.');
     } else {
@@ -339,14 +342,14 @@ function SearchBar({ isAftlitePortal }) {
       type: 'text',
       placeholder: 'Search bags ...',
       size: '30',
-      value: searchTerm,
-      onChange: handleOnChange,
+      ref: searchInputRef,
     }),
     e('input', {
       id: 'search-btn',
       type: 'button',
       value: 'Search',
       onClick: handleOnClick,
+      ref: searchBtnRef,
     }),
     ` ( ${progress} % )`,
   ]);
