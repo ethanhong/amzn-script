@@ -39,21 +39,18 @@ function getBags() {
     : [...document.querySelectorAll('#picklists_table > tbody > tr')]
   picklistsTableRows.shift() // drop header row
 
-  const rowContents = picklistsTableRows.map((row) => row.textContent.trim().split(/\s+/))
-  const packUrls = picklistsTableRows.map((row) => row.querySelector('td:last-child > a'))
-
-  for (let i = 0; i < rowContents.length; i += 1) {
+  const rowContents = picklistsTableRows.map((row) => row.outerText.trim().split(/\s+/))
+  return rowContents.map((content) => {
     const bag = {}
-    bag.picker = {}
-    ;[bag.id, bag.zone, bag.status, bag.spoo, bag.pickerLogin] = rowContents[i]
+    ;[bag.id, bag.zone, bag.status, bag.spoo, bag.pickerLogin] = content
     bag.pickerUrl = `/labor_tracking/lookup_history?user_name=${bag.pickerLogin}`
     bag.packUrl = isAftlitePortal
       ? `/picklist/pack_by_picklist?picklist_id=${bag.id}`
       : `/wms/pack_by_picklist?picklist_id=${bag.id}`
     bag.code = getBagCode(bag.spoo, isAftlitePortal)
     bag.totalItem = getBagTotalItem(bag.spoo, isAftlitePortal)
-  }
-  return bags
+    return bag
+  })
 }
 
 function isValidCode(str) {
