@@ -26,7 +26,7 @@ const e = React.createElement
   if (isAftlitePortal) {
     document.querySelector('#main-content > div').after(rootDiv)
   } else {
-  document.querySelector('#orders_form').before(rootDiv)
+    document.querySelector('#orders_form').before(rootDiv)
   }
   ReactDOM.createRoot(rootDiv).render(e(App))
   addCSS()
@@ -79,9 +79,8 @@ function getBagTotalItem(spoo, isAftlitePortal) {
   return contents[0] || '-'
 }
 
-function BagRow({ bag, allBags }) {
-  const { searchTerm } = React.useContext(SearchContext)
-  const { setQRCodeContent } = React.useContext(QRCodeContext)
+function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
+  const [completionTime, setCompletionTime] = React.useState('-')
 
   const handleOnClick = (event) => {
     const node = event.target.nodeName === 'TD' ? event.target : event.target.parentNode
@@ -91,32 +90,39 @@ function BagRow({ bag, allBags }) {
     }
   }
 
-  const formattedCode = isValidCode(bag.code)
-    ? e('span', null, [bag.code.slice(0, -4), e('b', null, bag.code.slice(-4))])
-    : bag.code
-  const pickerLik = e('a', { href: bag.pickerUrl }, `${bag.pickerLogin}`)
-  const packLink = e('a', { href: bag.packUrl }, 'Pack')
+  React.useEffect(() => {
+    const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
+    const url = isAftlitePortal
+      ? '/picklist/view_picklist_history?picklist_id='
+      : '/wms/view_picklist_history?picklist_id='
+    const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)'
+
+    return fetch(`${url}${bag.id}`)
+      .then((res) => res.text())
+      .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
+      .then((html) => html.querySelector(completionTimeSelector).textContent.match(/\d{1,2}:\d{1,2}/))
+      .then((cTime) => setCompletionTime(cTime))
+      .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
+  }, [])
 
   const rowCells = [
     e('td', null, bag.id),
     e('td', null, bag.zone),
     e('td', null, bag.status),
-    e('td', null, bag.completionTime),
-    e('td', { onClick: handleOnClick }, formattedCode),
+    e('td', null, completionTime),
+    e(
+      'td',
+      { onClick: handleOnClick },
+      isValidCode(bag.code) ? e('span', null, [bag.code.slice(0, -4), e('b', null, bag.code.slice(-4))]) : bag.code
+    ),
     e('td', { onClick: handleOnClick }, bag.spoo),
-    e('td', null, pickerLik),
+    e('td', null, e('a', { href: bag.pickerUrl }, `${bag.pickerLogin}`)),
     e('td', null, `${bag.totalItem} items`),
-    e('td', null, packLink),
+    e('td', null, e('a', { href: bag.packUrl }, 'Pack')),
   ]
 
-  const relatedClass = isRelatedBag(bag, searchTerm, allBags) ? 'related-bag' : ''
-  const targetClass = isTargetBag(bag, searchTerm) ? 'target-bag' : ''
-
-  return e('tr', { className: `${targetClass} ${relatedClass}` }, rowCells)
-}
-
-function containsKeyword(str, keyword) {
-  return str.indexOf(keyword) > -1
+  const classVal = [isTarget ? 'target-bag' : '', isRelated ? 'related-bag' : ''].join(' ').trim()
+  return e('tr', { className: classVal }, rowCells)
 }
 
 function isTargetBag(bag, searchTerm) {
@@ -141,30 +147,15 @@ function BagTable({ searchTerm, setQRCodeContent }) {
     headers.map((header) => e('th', null, header))
   )
 
-  const [bags, setBags] = React.useState(getBags())
-
-  React.useEffect(() => {
-    for (let i = 0; i < bags.length; i += 1) {
-      const bag = bags[i]
-      const fetchURL = '/wms/view_picklist_history?picklist_id='
-      fetch(`${fetchURL}${bag.id}`)
-        .then((res) => res.text())
-        .then((page) => {
-          const html = new DOMParser().parseFromString(page, 'text/html')
-          const completionTime = html.querySelector('tr:nth-child(6)').textContent.match(/\d{1,2}:\d{1,2}/)
-          return completionTime
-        })
-        .then((cTime) => {
-          setBags((prevArray) => {
-            const newBag = prevArray[i]
-            newBag.completionTime = cTime
-            return [...prevArray.slice(0, i), newBag, ...prevArray.slice(i + 1)]
-          })
-        })
-    }
-  }, [])
-
-  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, allBags, key: bag.id }))
+  const bagRows = getBags().map((bag, _, allBags) =>
+    e(BagRow, {
+      bag,
+      isTarget: isTargetBag(bag, searchTerm),
+      isRelated: isRelatedBag(bag, searchTerm, allBags),
+      setQRCodeContent,
+      key: bag.id,
+    })
+  )
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)])
 }
 
