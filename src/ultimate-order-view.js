@@ -232,10 +232,6 @@ function App() {
   return e(SearchContext.Provider, { value: { searchTerm, setsearchTerm } }, [e(SearchBar), e(UltimateTable)])
 }
 
-function getLogin() {
-  return document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
-}
-
 function addCSS() {
   const styles = `
     :root,
