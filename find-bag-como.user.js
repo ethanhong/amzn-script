@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.1
+// @version      2.0.2
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*/packages
@@ -17,6 +17,8 @@
 /* eslint-disable prefer-destructuring */
 
 const e = React.createElement
+
+startBagFinder()
 
 function getCSS() {
   const style = `
