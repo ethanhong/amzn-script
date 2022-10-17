@@ -182,16 +182,18 @@ function QRCodeArea() {
   return e('div', { id: 'qrcode-area' }, [qrcodeContainer, qrcodeText])
 }
 
-function SearchBar() {
-  const { searchTerm, setsearchTerm } = React.useContext(SearchContext)
-  const handleOnChange = (evt) => setsearchTerm(evt.target.value)
+function SearchBar({ setSearchTerm }) {
+  const inputRef = React.useRef(null)
+
+  const handleOnChange = () => setSearchTerm(inputRef.current.value)
+
   return e('form', null, [
     e('input', {
       id: 'search_input',
       type: 'text',
       placeholder: 'Search by tracking-code or spoo',
       size: '30',
-      value: searchTerm,
+      ref: inputRef,
       onChange: handleOnChange,
       style: { lineHeight: '1.5rem' },
     }),
@@ -225,11 +227,14 @@ function UltimateTable() {
 }
 
 function App() {
-  const [searchTerm, setsearchTerm] = React.useState('')
+  const [searchTerm, setSearchTerm] = React.useState('')
   React.useEffect(() => {
     document.querySelector('#search_input').focus()
   }, [])
-  return e(SearchContext.Provider, { value: { searchTerm, setsearchTerm } }, [e(SearchBar), e(UltimateTable)])
+  return e(SearchContext.Provider, { value: { searchTerm, setSearchTerm } }, [
+    e(SearchBar, { setSearchTerm }),
+    e(UltimateTable),
+  ])
 }
 
 function addCSS() {
