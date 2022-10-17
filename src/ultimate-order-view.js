@@ -23,10 +23,6 @@ const QRCodeContext = React.createContext()
 
 // eslint-disable-next-line no-unused-vars
 ;(function ultimateOrderView() {
-  if (!isVerifiedUser(getLogin())) {
-    return
-  }
-
   const rootDiv = document.createElement('div')
   document.querySelector('#orders_form').before(rootDiv)
   ReactDOM.createRoot(rootDiv).render(e(App))
@@ -238,11 +234,6 @@ function App() {
 
 function getLogin() {
   return document.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
-}
-
-function isVerifiedUser(user) {
-  console.log(`hello, ${user}`)
-  return true
 }
 
 function addCSS() {
