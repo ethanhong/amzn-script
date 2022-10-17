@@ -173,12 +173,9 @@ function makeQRCode(str) {
   })
 }
 
-function QRCodeArea() {
-  const { qrcodeContent } = React.useContext(QRCodeContext)
-
+function QRCodeArea({ qrcodeContent }) {
   const qrcodeContainer = e('div', { id: 'qrcode-container' })
   const qrcodeText = e('div', { id: 'qrcode-text' }, qrcodeContent)
-
   return e('div', { id: 'qrcode-area' }, [qrcodeContainer, qrcodeText])
 }
 
@@ -217,17 +214,15 @@ function UltimateTable() {
     }
   }, [qrcodeContent])
 
-  const bagTable = e(BagTable)
-  const qrcodeArea = e(QRCodeArea)
-  const ultimateTableContainer = e('div', { id: 'ultimateTable-container' }, [bagTable, qrcodeArea])
-
-  return e(
+  const bagTable = e(
     QRCodeContext.Provider,
     {
       value: { qrcodeContent, setQRCodeContent },
     },
-    ultimateTableContainer
+    e(BagTable)
   )
+  const qrcodeArea = e(QRCodeArea, { qrcodeContent })
+  return e('div', { id: 'ultimateTable-container' }, [bagTable, qrcodeArea])
 }
 
 function App() {
