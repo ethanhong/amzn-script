@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         Ultimate Order View
-// @namespace    https://github.com/ethanhong/amzn-script
-// @version      2.0
-// @description  enhance order view ultimate/cloud/React version
+// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
+// @version      2.0.1
+// @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
+// @updateURL    https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
+// @downloadURL  https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
+// @supportURL   https://github.com/ethanhong/amzntools-src/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js
