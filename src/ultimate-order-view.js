@@ -133,8 +133,9 @@ function BagTable() {
   const headerRow = e(
     'tr',
     null,
-    headers.map((header) => e('th', null, `${header}`))
+    headers.map((header) => e('th', null, header))
   )
+
   const [bags, setBags] = React.useState(getBags())
 
   React.useEffect(() => {
@@ -158,7 +159,7 @@ function BagTable() {
     }
   }, [])
 
-  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, allBags, key: i }))
+  const bagRows = bags.map((bag, i, allBags) => e(BagRow, { bag, allBags, key: bag.id }))
   return e('table', { id: 'bag-table' }, [e('thead', null, headerRow), e('tbody', null, bagRows)])
 }
 
