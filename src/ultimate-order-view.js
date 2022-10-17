@@ -23,16 +23,22 @@ const QRCodeContext = React.createContext()
 
 // eslint-disable-next-line no-unused-vars
 ;(function ultimateOrderView() {
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
   const rootDiv = document.createElement('div')
+  if (isAftlitePortal) {
+    document.querySelector('#main-content > div').after(rootDiv)
+  } else {
   document.querySelector('#orders_form').before(rootDiv)
+  }
   ReactDOM.createRoot(rootDiv).render(e(App))
   addCSS()
 })()
 
 function getBags() {
-  const bags = []
-
-  const picklistsTableRows = [...document.querySelectorAll('#picklists_table > tbody > tr')]
+  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
+  const picklistsTableRows = isAftlitePortal
+    ? [...document.querySelectorAll('#main-content > table:nth-child(20) > tbody > tr')]
+    : [...document.querySelectorAll('#picklists_table > tbody > tr')]
   picklistsTableRows.shift() // drop header row
 
   const rowContents = picklistsTableRows.map((row) => row.textContent.trim().split(/\s+/))
@@ -43,11 +49,11 @@ function getBags() {
     bag.picker = {}
     ;[bag.id, bag.zone, bag.status, bag.spoo, bag.pickerLogin] = rowContents[i]
     bag.pickerUrl = `/labor_tracking/lookup_history?user_name=${bag.pickerLogin}`
-    bag.packUrl = packUrls[i].href
-    bag.code = getBagCode(bag.spoo)
-    bag.totalItem = getBagTotalItem(bag.spoo)
-    bag.completionTime = '-'
-    bags.push(bag)
+    bag.packUrl = isAftlitePortal
+      ? `/picklist/pack_by_picklist?picklist_id=${bag.id}`
+      : `/wms/pack_by_picklist?picklist_id=${bag.id}`
+    bag.code = getBagCode(bag.spoo, isAftlitePortal)
+    bag.totalItem = getBagTotalItem(bag.spoo, isAftlitePortal)
   }
   return bags
 }
@@ -56,21 +62,25 @@ function isValidCode(str) {
   return Boolean(str.match(/[a-z,A-z,0-9]{20}/))
 }
 
-function getBagCode(spoo) {
+function getBagCode(spoo, isAftlitePortal) {
   if (!isValidCode(spoo)) {
     return '-'
   }
   const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo)
-  const contents = spooLink.parentNode.childNodes[5].textContent.trim().split(/\s+/)
+  const contents = isAftlitePortal
+    ? spooLink.parentNode.parentNode.childNodes[1].textContent.trim().split(/\s+/)
+    : spooLink.parentNode.childNodes[5].textContent.trim().split(/\s+/)
   return contents[1] || '-'
 }
 
-function getBagTotalItem(spoo) {
+function getBagTotalItem(spoo, isAftlitePortal) {
   if (!isValidCode(spoo)) {
     return '-'
   }
   const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo)
-  const contents = spooLink.parentNode.childNodes[7].textContent.trim().split(/\s+/)
+  const contents = isAftlitePortal
+    ? spooLink.parentNode.parentNode.childNodes[2].textContent.trim().split(/\s+/)
+    : spooLink.parentNode.childNodes[7].textContent.trim().split(/\s+/)
   return contents[0] || '-'
 }
 
