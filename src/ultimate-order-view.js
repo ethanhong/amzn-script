@@ -187,6 +187,10 @@ function SearchBar({ setSearchTerm }) {
 
   const handleOnChange = () => setSearchTerm(inputRef.current.value)
 
+  React.useEffect(() => {
+    inputRef.current.focus()
+  }, [])
+
   return e('form', null, [
     e('input', {
       id: 'search_input',
@@ -228,9 +232,6 @@ function UltimateTable() {
 
 function App() {
   const [searchTerm, setSearchTerm] = React.useState('')
-  React.useEffect(() => {
-    document.querySelector('#search_input').focus()
-  }, [])
   return e(SearchContext.Provider, { value: { searchTerm, setSearchTerm } }, [
     e(SearchBar, { setSearchTerm }),
     e(UltimateTable),
