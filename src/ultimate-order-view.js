@@ -18,8 +18,6 @@
 /* global QRCode */
 
 const e = React.createElement
-const SearchContext = React.createContext()
-const QRCodeContext = React.createContext()
 
 // eslint-disable-next-line no-unused-vars
 ;(function ultimateOrderView() {
@@ -138,7 +136,7 @@ function isRelatedBag(currentBag, searchTerm, allBags) {
   return targetBag.pickerLogin === currentBag.pickerLogin && targetBag.zone === currentBag.zone
 }
 
-function BagTable() {
+function BagTable({ searchTerm, setQRCodeContent }) {
   const headers = ['ID', 'Zone', 'Status', 'Completion Time', 'Tracking Code', 'Spoo', 'Picker', 'Total Items', '']
   const headerRow = e(
     'tr',
@@ -212,7 +210,7 @@ function SearchBar({ setSearchTerm }) {
   ])
 }
 
-function UltimateTable() {
+function UltimateTable({ searchTerm }) {
   const [qrcodeContent, setQRCodeContent] = React.useState('')
   const [qrcodeMaker, setQRcodeMaker] = React.useState(null)
 
@@ -225,23 +223,14 @@ function UltimateTable() {
     }
   }, [qrcodeContent])
 
-  const bagTable = e(
-    QRCodeContext.Provider,
-    {
-      value: { qrcodeContent, setQRCodeContent },
-    },
-    e(BagTable)
-  )
+  const bagTable = e(BagTable, { searchTerm, setQRCodeContent })
   const qrcodeArea = e(QRCodeArea, { qrcodeContent })
   return e('div', { id: 'ultimateTable-container' }, [bagTable, qrcodeArea])
 }
 
 function App() {
   const [searchTerm, setSearchTerm] = React.useState('')
-  return e(SearchContext.Provider, { value: { searchTerm, setSearchTerm } }, [
-    e(SearchBar, { setSearchTerm }),
-    e(UltimateTable),
-  ])
+  return e('div', null, [e(SearchBar, { setSearchTerm }), e(UltimateTable, { searchTerm })])
 }
 
 function addCSS() {
