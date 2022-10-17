@@ -123,10 +123,10 @@ function containsKeyword(str, keyword) {
 }
 
 function isTargetBag(bag, searchTerm) {
-  const keyword = searchTerm.toUpperCase()
+  const key = searchTerm.toUpperCase()
   const bagCode = bag.code.toUpperCase()
   const bagSpoo = bag.spoo.toUpperCase()
-  return keyword && (containsKeyword(bagCode, keyword) || containsKeyword(bagSpoo, keyword))
+  return key && (bagCode.includes(key) || bagSpoo.includes(key))
 }
 
 function isRelatedBag(currentBag, searchTerm, allBags) {
