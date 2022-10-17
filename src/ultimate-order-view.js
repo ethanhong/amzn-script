@@ -5,6 +5,7 @@
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
+// @match        https://aftlite-portal.amazon.com/orders/view_order_details*
 // @updateURL    https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
 // @downloadURL  https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
 // @supportURL   https://github.com/ethanhong/amzntools-src/issues
