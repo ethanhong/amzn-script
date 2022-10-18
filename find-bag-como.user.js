@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.2
+// @version      2.0.3
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*/packages
@@ -24,6 +24,7 @@ function getCSS() {
   const style = `
   #search-bar {
     margin-bottom: 1rem;
+    margin-left: 1rem;
   }
 
   #search_input {
@@ -96,7 +97,7 @@ function startBagFinder() {
 
   // mount app
   const rootDiv = document.createElement('div')
-  const countTextEle = document.querySelector('div.ng-scope > h2')
-  countTextEle.after(rootDiv)
+  const navBar = document.querySelector('nav')
+  navBar.append(rootDiv)
   ReactDOM.createRoot(rootDiv).render(e(App))
 }
