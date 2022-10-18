@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.1
+// @version      2.1.1
 // @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
@@ -165,6 +165,7 @@ function TableHeader({ titles }) {
 }
 
 async function getPackageInfo(pickListId, isAftlitePortal) {
+  if (!pickListId) return Array(4).fill('')
   // url and selectors
   const fetchURL = isAftlitePortal
     ? '/picklist/view_picklist_history?picklist_id='
@@ -217,15 +218,18 @@ function getTimeStyle(timeStamp, cpt, currentTime) {
   return ''
 }
 
-function ActionRow({ action, isFirstPackage, isAftlitePortal }) {
+function ActionRow({ action, info, isFirstPackage, isAftlitePortal }) {
   const orderviewUrl = isAftlitePortal ? '/orders/view_order?id=' : '/wms/view_order/'
   const picklistUrl = isAftlitePortal ? '/picklist/pack_by_picklist?picklist_id=' : '/wms/pack_by_picklist?picklist_id='
 
   const newAction = action.map((ele, i) => {
     if (i === 3) return e('span', { className: 'monospace' }, ele)
+    if (i === 5) return info[2]
+    if (i === 6) return info[0]
+    if (i === 7) return info[1]
     if (i === 8)
       return e('div', null, [e('span', { className: 'spoo-dot' }), e('span', { className: 'monospace' }, ele)])
-    if (i === 9) return e('a', { href: `${orderviewUrl}${ele}` }, ele)
+    if (i === 9) return e('a', { href: `${orderviewUrl}${info[3]}` }, info[3])
     if (i === 10) return e('a', { href: `${picklistUrl}${ele}` }, ele)
     return ele
   })
@@ -383,35 +387,28 @@ function MainTable({ oldTable, isAftlitePortal }) {
     const firstMatch = allActions.find((x) => x[spooIdx] === currAction[spooIdx])
     return !firstMatch[spooIdx] || firstMatch === currAction
   }
+  const newActions = getActions(oldTable)
+    .filter((action) => isPack(action) || isIndirect(action))
+    .filter(isLatestSpoo)
+    .map(mapToNewAction(isAftlitePortal))
 
-  const [newActions, setNewActions] = React.useState(
-    getActions(oldTable)
-      .filter((action) => isPack(action) || isIndirect(action))
-      .filter(isLatestSpoo)
-      .map(mapToNewAction(isAftlitePortal))
+  const [infos, setInfos] = React.useState(Array(newActions.length).fill(Array(4).fill('')))
+  React.useEffect(
+    () =>
+      newActions.map((action, i) =>
+        getPackageInfo(action[10], isAftlitePortal).then((info) =>
+          setInfos((prev) => [...prev.slice(0, i), info, ...prev.slice(i + 1)])
+        )
+      ),
+    []
   )
 
-  const header = e(TableHeader, { titles, key: 'main-table-header' })
-  const rows = newActions.map((action, i, allActions) => {
-    const isFirstPackage = !i || allActions[i][6] !== allActions[i - 1][6]
-    return e(ActionRow, { action, isFirstPackage, isAftlitePortal, key: action[8] })
-  })
-
-  React.useEffect(() => {
-    newActions.map(async (action, i) => {
-      const { 10: pickListId } = action
-      if (!pickListId) return
-      const packageInfo = await getPackageInfo(pickListId, isAftlitePortal)
-      const fetchedActions = (prevState) => {
-        const currAction = [...prevState[i]]
-        ;[currAction[6], currAction[7], currAction[5], currAction[9]] = packageInfo
-        return [...prevState.slice(0, i), currAction, ...prevState.slice(i + 1)]
-      }
-      setNewActions(fetchedActions)
-    })
-  }, [])
-
   const searchBar = e(SearchBar, { isAftlitePortal, key: 'search-bar' })
+  const header = e(TableHeader, { titles, key: 'main-table-header' })
+  const rows = newActions.map((action, i) => {
+    const isFirstPackage = !i || infos[i][0] !== infos[i - 1][0]
+    return e(ActionRow, { action, info: infos[i], isFirstPackage, isAftlitePortal, key: action[8] })
+  })
   const newTable = e(
     'table',
     { id: 'main-table', className: 'a-bordered a-spacing-top-large reportLayout' },
