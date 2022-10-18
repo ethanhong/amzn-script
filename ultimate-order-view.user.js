@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.1.1
+// @version      2.1.2
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
@@ -55,28 +55,44 @@ function getBags() {
 }
 
 function isValidCode(str) {
-  return Boolean(str.match(/[a-z,A-z,0-9]{20}/))
+  try {
+    return Boolean(str.match(/[a-z,A-z,0-9]{20}/))
+  } catch (error) {
+    return false
+  }
 }
 
 function getBagCode(spoo, isAftlitePortal) {
   if (!isValidCode(spoo)) {
     return '-'
   }
+
+  let contents = '-'
   const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo)
-  const contents = isAftlitePortal
-    ? spooLink.parentNode.parentNode.childNodes[1].textContent.trim().split(/\s+/)
-    : spooLink.parentNode.childNodes[5].textContent.trim().split(/\s+/)
-  return contents[1] || '-'
+  try {
+    ;[, contents] = isAftlitePortal
+      ? spooLink.parentNode.parentNode.childNodes[1].textContent.trim().split(/\s+/)
+      : spooLink.parentNode.childNodes[5].textContent.trim().split(/\s+/)
+  } catch (error) {
+    // do nothing
+  }
+  return isValidCode(contents) ? contents : '-'
 }
 
 function getBagTotalItem(spoo, isAftlitePortal) {
   if (!isValidCode(spoo)) {
     return '-'
   }
+
+  let contents = '-'
   const spooLink = [...document.querySelectorAll('a')].find((node) => node.textContent === spoo)
-  const contents = isAftlitePortal
-    ? spooLink.parentNode.parentNode.childNodes[2].textContent.trim().split(/\s+/)
-    : spooLink.parentNode.childNodes[7].textContent.trim().split(/\s+/)
+  try {
+    contents = isAftlitePortal
+      ? spooLink.parentNode.parentNode.childNodes[2].textContent.trim().split(/\s+/)
+      : spooLink.parentNode.childNodes[7].textContent.trim().split(/\s+/)
+  } catch (error) {
+    // do nothing
+  }
   return contents[0] || '-'
 }
 
@@ -102,7 +118,7 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
       .then((res) => res.text())
       .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
       .then((html) => html.querySelector(completionTimeSelector).textContent.match(/\d{1,2}:\d{1,2}/))
-      .then((cTime) => setCompletionTime(cTime))
+      .then((cTime) => (cTime ? setCompletionTime(cTime) : null))
       .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
   }, [])
 
