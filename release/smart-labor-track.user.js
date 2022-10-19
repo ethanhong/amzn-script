@@ -5,9 +5,9 @@
 // @description  Sign in to OBindirect according to current action
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
-// @updateURL    https://ethanhong.github.io/amzntools-src/smart-labor-track.user.js
-// @downloadURL  https://ethanhong.github.io/amzntools-src/smart-labor-track.user.js
-// @supportURL   https://github.com/ethanhong/amzntools-src/issues
+// @updateURL    https://ethanhong.github.io/amzn-tools/release/smart-labor-track.user.js
+// @downloadURL  https://ethanhong.github.io/amzn-tools/release/smart-labor-track.user.js
+// @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // ==/UserScript==
 
 const activity = 'OBINDIRECT' // activity you'd like to be checked in

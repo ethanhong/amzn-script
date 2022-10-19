@@ -5,9 +5,9 @@
 // @description  Color p-solves by pull time
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_dwell_time?type=status&value=problem-solve
-// @updateURL    https://ethanhong.github.io/amzntools-src/psolve-painter.user.js
-// @downloadURL  https://ethanhong.github.io/amzntools-src/psolve-painter.user.js
-// @supportURL   https://github.com/ethanhong/amzntools-src/issues
+// @updateURL    https://ethanhong.github.io/amzn-tools/release/psolve-painter.user.js
+// @downloadURL  https://ethanhong.github.io/amzn-tools/release/psolve-painter.user.js
+// @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @grant        GM_addStyle
 // ==/UserScript==
 

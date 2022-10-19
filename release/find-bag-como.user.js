@@ -5,9 +5,9 @@
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*
-// @updateURL    https://ethanhong.github.io/amzntools-src/find-bag-como.user.js
-// @downloadURL  https://ethanhong.github.io/amzntools-src/find-bag-como.user.js
-// @supportURL   https://github.com/ethanhong/amzntools-src/issues
+// @updateURL    https://ethanhong.github.io/amzn-tools/release/find-bag-como.user.js
+// @downloadURL  https://ethanhong.github.io/amzn-tools/release/find-bag-como.user.js
+// @supportURL   https://github.com/ethanhong/amzn-tools-src/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // ==/UserScript==

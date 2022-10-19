@@ -6,9 +6,9 @@
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
 // @match        https://aftlite-portal.amazon.com/orders/view_order_details*
-// @updateURL    https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
-// @downloadURL  https://ethanhong.github.io/amzntools-src/ultimate-order-view.user.js
-// @supportURL   https://github.com/ethanhong/amzntools-src/issues
+// @updateURL    https://ethanhong.github.io/amzn-tools/release/ultimate-order-view.user.js
+// @downloadURL  https://ethanhong.github.io/amzn-tools/release/ultimate-order-view.user.js
+// @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js
