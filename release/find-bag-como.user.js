@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.3
+// @version      2.0.4
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*
@@ -47,6 +47,7 @@ async function comoPackages() {
 
 function App() {
   const [searchTerm, setSearchTerm] = React.useState('')
+  const searchInputRef = React.useRef(null)
 
   const handleOnClick = async () => {
     const [scannableMissing, ...scannableToFind] = searchTerm.trim().split(',')
@@ -60,10 +61,11 @@ function App() {
       )
     // eslint-disable-next-line no-alert
     alert(message)
+    searchInputRef.current.value = ''
   }
 
   React.useEffect(() => {
-    document.querySelector('#search_input').focus()
+    searchInputRef.current.focus()
   }, [])
 
   const searchBar = e('form', null, [
@@ -73,6 +75,7 @@ function App() {
       placeholder: 'Find bags ...',
       size: '100',
       value: searchTerm,
+      ref: searchInputRef,
       onChange: (evt) => setSearchTerm(evt.target.value),
     }),
     e('input', {
