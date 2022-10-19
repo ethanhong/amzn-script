@@ -1,4 +1,4 @@
-# amzn-script
+# amzn-tools
 
 Tampermonkey scripts to speed work flow.
 
