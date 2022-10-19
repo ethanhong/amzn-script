@@ -23,7 +23,8 @@ You can buy me a coffe if you find this useful.<br>
 
 ## How to use
 ### clock
-- 
+- a simple digital clock shown at bottom center of the screen
+
 ### find-bag-aftlite
 -
 ### find-bag-como
