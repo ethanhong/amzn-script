@@ -7,7 +7,7 @@
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/find-bag-como.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/find-bag-como.user.js
-// @supportURL   https://github.com/ethanhong/amzn-tools-src/issues
+// @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // ==/UserScript==
