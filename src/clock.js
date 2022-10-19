@@ -14,12 +14,12 @@
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
-;(function clock() {
+function clock() {
   const clockDiv = document.createElement('div')
   clockDiv.setAttribute('id', 'clock')
   document.body.append(clockDiv)
   startTime()
-})()
+}
 
 function startTime() {
   const checkTime = (x) => (x < 10 ? `0${x}` : x)

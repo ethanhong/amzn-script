@@ -20,8 +20,6 @@
 
 const e = React.createElement
 
-startBagFinder()
-
 function getCSS(isAftlitePortal) {
   const styleNA = `
     :root,

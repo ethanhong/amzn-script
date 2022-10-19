@@ -18,8 +18,6 @@
 
 const e = React.createElement
 
-startBagFinder()
-
 function getCSS() {
   const style = `
   #search-bar {

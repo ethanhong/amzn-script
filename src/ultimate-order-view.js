@@ -21,7 +21,7 @@
 const e = React.createElement
 
 // eslint-disable-next-line no-unused-vars
-;(function ultimateOrderView() {
+function ultimateOrderView() {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
   const rootDiv = document.createElement('div')
   if (isAftlitePortal) {
@@ -31,7 +31,7 @@ const e = React.createElement
   }
   ReactDOM.createRoot(rootDiv).render(e(App))
   addCSS()
-})()
+}
 
 function getBags() {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'

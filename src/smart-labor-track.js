@@ -10,12 +10,6 @@
 // @supportURL   https://github.com/ethanhong/amzntools-src/issues
 // ==/UserScript==
 
-const activity = 'OBINDIRECT' // activity you'd like to be checked in
-const skipActivities = ['EOS', 'ASM', 'BATCHING', 'OBINDIRECT'] // activities which would be skipped (targetActivity will always be skipped)
-const interval = 5 // period to check current activity (in minutes)
-const brkLength = 10 // break time (in minutes)
-startLaborTrack(activity, skipActivities, interval, brkLength)
-
 // eslint-disable-next-line no-unused-vars
 async function startLaborTrack(targetAct, skip, period = 5, brkTime = 10, login = '') {
   const isNASite = window.location.hostname === 'aftlite-na.amazon.com'

@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 // eslint-disable-next-line no-unused-vars
-;(function psolvePainter() {
+function psolvePainter() {
   const deliveryDateSelector = '#wms_table_dwell_time > tbody:nth-child(2) > tr > td:nth-child(10)'
 
   // calulate window hour
@@ -35,7 +35,7 @@
     }
     return null
   })
-})()
+}
 
 // eslint-disable-next-line no-undef
 GM_addStyle(`
