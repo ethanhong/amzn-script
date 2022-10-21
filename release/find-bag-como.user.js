@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
-// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.5
+// @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
+// @version      2.0.6
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*

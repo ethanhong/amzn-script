@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Clock
-// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      1.0.5
+// @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
+// @version      1.0.6
 // @description  clock
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/*

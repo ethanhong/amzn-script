@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
-// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.1.3
+// @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
+// @version      2.1.4
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*

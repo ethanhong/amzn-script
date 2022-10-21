@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         P-solve Painter
-// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      1.0.1
+// @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
+// @version      1.0.2
 // @description  Color p-solves by pull time
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_dwell_time?type=status&value=problem-solve

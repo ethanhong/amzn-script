@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Smart Labor Track
-// @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.1.1
+// @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
+// @version      2.1.2
 // @description  Sign in to OBindirect according to current action
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/indirect_action/signin_indirect_action*
