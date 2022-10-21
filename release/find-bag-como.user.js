@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.0.4
+// @version      2.0.5
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*
@@ -71,7 +71,7 @@ function App() {
   const searchBar = e('form', null, [
     e('input', {
       id: 'search_input',
-      type: 'text',
+      type: 'search',
       placeholder: 'Find bags ...',
       size: '100',
       value: searchTerm,

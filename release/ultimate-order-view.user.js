@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
 // @namespace    https://github.com/ethanhong/amzntools-src/tree/release
-// @version      2.1.2
+// @version      2.1.3
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
@@ -205,7 +205,7 @@ function SearchBar({ setSearchTerm }) {
   return e('form', null, [
     e('input', {
       id: 'search_input',
-      type: 'text',
+      type: 'search',
       placeholder: 'Search by tracking-code or spoo',
       size: '30',
       ref: inputRef,
