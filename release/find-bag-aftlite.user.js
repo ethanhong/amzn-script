@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.3
+// @version      2.2.1
 // @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
@@ -318,13 +318,14 @@ function getActionToFetch(searchTerm) {
 }
 
 function SearchBar({ isAftlitePortal }) {
-  const [progress, setProgress] = React.useState(0)
+  const [progress, setProgress] = React.useState(-1)
   const searchInputRef = React.useRef(null)
   const searchBtnRef = React.useRef(null)
 
   const handleOnClick = async () => {
     if (!searchInputRef.current.value) return
     // start fetching
+    setProgress(0)
     searchBtnRef.current.disabled = true
     const actionToFetch = getActionToFetch(searchInputRef.current.value)
     const scannableId = await fetchTrackCode(actionToFetch, setProgress, isAftlitePortal)
@@ -338,7 +339,7 @@ function SearchBar({ isAftlitePortal }) {
           `Found ${scannableId.length - 1} related bags.\nCopy and paste the relust into COMO for locations.`,
           scannableId
         )
-        setProgress(0)
+        setProgress(-1)
       }, 100)
     }
   }
@@ -358,7 +359,8 @@ function SearchBar({ isAftlitePortal }) {
       onClick: handleOnClick,
       ref: searchBtnRef,
     }),
-    ` ( ${progress} % )`,
+    e('span', { id: 'loading-text' }, ' Loading data ...'),
+    progress < 0 ? '' : ` Analyzing ... ${progress} %`,
   ])
 
   return e('div', { id: 'search-bar' }, [searchForm])
@@ -393,15 +395,24 @@ function MainTable({ oldTable, isAftlitePortal }) {
     .map(mapToNewAction(isAftlitePortal))
 
   const [infos, setInfos] = React.useState(Array(newActions.length).fill(Array(4).fill('')))
-  React.useEffect(
-    () =>
-      newActions.map((action, i) =>
-        getPackageInfo(action[10], isAftlitePortal).then((info) =>
+  React.useEffect(() => {
+    const searchBtn = document.querySelector('#search-btn')
+    searchBtn.disabled = true
+    Promise.all(
+      newActions.map((action, i) => {
+        if (diffHours(new Date(), new Date(action[0])) > 12) {
+          return null
+        }
+        return getPackageInfo(action[10], isAftlitePortal).then((info) =>
           setInfos((prev) => [...prev.slice(0, i), info, ...prev.slice(i + 1)])
         )
-      ),
-    []
-  )
+      })
+    ).then(() => {
+      searchBtn.disabled = false
+      document.querySelector('#loading-text').textContent = ''
+      return null
+    })
+  }, [])
 
   const searchBar = e(SearchBar, { isAftlitePortal, key: 'search-bar' })
   const header = e(TableHeader, { titles, key: 'main-table-header' })
@@ -415,6 +426,10 @@ function MainTable({ oldTable, isAftlitePortal }) {
     e('tbody', null, [header, ...rows])
   )
   return e('div', null, [searchBar, newTable])
+}
+
+function diffHours(dt2, dt1) {
+  return Math.abs(Math.floor((dt2.getTime() - dt1.getTime()) / 1000 / 60 / 60))
 }
 
 function TableSwitch({ isOriginalTable, setIsOriginalTable }) {
