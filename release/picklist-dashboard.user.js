@@ -166,11 +166,10 @@ function gatherByGroupId(bags) {
 function Dashboard({ groups, isAftlitePortal }) {
   return e('table', { className: 'sortable', id: 'dashboard' }, [
     e('thead', null, e(Header)),
-    e(
-      'tbody',
-      null,
-      groups.map((group) => e(GroupRow, { group, isAftlitePortal, key: group.groupId }))
-    ),
+    e('tbody', null, [
+      ...groups.map((group) => e(GroupRow, { group, isAftlitePortal, key: group.groupId })),
+      e(TotalRow, { groups }),
+    ]),
   ])
 }
 
@@ -218,6 +217,18 @@ function GroupRow({ group, isAftlitePortal }) {
     e('td', { className: skipBags.length ? 'skipped' : '' }, skipBags),
   ]
   return e('tr', null, cells)
+}
+
+function TotalRow({ groups }) {
+  const timeDiff = groups.map((x) => x.cpt.map((t) => minDiff(new Date(t), new Date())))
+  const cells = Array(11).fill(e('td', null, ''))
+  cells[5] = e('td', null, 'Subtotal:')
+  cells[6] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x < 60).length)))
+  cells[7] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 60 && x < 120).length)))
+  cells[8] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 120 && x < 180).length)))
+  cells[9] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 180).length)))
+
+  return e('tr', { id: 'total-row' }, cells)
 }
 
 function minDiff(dt1, dt2) {
@@ -269,6 +280,10 @@ GM_addStyle(`
   #dashboard a.skipped {
     background-color: pink;
     color: red;
+  }
+
+  tr#total-row {
+    font-weight: bold;
   }
 
   /* Sortable tables */
