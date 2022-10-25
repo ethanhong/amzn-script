@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.1.1
+// @version      1.2.1
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -45,7 +45,7 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
     () => getBags(oldTbl, isAftlitePortal, isCompletePage),
     [oldTbl, isAftlitePortal, isCompletePage]
   )
-  const [groups, setGroups] = React.useState(gatherByGroupId(bags, isCompletePage))
+  const [groups, setGroups] = React.useState(gatherByGroupId(bags))
 
   React.useEffect(
     () =>
@@ -143,10 +143,14 @@ function getBags(tbl, isAftlitePortal, isCompletePage) {
       remainUnit: null,
       remainBin: null,
     }))
-  return isCompletePage ? bags.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)) : bags
+  return isCompletePage
+    ? bags
+        .filter((x) => minDiff(new Date(), new Date(x.completedAt)) < 30)
+        .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
+    : bags
 }
 
-function gatherByGroupId(bags, isCompletePage) {
+function gatherByGroupId(bags) {
   const groups = []
   for (let i = 0; i < bags.length; i += 1) {
     const sameGroup = groups.find((x) => x.groupId === bags[i].groupId)
@@ -156,7 +160,7 @@ function gatherByGroupId(bags, isCompletePage) {
       sameGroup.plistId.push(bags[i].plistId[0])
     }
   }
-  return isCompletePage ? groups.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)) : groups
+  return groups
 }
 
 function Dashboard({ groups, isAftlitePortal }) {
