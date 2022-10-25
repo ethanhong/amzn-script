@@ -96,14 +96,15 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
 
 function getBagCPT(bag, isAftlitePortal, retryCnt) {
   if (!retryCnt) return null
-  const url = isAftlitePortal ? '/picklist/view_picklist?picklist_id=' : '' // todo
-  const cptSelector = isAftlitePortal ? '#main-content > div:nth-child(4) > div.a-column.a-span4 > h5 > span' : '' // todo
+  const url = isAftlitePortal ? '/picklist/view_picklist?picklist_id=' : '' // TODO: view picklist url
+  const cptSelector = isAftlitePortal ? '#main-content > div:nth-child(4) > div.a-column.a-span4 > h5 > span' : '' // TODO: cptSelector for na-site
   return fetch(`${url}${bag.plistId[0]}`)
     .then((res) => res.text())
     .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
     .then((html) => html.querySelector(cptSelector).textContent)
-    .then((content) =>
-      content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '')
+    .then(
+      (content) =>
+        content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '') // TODO: confirm this for na-site
     )
     .catch((err) => {
       console.log(`${err} \n picklistId: ${bag.plistId} \n retryCnt: ${retryCnt}`)
@@ -114,7 +115,7 @@ function getBagCPT(bag, isAftlitePortal, retryCnt) {
 function getGroupIfno(group, isAftlitePortal, retryCnt) {
   if (!retryCnt) return false
   const url = '/picklist_group/display_picklist_group?picklist_group_id='
-  const trSelector = isAftlitePortal ? '#main-content > table > tbody > tr:not(tr:first-child)' : '' // todo
+  const trSelector = isAftlitePortal ? '#main-content > table > tbody > tr:not(tr:first-child)' : '' // TODO: trSelector for na-site
   return fetch(`${url}${group.groupId}`)
     .then((res) => res.text())
     .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
