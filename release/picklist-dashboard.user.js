@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.0.1
+// @version      1.1.1
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -133,7 +133,7 @@ function getBags(tbl, isAftlitePortal, isCompletePage) {
       picker: x[1].textContent.trim(),
       pickerURL: x[1].firstElementChild.href,
       status: x[2].textContent,
-      completedAt: x[3].textContent,
+      completedAt: x[3].textContent || 'In progress',
       plistId: [x[4].firstElementChild.textContent],
       orderId: x[5].firstElementChild.href.match(/\d{7}/)[0],
       zone: x[6].textContent,
@@ -176,7 +176,7 @@ function Header() {
     'Picker',
     'Remaining Units',
     'Remaining Bins',
-    'Status',
+    // 'Status',
     'Completed at',
     '< 1 Hour',
     '< 2 Hours',
@@ -204,7 +204,7 @@ function GroupRow({ group, isAftlitePortal }) {
     e('td', null, e('a', { href: group.pickerURL }, group.picker)),
     e('td', null, group.remainUnit),
     e('td', null, group.remainBin),
-    e('td', null, group.status),
+    // e('td', null, group.status),
     e('td', null, group.completedAt),
     e('td', null, minFromNow.filter((x) => x < 60).length),
     e('td', null, minFromNow.filter((x) => x >= 60 && x < 120).length),
