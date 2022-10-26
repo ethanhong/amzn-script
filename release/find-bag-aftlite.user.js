@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.1
+// @version      2.2.2
 // @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
@@ -164,7 +164,7 @@ function TableHeader({ titles }) {
   return e('tr', null, tableHeaders)
 }
 
-async function getPackageInfo(pickListId, isAftlitePortal) {
+async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
   if (!pickListId) return Array(4).fill('')
   // url and selectors
   const fetchURL = isAftlitePortal
@@ -180,7 +180,7 @@ async function getPackageInfo(pickListId, isAftlitePortal) {
   const orderIdRe = /\d{7}/
 
   try {
-    const response = await fetch(`${fetchURL}${pickListId}`)
+    const response = await fetch(`${fetchURL}${pickListId}`, { signal: abortController.signal })
     const text = await response.text()
     const html = new DOMParser().parseFromString(text, 'text/html')
     const packageInfo = []
@@ -398,12 +398,13 @@ function MainTable({ oldTable, isAftlitePortal }) {
   React.useEffect(() => {
     const searchBtn = document.querySelector('#search-btn')
     searchBtn.disabled = true
+    const abortController = new AbortController()
     Promise.all(
       newActions.map((action, i) => {
         if (diffHours(new Date(), new Date(action[0])) > 12) {
           return null
         }
-        return getPackageInfo(action[10], isAftlitePortal).then((info) =>
+        return getPackageInfo(action[10], isAftlitePortal, abortController).then((info) =>
           setInfos((prev) => [...prev.slice(0, i), info, ...prev.slice(i + 1)])
         )
       })
@@ -412,6 +413,7 @@ function MainTable({ oldTable, isAftlitePortal }) {
       document.querySelector('#loading-text').textContent = ''
       return null
     })
+    return () => abortController.abort()
   }, [])
 
   const searchBar = e(SearchBar, { isAftlitePortal, key: 'search-bar' })
