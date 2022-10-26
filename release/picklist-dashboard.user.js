@@ -49,14 +49,14 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
 
   React.useEffect(() => {
     const abortController = new AbortController()
-      bags.map(async (bag) => {
+    bags.map(async (bag) => {
       const cpt = await getBagCPT(bag, isAftlitePortal, abortController)
-        setGroups((prev) => {
-          const i = prev.findIndex((group) => group.groupId === bag.groupId)
-          const currentGroup = prev[i]
-          currentGroup.cpt.push(cpt)
-          return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
-        })
+      setGroups((prev) => {
+        const i = prev.findIndex((group) => group.groupId === bag.groupId)
+        const currentGroup = prev[i]
+        currentGroup.cpt.push(cpt)
+        return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
+      })
     })
     return () => abortController.abort()
   }, [])
@@ -65,17 +65,24 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
     const abortController = new AbortController()
     groups.map(async (group, i, allGroup) => {
       const info = await getGroupIfno(group, isAftlitePortal, abortController)
-        const totalUnit = sum(info[3])
-        const packedUnit = sum(info[4])
-        const remainBin = new Set(info[2].filter((_, j) => !info[4][j]))
-        const skip = info[1].filter((_, j) => Boolean(info[5][j]) || Boolean(info[6][j]))
-        setGroups((prev) => {
-          const currentGroup = prev[i]
-          currentGroup.remainUnit = totalUnit - packedUnit
-          currentGroup.remainBin = remainBin.size
-          currentGroup.skipped = Array.from(new Set(skip))
-          return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
-        })
+      const totalUnit = sum(info[3])
+      const packedUnit = sum(info[4])
+      const remainBin = new Set(info[2].filter((_, j) => !info[4][j]))
+      const skippedId = Array.from(new Set(info[1].filter((_, j) => Boolean(info[5][j]) || Boolean(info[6][j]))))
+      const skippedBags = []
+      for (let j = 0; j < skippedId.length; j += 1) {
+        const skipBag = bags.find((x) => x.plistId[0] === skippedId[j])
+        const skipGroup = allGroup.find((x) => x.groupId === skipBag.groupId)
+        skippedBags.push({ plistId: skipBag.plistId, cpt: skipGroup.cpt[0] })
+      }
+
+      setGroups((prev) => {
+        const currentGroup = prev[i]
+        currentGroup.remainUnit = totalUnit - packedUnit
+        currentGroup.remainBin = remainBin.size
+        currentGroup.skipped = skippedBags.sort((a, b) => new Date(a.cpt) - new Date(b.cpt))
+        return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
+      })
     })
     return () => abortController.abort()
   }, [])
@@ -199,7 +206,11 @@ function Header() {
 function GroupRow({ group, isAftlitePortal }) {
   const bagURL = isAftlitePortal ? '/picklist/pack_by_picklist?picklist_id=' : '/wms/pack_by_picklist?picklist_id='
   const skipBags = group.skipped.map((bag) =>
-    e('div', { key: bag }, e('a', { className: 'skipped', href: `${bagURL}${bag}` }, bag))
+    e(
+      'div',
+      { key: bag.plistId },
+      e('a', { className: 'skipped', href: `${bagURL}${bag.plistId}` }, bag.cpt.split(/\s+/).slice(-2).join(''))
+    )
   )
   const minFromNow = group.cpt.map((t) => minDiff(new Date(t), new Date()))
 
