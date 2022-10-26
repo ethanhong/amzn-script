@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.4
+// @version      2.1.5
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
@@ -114,12 +114,14 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
       : '/wms/view_picklist_history?picklist_id='
     const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)'
 
-    return fetch(`${url}${bag.id}`)
+    const abortController = new AbortController()
+    fetch(`${url}${bag.id}`, { signal: abortController.signal })
       .then((res) => res.text())
       .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
       .then((html) => html.querySelector(completionTimeSelector).textContent.match(/\d{1,2}:\d{1,2}/))
       .then((cTime) => (cTime ? setCompletionTime(cTime) : null))
       .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
+    return () => abortController.abort()
   }, [])
 
   const rowCells = [
