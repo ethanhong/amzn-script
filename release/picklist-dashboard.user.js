@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.2.1
+// @version      1.3.1
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -47,24 +47,24 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
   )
   const [groups, setGroups] = React.useState(gatherByGroupId(bags))
 
-  React.useEffect(
-    () =>
+  React.useEffect(() => {
+    const abortController = new AbortController()
       bags.map(async (bag) => {
-        const cpt = await getBagCPT(bag, isAftlitePortal, 2)
+      const cpt = await getBagCPT(bag, isAftlitePortal, abortController)
         setGroups((prev) => {
           const i = prev.findIndex((group) => group.groupId === bag.groupId)
           const currentGroup = prev[i]
           currentGroup.cpt.push(cpt)
           return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
         })
-      }),
-    []
-  )
+    })
+    return () => abortController.abort()
+  }, [])
 
-  React.useEffect(
-    () =>
-      groups.map(async (group, i) => {
-        const info = await getGroupIfno(group, isAftlitePortal, 2)
+  React.useEffect(() => {
+    const abortController = new AbortController()
+    groups.map(async (group, i, allGroup) => {
+      const info = await getGroupIfno(group, isAftlitePortal, abortController)
         const totalUnit = sum(info[3])
         const packedUnit = sum(info[4])
         const remainBin = new Set(info[2].filter((_, j) => !info[4][j]))
@@ -76,9 +76,9 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
           currentGroup.skipped = Array.from(new Set(skip))
           return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
         })
-      }),
-    []
-  )
+    })
+    return () => abortController.abort()
+  }, [])
 
   const backSwitch = e('form', { id: 'switch-form' }, [
     e('input', {
@@ -94,35 +94,30 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
   return e(React.Fragment, null, [backSwitch, dashboard])
 }
 
-function getBagCPT(bag, isAftlitePortal, retryCnt) {
-  if (!retryCnt) return null
+async function getBagCPT(bag, isAftlitePortal, abortController) {
   const url = isAftlitePortal ? '/picklist/view_picklist?picklist_id=' : '' // TODO: view picklist url
   const cptSelector = isAftlitePortal ? '#main-content > div:nth-child(4) > div.a-column.a-span4 > h5 > span' : '' // TODO: cptSelector for na-site
-  return fetch(`${url}${bag.plistId[0]}`)
-    .then((res) => res.text())
-    .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
-    .then((html) => html.querySelector(cptSelector).textContent)
-    .then(
-      (content) =>
-        content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '') // TODO: confirm this for na-site
-    )
-    .catch((err) => {
-      console.log(`${err} \n picklistId: ${bag.plistId} \n retryCnt: ${retryCnt}`)
-      getBagCPT(bag, isAftlitePortal, retryCnt - 1)
-    })
+  try {
+    const res = await fetch(`${url}${bag.plistId[0]}`, { signal: abortController.signal })
+    const txt = await res.text()
+    const html = new DOMParser().parseFromString(txt, 'text/html')
+    const content = html.querySelector(cptSelector).textContent
+    return content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '') // TODO: confirm this for na-site
+  } catch (err) {
+    console.log(`${err} \n picklistId: ${bag.plistId}`)
+    return null
+  }
 }
 
-function getGroupIfno(group, isAftlitePortal, retryCnt) {
-  if (!retryCnt) return false
+async function getGroupIfno(group, isAftlitePortal, abortController) {
   const url = '/picklist_group/display_picklist_group?picklist_group_id='
   const trSelector = isAftlitePortal ? '#main-content > table > tbody > tr:not(tr:first-child)' : '' // TODO: trSelector for na-site
-  return fetch(`${url}${group.groupId}`)
-    .then((res) => res.text())
-    .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
-    .then((html) => [...html.querySelectorAll(trSelector)])
-    .then((rows) => rows.map((row) => [...row.childNodes]))
-    .then((rows) => rows.map((row) => row.map((cell) => cell.innerText.trim())))
-    .then((data) => data[0].map((col, i) => data.map((row) => row[i]))) // transpose
+  const res = await fetch(`${url}${group.groupId}`, { signal: abortController.signal })
+  const txt = await res.text()
+  const html = new DOMParser().parseFromString(txt, 'text/html')
+  const rows = [...html.querySelectorAll(trSelector)]
+  const data = rows.map((row) => [...row.childNodes]).map((row) => row.map((cell) => cell.innerText.trim()))
+  return data[0].map((col, i) => data.map((row) => row[i])) // transpose
 }
 
 function getBags(tbl, isAftlitePortal, isCompletePage) {
