@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.3.2
+// @version      1.3.3
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -105,15 +105,13 @@ async function getBagCPT(bag, isAftlitePortal, abortController) {
   const url = isAftlitePortal ? '/picklist/view_picklist?picklist_id=' : '/wms/view_picklist?picklist_id='
   const cptSelector = isAftlitePortal
     ? '#main-content > div:nth-child(4) > div.a-column.a-span4 > h5 > span'
-    : 'body > table:nth-child(6) > tbody > tr:nth-child(8) > td:nth-child(2)'
+    : 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)'
   try {
     const res = await fetch(`${url}${bag.plistId[0]}`, { signal: abortController.signal })
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
     const content = html.querySelector(cptSelector).textContent
-    return isAftlitePortal
-      ? content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '')
-      : content.toLowerCase().replace('am', ' am').replace('pm', ' pm')
+    return content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '')
   } catch (err) {
     console.log(`${err} \n picklistId: ${bag.plistId}`)
     return null
