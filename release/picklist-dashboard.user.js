@@ -234,7 +234,7 @@ function GroupRow({ group, isAftlitePortal }) {
 function TotalRow({ groups }) {
   const timeDiff = groups.map((x) => x.cpt.map((t) => minDiff(new Date(t), new Date())))
   const cells = Array(11).fill(e('td', null, ''))
-  cells[5] = e('td', null, 'Subtotal:')
+  cells[5] = e('td', null, 'Subtotal')
   cells[6] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x < 60).length)))
   cells[7] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 60 && x < 120).length)))
   cells[8] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 120 && x < 180).length)))
@@ -265,9 +265,9 @@ GM_addStyle(`
     box-sizing: border-box !important;
   }
 
-  #dashboard, th, td {
+  #dashboard th, #dashboard td {
     border-collapse: collapse;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #e8e8e8;
     text-align: center;
     vertical-align: middle;
   }
