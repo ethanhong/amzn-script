@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         One Item Image
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.0.1
+// @version      1.0.2
 // @description  Show image if there is only one item
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/picklist/view_pack_by_picklist*
@@ -15,7 +15,7 @@
 // eslint-disable-next-line func-names
 ;(function () {
   const tds = document.querySelectorAll('td')
-  const asin = [...tds].map((x) => x.textContent).filter((x) => x.match(/^[A-Z0-9]{10}$/))
+  const asin = [...tds].map((x) => x.textContent).filter((x) => x.match(/^B[A-Z0-9]{9}$/))
   if (asin.length === 1) {
     addImage(asin[0])
   }
