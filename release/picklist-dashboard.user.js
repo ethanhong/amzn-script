@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.4.3
+// @version      1.4.4
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -137,7 +137,11 @@ function setGroupInfo(data, groupId, setGroups) {
 }
 
 function getBags(tbl, isAftlitePortal, isCompletePage) {
-  const bags = [...tbl.querySelectorAll(isAftlitePortal ? 'tbody > tr:not(tr:first-child)' : 'tbody > tr')]
+  const bags = [
+    ...tbl.querySelectorAll(
+      isAftlitePortal ? 'tbody > tr:not(tr:first-child)' : 'table#picklist_group_list > tbody > tr'
+    ),
+  ]
     .map((x) => [...x.querySelectorAll('td')])
     .map((x) => ({
       groupId: x[0].textContent.trim(),
