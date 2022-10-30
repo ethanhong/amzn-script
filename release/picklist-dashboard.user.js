@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.4.4
+// @version      1.4.5
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -149,7 +149,9 @@ function getBags(tbl, isAftlitePortal, isCompletePage) {
       picker: x[1].textContent.trim(),
       pickerURL: x[1].firstElementChild.href,
       status: x[2].textContent,
-      completedAt: x[3].textContent || 'In progress',
+      completedAt: x[3].textContent
+        ? x[3].textContent.replace('AM', ' AM').replace('PM', ' PM').replace(' on', '')
+        : 'In progress',
       plistId: [x[4].firstElementChild.textContent],
       orderId: x[5].firstElementChild.href.match(/\d{7}/)[0],
       zone: x[6].textContent,
