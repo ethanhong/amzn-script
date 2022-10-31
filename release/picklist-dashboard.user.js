@@ -22,6 +22,22 @@
 /* global ReactDOM */
 
 const e = React.createElement
+const URL = {
+  VIEW_PICKLIST: (isPortal) => (isPortal ? '/picklist/view_picklist?picklist_id=' : '/wms/view_picklist?picklist_id='),
+  PACK_BY_PICKLIST: (isPortal) =>
+    isPortal ? '/picklist/pack_by_picklist?picklist_id=' : '/wms/pack_by_picklist?picklist_id=',
+  PICKLIST_GROUP: '/picklist_group/display_picklist_group?picklist_group_id=',
+}
+const SELECTOR = {
+  OLD_TABLE: (isPortal) => (isPortal ? '#main-content > table' : '#picklist_group_list'),
+  VIEW_PICKLIST_CPT: (isPortal) =>
+    isPortal
+      ? '#main-content > div:nth-child(4) > div.a-span4'
+      : 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)',
+  PICKLIST_GROUP_TR: (isPortal) =>
+    isPortal ? '#main-content > table > tbody > tr:not(tr:first-child)' : '#picklist_group > tbody > tr',
+  GROUP_LIST_TR: (isPortal) => (isPortal ? 'tbody > tr:not(tr:first-child)' : 'table#picklist_group_list > tbody > tr'),
+}
 
 showDashboard()
 
@@ -29,7 +45,7 @@ showDashboard()
 async function showDashboard() {
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
   const isCompletePage = window.location.search.toLowerCase().includes('completed')
-  const oldTbl = document.querySelector(isAftlitePortal ? '#main-content > table' : '#picklist_group_list')
+  const oldTbl = document.querySelector(SELECTOR.OLD_TABLE(isAftlitePortal))
   // mount app
   const rootDiv = document.createElement('div')
   rootDiv.setAttribute('id', 'root')
@@ -77,10 +93,8 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
 }
 
 async function getBagCPT(plistId, isAftlitePortal, { signal }) {
-  const url = isAftlitePortal ? '/picklist/view_picklist?picklist_id=' : '/wms/view_picklist?picklist_id='
-  const cptSelector = isAftlitePortal
-    ? '#main-content > div:nth-child(4) > div.a-column.a-span4 > h5 > span'
-    : 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)'
+  const url = URL.VIEW_PICKLIST(isAftlitePortal)
+  const cptSelector = SELECTOR.VIEW_PICKLIST_CPT(isAftlitePortal)
   try {
     const res = await fetch(`${url}${plistId}`, { signal })
     const txt = await res.text()
@@ -103,10 +117,8 @@ function setBagCPT(cpt, groupId, setGroups) {
 }
 
 async function getGroupData(groupId, isAftlitePortal, { signal }) {
-  const url = '/picklist_group/display_picklist_group?picklist_group_id='
-  const trSelector = isAftlitePortal
-    ? '#main-content > table > tbody > tr:not(tr:first-child)'
-    : '#picklist_group > tbody > tr'
+  const url = URL.PICKLIST_GROUP
+  const trSelector = SELECTOR.PICKLIST_GROUP_TR(isAftlitePortal)
   try {
     const res = await fetch(`${url}${groupId}`, { signal })
     const txt = await res.text()
@@ -137,11 +149,7 @@ function setGroupInfo(data, groupId, setGroups) {
 }
 
 function getBags(tbl, isAftlitePortal, isCompletePage) {
-  const bags = [
-    ...tbl.querySelectorAll(
-      isAftlitePortal ? 'tbody > tr:not(tr:first-child)' : 'table#picklist_group_list > tbody > tr'
-    ),
-  ]
+  const bags = [...tbl.querySelectorAll(SELECTOR.GROUP_LIST_TR(isAftlitePortal))]
     .map((x) => [...x.querySelectorAll('td')])
     .map((x) => ({
       groupId: x[0].textContent.trim(),
@@ -214,7 +222,7 @@ function Header() {
 }
 
 function GroupRow({ group, isAftlitePortal }) {
-  const bagURL = isAftlitePortal ? '/picklist/pack_by_picklist?picklist_id=' : '/wms/pack_by_picklist?picklist_id='
+  const bagURL = URL.PACK_BY_PICKLIST(isAftlitePortal)
   const skipBags = group.skipped.map((bag) =>
     e(
       'div',
