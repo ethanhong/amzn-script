@@ -186,11 +186,11 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
     const packageInfo = []
 
     // extract completion time
-    const completionTime = html.querySelector(completionTimeSelector).textContent.match(timeRe)
-    packageInfo[0] = completionTime ? completionTime[0] : '-'
+    const completionTime = convertToMilitaryTime(html.querySelector(completionTimeSelector).textContent)
+    packageInfo[0] = completionTime
     // extract CPT
-    const cpt = html.querySelector(cptSelector).textContent.match(timeRe)
-    packageInfo[1] = cpt ? cpt[0] : '-'
+    const cpt = convertToMilitaryTime(html.querySelector(cptSelector).textContent)
+    packageInfo[1] = cpt
     // extract status
     const status = html.querySelector(statusSelector).textContent.match(statusRe)
     packageInfo[2] = status ? status[1] : '-'
@@ -202,6 +202,17 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
     console.log('[getPackgeInfo]Fetch error: ', err)
     return Array(4).fill('-')
   }
+}
+
+function convertToMilitaryTime(timeStr) {
+  const dt = new Date(timeStr.trim().split(/\s+/).slice(-2).join(' ').replace('AM', ' AM').replace('PM', ' PM'))
+
+  // eslint-disable-next-line no-restricted-globals
+  if (dt instanceof Date && isNaN(dt)) return '-' // invalid date object
+
+  const hh = dt.getHours()
+  const mm = `0${dt.getMinutes()}`.slice(-2)
+  return `${hh}:${mm}`
 }
 
 function getTimeStyle(timeStamp, cpt, currentTime) {
