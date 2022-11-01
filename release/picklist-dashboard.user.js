@@ -1,14 +1,17 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.4.5
+// @version      1.5.1
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
 // @match        https://aftlite-na.amazon.com/picklist_group/index
 // @match        https://aftlite-na.amazon.com/picklist_group?selected_tab*
 // @match        https://aftlite-na.amazon.com/picklist_group/index?selected_tab*
-// @match        https://aftlite-portal.amazon.com/picklist_group*
+// @match        https://aftlite-portal.amazon.com/picklist_group
+// @match        https://aftlite-portal.amazon.com/picklist_group/index
+// @match        https://aftlite-portal.amazon.com/picklist_group?selected_tab=*
+// @match        https://aftlite-portal.amazon.com/picklist_group/index?selected_tab=*
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/picklist-dashboard.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/picklist-dashboard.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
@@ -22,59 +25,57 @@
 /* global ReactDOM */
 
 const e = React.createElement
-const URL = {
-  VIEW_PICKLIST: (isPortal) => (isPortal ? '/picklist/view_picklist?picklist_id=' : '/wms/view_picklist?picklist_id='),
-  PACK_BY_PICKLIST: (isPortal) =>
-    isPortal ? '/picklist/pack_by_picklist?picklist_id=' : '/wms/pack_by_picklist?picklist_id=',
-  PICKLIST_GROUP: '/picklist_group/display_picklist_group?picklist_group_id=',
-}
-const SELECTOR = {
-  OLD_TABLE: (isPortal) => (isPortal ? '#main-content > table' : '#picklist_group_list'),
-  VIEW_PICKLIST_CPT: (isPortal) =>
-    isPortal
-      ? '#main-content > div:nth-child(4) > div.a-span4'
-      : 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)',
-  PICKLIST_GROUP_TR: (isPortal) =>
-    isPortal ? '#main-content > table > tbody > tr:not(tr:first-child)' : '#picklist_group > tbody > tr',
-  GROUP_LIST_TR: (isPortal) => (isPortal ? 'tbody > tr:not(tr:first-child)' : 'table#picklist_group_list > tbody > tr'),
+const isPortal = window.location.hostname === 'aftlite-portal.amazon.com'
+const URL = {}
+const SELECTOR = {}
+
+if (isPortal) {
+  URL.VIEW_PICKLIST = '/picklist/view_picklist?picklist_id='
+  URL.PACK_BY_PICKLIST = '/picklist/pack_by_picklist?picklist_id='
+  URL.PICKLIST_GROUP = '/picklist_group/display_picklist_group?picklist_group_id='
+  URL.USER_TRACKING = '/labor_tracking/lookup_history?user_name='
+  SELECTOR.OLD_TABLE = '#main-content > table'
+  SELECTOR.VIEW_PICKLIST_CPT = '#main-content > div:nth-child(4) > div.a-span4'
+  SELECTOR.PICKLIST_GROUP_TR = '#main-content > table > tbody > tr:not(tr:first-child)'
+  SELECTOR.GROUP_LIST_TR = 'tbody > tr:not(tr:first-child)'
+} else {
+  URL.VIEW_PICKLIST = '/wms/view_picklist?picklist_id='
+  URL.PACK_BY_PICKLIST = '/wms/pack_by_picklist?picklist_id='
+  URL.PICKLIST_GROUP = '/picklist_group/display_picklist_group?picklist_group_id='
+  URL.USER_TRACKING = '/labor_tracking/lookup_history?user_name='
+  SELECTOR.OLD_TABLE = '#picklist_group_list'
+  SELECTOR.VIEW_PICKLIST_CPT = 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)'
+  SELECTOR.PICKLIST_GROUP_TR = '#picklist_group > tbody > tr'
+  SELECTOR.GROUP_LIST_TR = 'table#picklist_group_list > tbody > tr'
 }
 
 showDashboard()
 
 // eslint-disable-next-line no-unused-vars
 async function showDashboard() {
-  const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
-  const isCompletePage = window.location.search.toLowerCase().includes('completed')
-  const oldTbl = document.querySelector(SELECTOR.OLD_TABLE(isAftlitePortal))
+  const oldTbl = document.querySelector(SELECTOR.OLD_TABLE)
   // mount app
   const rootDiv = document.createElement('div')
   rootDiv.setAttribute('id', 'root')
   oldTbl.before(rootDiv)
-  ReactDOM.createRoot(rootDiv).render(e(App, { oldTbl, isAftlitePortal, isCompletePage }))
+  ReactDOM.createRoot(rootDiv).render(e(App, { oldTbl }))
 }
 
-function App({ oldTbl, isAftlitePortal, isCompletePage }) {
+function App({ oldTbl }) {
   const switchRef = React.useRef()
   const dashboardRef = React.useRef()
 
-  const bags = React.useMemo(
-    () => getBags(oldTbl, isAftlitePortal, isCompletePage),
-    [oldTbl, isAftlitePortal, isCompletePage]
-  )
-  const [groups, setGroups] = React.useState(gatherByGroupId(bags))
+  const bags = React.useMemo(() => getBags(oldTbl), [oldTbl])
+  const [groups, setGroups] = React.useState(createGroups(bags))
 
   React.useEffect(() => {
     const abortController = new AbortController()
-    bags.map(async (bag) => {
-      const gId = bag.groupId
-      const thisGroup = groups.find((group) => group.groupId === gId)
+    const { signal } = abortController
 
-      await getBagCPT(bag.plistId[0], isAftlitePortal, abortController).then((cpt) => setBagCPT(cpt, gId, setGroups))
-      if (!thisGroup.isChecked) {
-        thisGroup.isChecked = true
-        await getGroupData(gId, isAftlitePortal, abortController).then((data) => setGroupInfo(data, gId, setGroups))
-      }
-    })
+    const gIDs = groups.map((group) => group.gID)
+    gIDs.map((gID) => getGroupInfo(gID, signal).then((info) => setGroupInfo(info, gID, setGroups)))
+    bags.map((bag) => getBagPullTime(bag.pID, signal).then((pullTime) => setBagPullTime(pullTime, bag.gID, setGroups)))
+
     return () => abortController.abort()
   }, [])
 
@@ -88,114 +89,128 @@ function App({ oldTbl, isAftlitePortal, isCompletePage }) {
     }),
     ' Hide dashboard',
   ])
-  const dashboard = e('div', { ref: dashboardRef }, e(Dashboard, { groups, isAftlitePortal }))
+  const dashboard = e('div', { ref: dashboardRef }, e(Dashboard, { groups }))
   return e(React.Fragment, null, [backSwitch, dashboard])
 }
 
-async function getBagCPT(plistId, isAftlitePortal, { signal }) {
-  const url = URL.VIEW_PICKLIST(isAftlitePortal)
-  const cptSelector = SELECTOR.VIEW_PICKLIST_CPT(isAftlitePortal)
+async function getBagPullTime(pID, signal) {
+  const cptSelector = SELECTOR.VIEW_PICKLIST_CPT
   try {
-    const res = await fetch(`${url}${plistId}`, { signal })
+    const res = await fetch(`${URL.VIEW_PICKLIST}${pID}`, signal)
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
     const content = html.querySelector(cptSelector).textContent
-    return content.split(/\s/).slice(0, -2).join(' ').replace('am', ' am').replace('pm', ' pm').replace('between ', '')
+    const timeStr = content
+      .split(/\s+/)
+      .slice(0, -2)
+      .join(' ')
+      .replace('am', ' am')
+      .replace('pm', ' pm')
+      .replace('between ', '')
+    return new Date(timeStr)
   } catch (err) {
-    console.log(`${err} \n picklistId: ${plistId}`)
+    console.log(`${err} \n picklistId: ${pID}`)
     return null
   }
 }
 
-function setBagCPT(cpt, groupId, setGroups) {
+function setBagPullTime(pullTime, gID, setGroups) {
   setGroups((prev) => {
-    const i = prev.findIndex((group) => group.groupId === groupId)
+    const i = prev.findIndex((group) => group.gID === gID)
     const currentGroup = prev[i]
-    currentGroup.cpt.push(new Date(cpt))
+    currentGroup.pullTime.push(pullTime)
     return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
   })
 }
 
-async function getGroupData(groupId, isAftlitePortal, { signal }) {
-  const url = URL.PICKLIST_GROUP
-  const trSelector = SELECTOR.PICKLIST_GROUP_TR(isAftlitePortal)
+async function getGroupInfo(gID, signal) {
+  const trSelector = SELECTOR.PICKLIST_GROUP_TR
   try {
-    const res = await fetch(`${url}${groupId}`, { signal })
+    const res = await fetch(`${URL.PICKLIST_GROUP}${gID}`, signal)
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
     const rows = [...html.querySelectorAll(trSelector)]
     const data = rows.map((row) => [...row.children]).map((row) => row.map((cell) => cell.innerText.trim()))
-    return data[0].map((col, i) => data.map((row) => row[i])) // transpose
+    const transposedData = data[0].map((col, i) => data.map((row) => row[i])) // transpose
+    const [, pIDArr, locationArr, qtyArr, packedArr, shortArr, skipArr] = transposedData
+    const remainUnit = sum(qtyArr) - sum(packedArr)
+    const remainBin = new Set(locationArr.filter((_, i) => !packedArr[i])).size
+    const skipBags = await getSkipBags(pIDArr, shortArr, skipArr, signal)
+    return [remainUnit, remainBin, skipBags]
   } catch (err) {
-    console.log(`${err} \n groupId: ${groupId}`)
-    return null
+    console.log(`${err} \n groupId: ${gID}`)
+    return ['-', '-', []]
   }
 }
 
-function setGroupInfo(data, groupId, setGroups) {
-  setGroups((prev) => {
-    const i = prev.findIndex((group) => group.groupId === groupId)
-    const currentGroup = prev[i]
-    currentGroup.remainUnit = sum(data[3]) - sum(data[4])
-    currentGroup.remainBin = new Set(data[2].filter((_, j) => !data[4][j])).size
+async function getSkipBags(pIDArr, shortArr, skipArr, signal) {
+  const skipId = Array.from(new Set(pIDArr.filter((_, i) => Boolean(shortArr[i] + skipArr[i]))))
+  const skipBags = []
+  for (let i = 0; i < skipId.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const pullTime = await getBagPullTime(skipId[i], signal)
+    skipBags.push([skipId[i], pullTime])
+  }
+  return skipBags
+}
 
-    const skippedId = Array.from(new Set(data[1].filter((_, j) => Boolean(data[5][j]) || Boolean(data[6][j]))))
-    const skippedCPT = skippedId.map((plistId) => currentGroup.cpt[currentGroup.plistId.indexOf(plistId)])
-    currentGroup.skipped = skippedId
-      .map((_, j) => ({ plistId: skippedId[j], cpt: skippedCPT[j] }))
-      .sort((a, b) => new Date(a.cpt) - new Date(b.cpt))
+function setGroupInfo(info, gID, setGroups) {
+  setGroups((prev) => {
+    const [remainUnit, remainBin, skipBags] = info
+    const i = prev.findIndex((group) => group.gID === gID)
+    const currentGroup = prev[i]
+    currentGroup.remainUnit = remainUnit
+    currentGroup.remainBin = remainBin
+    currentGroup.skipped = skipBags
     return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
   })
 }
 
-function getBags(tbl, isAftlitePortal, isCompletePage) {
-  const bags = [...tbl.querySelectorAll(SELECTOR.GROUP_LIST_TR(isAftlitePortal))]
+function getBags(tbl) {
+  const bags = [...tbl.querySelectorAll(SELECTOR.GROUP_LIST_TR)]
     .map((x) => [...x.querySelectorAll('td')])
     .map((x) => ({
-      groupId: x[0].textContent.trim(),
-      groupURL: x[0].firstElementChild.href,
+      gID: x[0].textContent.trim(),
       picker: x[1].textContent.trim(),
-      pickerURL: x[1].firstElementChild.href,
-      status: x[2].textContent,
       completedAt: x[3].textContent
-        ? x[3].textContent.replace('AM', ' AM').replace('PM', ' PM').replace(' on', '')
+        ? x[3].textContent.replace('AM', ' AM').replace('PM', ' PM').replace(' on', '').trim()
         : 'In progress',
-      plistId: [x[4].firstElementChild.textContent],
-      orderId: x[5].firstElementChild.href.match(/\d{7}/)[0],
-      zone: x[6].textContent,
-      cpt: [],
-      skipped: [],
-      remainUnit: null,
-      remainBin: null,
-      isChecked: false,
+      pID: x[4].firstElementChild.textContent.trim(),
+      zone: x[6].textContent.trim(),
     }))
-  return isCompletePage
+
+  return window.location.search.toLowerCase().includes('completed')
     ? bags
-        .filter((x) => minDiff(new Date(), new Date(x.completedAt)) < 30)
+        .filter((bag) => minDiff(new Date(), new Date(bag.completedAt)) < 30)
         .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt))
     : bags
 }
 
-function gatherByGroupId(bags) {
+function createGroups(bags) {
   const groups = []
   for (let i = 0; i < bags.length; i += 1) {
-    const sameGroup = groups.find((x) => x.groupId === bags[i].groupId)
-    if (!sameGroup) {
-      groups.push(JSON.parse(JSON.stringify(bags[i])))
-    } else {
-      sameGroup.plistId.push(bags[i].plistId[0])
+    const bag = bags[i]
+    const isCreatedGroup = groups.find((group) => group.gID === bag.gID)
+    if (!isCreatedGroup) {
+      groups.push({
+        gID: bag.gID,
+        zone: bag.zone,
+        picker: bag.picker,
+        completedAt: bag.completedAt,
+        remainUnit: null,
+        remainBin: null,
+        pullTime: [],
+        skipped: [],
+      })
     }
   }
   return groups
 }
 
-function Dashboard({ groups, isAftlitePortal }) {
+function Dashboard({ groups }) {
   return e('table', { className: 'sortable', id: 'dashboard' }, [
     e('thead', null, e(Header)),
-    e('tbody', null, [
-      ...groups.map((group) => e(GroupRow, { group, isAftlitePortal, key: group.groupId })),
-      e(TotalRow, { groups }),
-    ]),
+    e('tbody', null, [...groups.map((group) => e(GroupRow, { group, key: group.gId })), e(TotalRow, { groups })]),
   ])
 }
 
@@ -206,7 +221,6 @@ function Header() {
     'Picker',
     'Remaining Units',
     'Remaining Bins',
-    // 'Status',
     'Completed at',
     '< 1 Hour',
     '< 2 Hours',
@@ -221,25 +235,24 @@ function Header() {
   )
 }
 
-function GroupRow({ group, isAftlitePortal }) {
-  const bagURL = URL.PACK_BY_PICKLIST(isAftlitePortal)
+function GroupRow({ group }) {
+  const now = new Date()
+  const minFromNow = group.pullTime.map((pt) => minDiff(pt, now))
+
   const skipBags = group.skipped.map((bag) =>
     e(
       'div',
-      { key: bag.plistId },
-      e('a', { className: 'skipped', href: `${bagURL}${bag.plistId}` }, `${bag.cpt.getHours()}:00`)
+      { key: bag[0] },
+      e('a', { className: 'skipped', href: `${URL.PACK_BY_PICKLIST}${bag[0]}` }, `0${bag[1].getHours()}:00`.slice(-5))
     )
   )
-  const now = new Date()
-  const minFromNow = group.cpt.map((t) => minDiff(t, now))
 
   const cells = [
-    e('td', null, e('a', { href: group.groupURL }, group.groupId)),
+    e('td', null, e('a', { href: `${URL.PICKLIST_GROUP}${group.gID}` }, group.gID)),
     e('td', null, group.zone),
-    e('td', null, e('a', { href: group.pickerURL }, group.picker)),
+    e('td', null, e('a', { href: `${URL.USER_TRACKING}${group.picker}` }, group.picker)),
     e('td', null, group.remainUnit),
     e('td', null, group.remainBin),
-    // e('td', null, group.status),
     e('td', null, group.completedAt),
     e('td', null, minFromNow.filter((x) => x < 60).length),
     e('td', null, minFromNow.filter((x) => x >= 60 && x < 120).length),
@@ -252,14 +265,13 @@ function GroupRow({ group, isAftlitePortal }) {
 
 function TotalRow({ groups }) {
   const now = new Date()
-  const timeDiff = groups.map((x) => x.cpt.map((t) => minDiff(t, now)))
+  const timeDiff = groups.map((group) => group.pullTime.map((pt) => minDiff(pt, now)))
   const cells = Array(11).fill(e('td', null, ''))
   cells[5] = e('td', null, 'Subtotal')
   cells[6] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x < 60).length)))
   cells[7] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 60 && x < 120).length)))
   cells[8] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 120 && x < 180).length)))
   cells[9] = e('td', null, sum(timeDiff.map((row) => row.filter((x) => x >= 180).length)))
-
   return e('tr', { id: 'total-row' }, cells)
 }
 
