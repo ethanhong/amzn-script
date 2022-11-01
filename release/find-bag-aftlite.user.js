@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.2
+// @version      2.2.3
 // @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
@@ -175,7 +175,6 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
   const cptSelector = isAftlitePortal ? 'div.a-row:nth-child(12)' : 'tr:nth-child(8)'
   const orderIdSelector = isAftlitePortal ? 'div.a-row:nth-child(2)' : 'tr:nth-child(2)'
   // define re
-  const timeRe = /\d{1,2}:\d{1,2}/
   const statusRe = /\(([\w-]+)\)/
   const orderIdRe = /\d{7}/
 
@@ -207,10 +206,9 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
 function convertToMilitaryTime(timeStr) {
   const dt = new Date(timeStr.trim().split(/\s+/).slice(-2).join(' ').replace('AM', ' AM').replace('PM', ' PM'))
 
-  // eslint-disable-next-line no-restricted-globals
-  if (dt instanceof Date && isNaN(dt)) return '-' // invalid date object
+  if (Number.isNaN(dt.getHours())) return '-' // invalid date object
 
-  const hh = dt.getHours()
+  const hh = `0${dt.getHours()}`.slice(-2)
   const mm = `0${dt.getMinutes()}`.slice(-2)
   return `${hh}:${mm}`
 }

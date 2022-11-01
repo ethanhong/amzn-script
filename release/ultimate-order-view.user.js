@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.5
+// @version      2.1.6
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
@@ -121,8 +121,7 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
       .then((html) => html.querySelector(completionTimeSelector).textContent)
       .then((content) => content.trim().replace('AM', ' AM').replace('PM', ' PM'))
       .then((timeStr) => new Date(timeStr))
-      .then((date) => [date.getHours(), (date.getMinutes() < 10 ? '0' : '') + date.getMinutes()])
-      .then(([hh, mm]) => setCompletionTime(`${hh}:${mm}`))
+      .then((date) => setCompletionTime(formatTime(date)))
       .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
     return () => abortController.abort()
   }, [])
@@ -145,6 +144,15 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
 
   const classVal = [isTarget ? 'target-bag' : '', isRelated ? 'related-bag' : ''].join(' ').trim()
   return e('tr', { className: classVal }, rowCells)
+}
+
+function formatTime(date) {
+  if (Number.isNaN(date.getHours())) {
+    return '-'
+  }
+  const hh = `0${date.getHours()}`.slice(-2)
+  const mm = `0${date.getMinutes()}`.slice(-2)
+  return `${hh}:${mm}`
 }
 
 function isTargetBag(bag, searchTerm) {
