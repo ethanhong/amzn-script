@@ -65,7 +65,7 @@ function App({ oldTbl }) {
   const switchRef = React.useRef()
   const dashboardRef = React.useRef()
 
-  const bags = React.useMemo(() => getBags(oldTbl), [oldTbl])
+  const bags = React.useMemo(() => getBags(oldTbl), [])
   const [groups, setGroups] = React.useState(createGroups(bags))
 
   React.useEffect(() => {
