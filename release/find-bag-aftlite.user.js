@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [aftlite]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.3
+// @version      2.2.2
 // @description  Find a missing bag by giving you the scannable codes of its sibling bags
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/labor_tracking/lookup_history?user_name=*
