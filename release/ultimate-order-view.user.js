@@ -112,7 +112,7 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
     const url = isAftlitePortal
       ? '/picklist/view_picklist_history?picklist_id='
       : '/wms/view_picklist_history?picklist_id='
-    const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)'
+    const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10) h5' : 'tr:nth-child(6) > td:nth-child(2)'
 
     const abortController = new AbortController()
     fetch(`${url}${bag.id}`, { signal: abortController.signal })
