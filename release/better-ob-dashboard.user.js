@@ -23,9 +23,9 @@ if (isPortal) {
   SELECTOR.DASHBOARD_TR = 'table > tbody:nth-child(2) > tr:not(tr:first-child)'
 } else {
   // TODO: na URL, SELECTOR
-  URL.PICKLIST_BY_STATE = ''
-  SELECTOR.PICKLIST_TR = ''
-  SELECTOR.TIME_TH = ''
+  URL.PICKLIST_BY_STATE = '/wms/view_picklists?state='
+  SELECTOR.PICKLIST_TR = '#wms_orders_in_state > tbody > tr'
+  SELECTOR.TIME_TH = '#cpt_table > thead > tr > th'
   SELECTOR.DASHBOARD_TR = ''
 }
 
@@ -38,6 +38,7 @@ const STATE = {
   PSOLVE: 'problem-solve',
   HOLD: 'generated,hold',
   GENERATED: 'generated',
+  TOTAL: 'total',
 }
 
 let now = new Date()
@@ -46,8 +47,6 @@ waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
 function betterDashboard() {
   doRefresh()
-  changeTitles(getNewTitles(now.getHours()))
-
   setInterval(() => {
     doRefresh()
   }, 30000)
@@ -71,54 +70,30 @@ function doRefresh() {
     setData(data[4], STATE.SLAM)
     setData(data[5], STATE.PSOLVE)
     setData(data[6], STATE.GENERATED)
-    const totalData = data.reduce((arr, x) => arr.concat(x), [])
-    setTotal(totalData)
-    if (now.getMinutes() === 0) {
-      changeTitles(getNewTitles(now.getHours()))
-    }
+    const totalData = data.reduce((result, x) => result.concat(x), [])
+    setData(totalData, STATE.TOTAL)
+    changeTitles(getNewTitles(now.getHours()))
+    flashCells()
   })
 }
 
 const diffMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
 
-function setTotal(data) {
-  const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
-    .map((row) => [...row.children].slice(1, 5))
-    .filter((row) => [...row[0].classList].join().includes('total'))
-    .map((row) => row.slice(1))
+function dimCells() {
+  ;[...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
+    .map((row) => [...row.children].slice(2, 5))
+    .map((row) => row.map((cell) => cell.classList.add('obd-dim')))
+}
 
-  const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6]
-  const zones = ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
-  for (let i = 0; i < zones.length; i += 1) {
-    const zone = zones[i]
-    const currentHour = now.getHours()
-    const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour)
+function unDimCells() {
+  ;[...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
+    .map((row) => [...row.children].slice(2, 5))
+    .map((row) => row.map((cell) => cell.classList.remove('obd-dim')))
+}
 
-    const dataByZone = data.filter((d) => d.zone === zone)
-
-    const dataByPullTime = Array(3)
-    dataByPullTime[0] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 1])
-    dataByPullTime[1] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 2])
-    dataByPullTime[2] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 3])
-
-    const items = dataByPullTime.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
-    const contents = items.map((item, idx) => (item ? `${item} (${dataByPullTime[idx].length})` : 0))
-
-    const row = rows[i]
-    row[0].innerHTML = contents[0]
-    row[1].innerHTML = contents[1]
-    row[2].innerHTML = contents[2]
-
-    row.forEach((cell) => {
-      if (cell.textContent !== '0') {
-        cell.classList.remove('obd-alt-bg')
-        cell.classList.add(`obd-data-total`)
-      } else {
-        cell.classList.add('obd-alt-bg')
-        cell.classList.remove(`obd-data-total`)
-      }
-    })
-  }
+function flashCells() {
+  dimCells()
+  setTimeout(() => unDimCells(), 500)
 }
 
 function setData(data, state) {
@@ -137,11 +112,10 @@ function setData(data, state) {
     const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour)
 
     const dataByZone = data.filter((d) => d.zone === zone)
-
     const dataByPullTime = Array(3)
-    dataByPullTime[0] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 1])
-    dataByPullTime[1] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 2])
-    dataByPullTime[2] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 3])
+    for (let j = 0; j < dataByPullTime.length; j += 1) {
+      dataByPullTime[j] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 1 + j])
+    }
 
     const items = dataByPullTime.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
 
@@ -165,14 +139,9 @@ function setData(data, state) {
     }
 
     const row = rows[i]
-    row[0].innerHTML = ''
-    row[0].append(content[0] ? aTag(content[0], zone, state, timeFrames[0]) : content[0])
-    row[1].innerHTML = ''
-    row[1].append(content[1] ? aTag(content[1], zone, state, timeFrames[1]) : content[1])
-    row[2].innerHTML = ''
-    row[2].append(content[2] ? aTag(content[2], zone, state, timeFrames[2]) : content[2])
-
-    row.forEach((cell) => {
+    row.forEach((cell, j) => {
+      cell.removeChild(cell.firstChild)
+      cell.append(content[j] ? aTag(content[j], zone, state, timeFrames[j]) : content[j])
       if (cell.textContent !== '0') {
         cell.classList.remove('obd-alt-bg')
         cell.classList.add(`obd-data-${state}`)
@@ -197,11 +166,18 @@ async function getPicklistData(state) {
   const txt = await res.text()
   const html = new DOMParser().parseFromString(txt, 'text/html')
   const picklists = [...html.querySelectorAll(SELECTOR.PICKLIST_TR)]
-  const data = picklists
+  // aftlite-portal
+  if (isPortal) {
+    return picklists
+      .map((pl) => [...pl.querySelectorAll('td')])
+      .map((pl) => pl.map((td) => td.textContent))
+      .map((pl) => ({ zone: pl[3], items: pl[5], pullTime: new Date(pl[7]) }))
+  }
+  // aftlite-na
+  return picklists
     .map((pl) => [...pl.querySelectorAll('td')])
-    .map((pl) => pl.map((td) => td.textContent))
-    .map((pl) => ({ zone: pl[3], items: pl[5], pullTime: new Date(new Date(pl[7]) - 15 * 60000) }))
-  return data
+    .map((pl) => pl.map((td) => td.textContent.trim()))
+    .map((pl) => ({ zone: pl[3], items: pl[6], pullTime: new Date(pl[8]) }))
 }
 
 function getNewTitles(startHr) {
@@ -211,7 +187,7 @@ function getNewTitles(startHr) {
 }
 
 function changeTitles(titles) {
-  const titleThs = [...document.querySelectorAll(SELECTOR.TIME_TH)].splice(2, titles.length)
+  const titleThs = [...document.querySelectorAll(SELECTOR.TIME_TH)].splice(isPortal ? 2 : 3, titles.length)
   for (let i = 0; i < titleThs.length; i += 1) {
     titleThs[i].textContent = titles[i]
   }
