@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-loop-func */
 // ==UserScript==
 // @name         Better Outbound Dashboard
@@ -44,11 +45,10 @@ let now = new Date()
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
 function betterDashboard() {
-  changeTitles(getNewTitles(now.getHours()))
   doRefresh()
+  changeTitles(getNewTitles(now.getHours()))
 
   setInterval(() => {
-    now = new Date()
     doRefresh()
   }, 30000)
 }
@@ -63,6 +63,7 @@ function doRefresh() {
     getPicklistData(STATE.PSOLVE),
     getPicklistData(STATE.HOLD),
   ]).then((data) => {
+    now = new Date()
     setData(data[0], STATE.DROP)
     setData(data[1], STATE.ASSIGN)
     setData(data[2], STATE.PICK)
@@ -76,13 +77,6 @@ function doRefresh() {
       changeTitles(getNewTitles(now.getHours()))
     }
   })
-  // getPicklistData(STATE.DROP).then((data) => setData(data, STATE.DROP))
-  // getPicklistData(STATE.ASSIGN).then((data) => setData(data, STATE.ASSIGN))
-  // getPicklistData(STATE.PICK).then((data) => setData(data, STATE.PICK))
-  // getPicklistData(STATE.PACK).then((data) => setData(data, STATE.PACK))
-  // getPicklistData(STATE.SLAM).then((data) => setData(data, STATE.SLAM))
-  // getPicklistData(STATE.PSOLVE).then((data) => setData(data, STATE.PSOLVE))
-  // getPicklistData(STATE.HOLD).then((data) => setData(data, STATE.GENERATED))
 }
 
 const diffMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
@@ -93,26 +87,27 @@ function setTotal(data) {
     .filter((row) => [...row[0].classList].join().includes('total'))
     .map((row) => row.slice(1))
 
+  const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6]
   const zones = ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
+    const currentHour = now.getHours()
+    const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour)
+
     const dataByZone = data.filter((d) => d.zone === zone)
-    const data0 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 0 && diffMin(d.pullTime, now) <= 60)
-    const data1 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 60 && diffMin(d.pullTime, now) <= 120)
-    const data2 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 120 && diffMin(d.pullTime, now) <= 180)
 
-    const items0 = data0.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
-    const items1 = data1.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
-    const items2 = data2.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
+    const dataByPullTime = Array(3)
+    dataByPullTime[0] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 1])
+    dataByPullTime[1] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 2])
+    dataByPullTime[2] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 3])
 
-    const content0 = items0 ? `${items0} (${data0.length})` : 0
-    const content1 = items1 ? `${items1} (${data1.length})` : 0
-    const content2 = items2 ? `${items2} (${data2.length})` : 0
+    const items = dataByPullTime.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
+    const contents = items.map((item, idx) => (item ? `${item} (${dataByPullTime[idx].length})` : 0))
 
     const row = rows[i]
-    row[0].innerHTML = content0
-    row[1].innerHTML = content1
-    row[2].innerHTML = content2
+    row[0].innerHTML = contents[0]
+    row[1].innerHTML = contents[1]
+    row[2].innerHTML = contents[2]
 
     row.forEach((cell) => {
       if (cell.textContent !== '0') {
@@ -132,38 +127,50 @@ function setData(data, state) {
     .filter((row) => [...row[0].classList].join().includes(state))
     .map((row) => row.slice(1))
 
+  const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6]
   const zones =
     state === STATE.GENERATED ? ['chilled', 'frozen', 'produce'] : ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
 
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
+    const currentHour = now.getHours()
+    const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour)
+
     const dataByZone = data.filter((d) => d.zone === zone)
-    const data0 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 0 && diffMin(d.pullTime, now) <= 60)
-    const data1 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 60 && diffMin(d.pullTime, now) <= 120)
-    const data2 = dataByZone.filter((d) => diffMin(d.pullTime, now) > 120 && diffMin(d.pullTime, now) <= 180)
 
-    const items0 = data0.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
-    const items1 = data1.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
-    const items2 = data2.reduce((acc, d) => acc + parseInt(d.items, 10), 0)
+    const dataByPullTime = Array(3)
+    dataByPullTime[0] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 1])
+    dataByPullTime[1] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 2])
+    dataByPullTime[2] = dataByZone.filter((d) => d.pullTime.getHours() === timeTable[startTimeIdx + 3])
 
-    let [content0, content1, content2] = [0, 0, 0]
+    const items = dataByPullTime.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
+
+    let content = []
     if (state === STATE.PSOLVE) {
-      content0 = data0.length
-      content1 = data1.length
-      content2 = data2.length
+      content = dataByPullTime.map((d) => d.length)
     } else {
-      content0 = items0 ? `${items0} (${data0.length})` : 0
-      content1 = items1 ? `${items1} (${data1.length})` : 0
-      content2 = items2 ? `${items2} (${data2.length})` : 0
+      content = items.map((item, idx) => (item ? `${item} (${dataByPullTime[idx].length})` : 0))
+    }
+
+    const timeFrames = Array(3)
+    for (let j = 0; j < timeFrames.length; j += 1) {
+      const timeIdx = startTimeIdx + 1 + j
+      const pullTime = new Date(now)
+      pullTime.setHours(timeTable[timeIdx])
+      pullTime.setMinutes(15)
+      pullTime.setSeconds(0)
+      let timeDiff = diffMin(pullTime, now)
+      timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
+      timeFrames[j] = `${Math.max(timeDiff - 60, 0)},${timeDiff}`
     }
 
     const row = rows[i]
     row[0].innerHTML = ''
-    row[0].append(content0 ? aTag(content0, zone, state, '0,60') : content0)
+    row[0].append(content[0] ? aTag(content[0], zone, state, timeFrames[0]) : content[0])
     row[1].innerHTML = ''
-    row[1].append(content1 ? aTag(content1, zone, state, '60,120') : content1)
+    row[1].append(content[1] ? aTag(content[1], zone, state, timeFrames[1]) : content[1])
     row[2].innerHTML = ''
-    row[2].append(content2 ? aTag(content2, zone, state, '120,180') : content2)
+    row[2].append(content[2] ? aTag(content[2], zone, state, timeFrames[2]) : content[2])
 
     row.forEach((cell) => {
       if (cell.textContent !== '0') {
