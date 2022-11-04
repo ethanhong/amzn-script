@@ -41,7 +41,7 @@ const STATE = {
   TOTAL: 'total',
 }
 
-let now = new Date()
+const NOW = new Date()
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
@@ -62,7 +62,7 @@ function doRefresh() {
     getPicklistData(STATE.PSOLVE),
     getPicklistData(STATE.HOLD),
   ]).then((data) => {
-    now = new Date()
+    NOW.setTime(Date.now())
     setData(data[0], STATE.DROP)
     setData(data[1], STATE.ASSIGN)
     setData(data[2], STATE.PICK)
@@ -72,7 +72,7 @@ function doRefresh() {
     setData(data[6], STATE.GENERATED)
     const totalData = data.reduce((result, x) => result.concat(x), [])
     setData(totalData, STATE.TOTAL)
-    changeTitles(getNewTitles(now.getHours()))
+    changeTitles(getNewTitles(NOW.getHours()))
     flashCells()
   })
 }
@@ -108,7 +108,7 @@ function setData(data, state) {
 
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
-    const currentHour = now.getHours()
+    const currentHour = NOW.getHours()
     const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour)
 
     const dataByZone = data.filter((d) => d.zone === zone)
@@ -129,11 +129,11 @@ function setData(data, state) {
     const timeFrames = Array(3)
     for (let j = 0; j < timeFrames.length; j += 1) {
       const timeIdx = startTimeIdx + 1 + j
-      const pullTime = new Date(now)
+      const pullTime = new Date(NOW)
       pullTime.setHours(timeTable[timeIdx])
       pullTime.setMinutes(15)
       pullTime.setSeconds(0)
-      let timeDiff = diffMin(pullTime, now)
+      let timeDiff = diffMin(pullTime, NOW)
       timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
       timeFrames[j] = `${Math.max(timeDiff - 60, 0)},${timeDiff}`
     }
