@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.5.2
+// @version      1.6.1
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -49,6 +49,11 @@ if (isPortal) {
   SELECTOR.GROUP_LIST_TR = 'table#picklist_group_list > tbody > tr'
 }
 
+const ACTIONS = {
+  ADD_INFO: 'add-info',
+  ADD_PULLTIME: 'add-pulltime',
+}
+
 showDashboard()
 
 // eslint-disable-next-line no-unused-vars
@@ -61,21 +66,57 @@ async function showDashboard() {
   ReactDOM.createRoot(rootDiv).render(e(App, { oldTbl }))
 }
 
+function reducer(groups, action) {
+  switch (action.type) {
+    case ACTIONS.ADD_INFO:
+      return groups.map((group) => {
+        if (group.gID === action.payload.gID) {
+          return {
+            ...group,
+            remainUnit: action.payload.info[0],
+            remainBin: action.payload.info[1],
+            skipped: action.payload.info[2],
+          }
+        }
+        return group
+      })
+
+    case ACTIONS.ADD_PULLTIME:
+      return groups.map((group) => {
+        if (group.gID === action.payload.gID) {
+          return {
+            ...group,
+            pullTime: [...group.pullTime, action.payload.pullTime],
+          }
+        }
+        return group
+      })
+
+    default:
+      return groups
+  }
+}
+
 function App({ oldTbl }) {
   const switchRef = React.useRef()
   const dashboardRef = React.useRef()
 
   const bags = React.useMemo(() => getBags(oldTbl), [])
-  const [groups, setGroups] = React.useState(createGroups(bags))
+  const [groups, dispatch] = React.useReducer(reducer, createGroups(bags))
 
   React.useEffect(() => {
     const abortController = new AbortController()
     const { signal } = abortController
-
-    const gIDs = groups.map((group) => group.gID)
-    gIDs.map((gID) => getGroupInfo(gID, signal).then((info) => setGroupInfo(info, gID, setGroups)))
-    bags.map((bag) => getBagPullTime(bag.pID, signal).then((pullTime) => setBagPullTime(pullTime, bag.gID, setGroups)))
-
+    bags.map((bag) =>
+      getBagPullTime(bag.pID, signal).then((pullTime) =>
+        dispatch({ type: ACTIONS.ADD_PULLTIME, payload: { gID: bag.gID, pullTime } })
+      )
+    )
+    groups.map((group) =>
+      getGroupInfo(group.gID, signal).then((info) =>
+        dispatch({ type: ACTIONS.ADD_INFO, payload: { gID: group.gID, info } })
+      )
+    )
     return () => abortController.abort()
   }, [])
 
@@ -114,15 +155,6 @@ async function getBagPullTime(pID, signal) {
   }
 }
 
-function setBagPullTime(pullTime, gID, setGroups) {
-  setGroups((prev) => {
-    const i = prev.findIndex((group) => group.gID === gID)
-    const currentGroup = prev[i]
-    currentGroup.pullTime.push(pullTime)
-    return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
-  })
-}
-
 async function getGroupInfo(gID, signal) {
   const trSelector = SELECTOR.PICKLIST_GROUP_TR
   try {
@@ -152,18 +184,6 @@ async function getSkipBags(pIDArr, shortArr, skipArr, signal) {
     skipBags.push([skipId[i], pullTime])
   }
   return skipBags
-}
-
-function setGroupInfo(info, gID, setGroups) {
-  setGroups((prev) => {
-    const [remainUnit, remainBin, skipBags] = info
-    const i = prev.findIndex((group) => group.gID === gID)
-    const currentGroup = prev[i]
-    currentGroup.remainUnit = remainUnit
-    currentGroup.remainBin = remainBin
-    currentGroup.skipped = skipBags
-    return [...prev.slice(0, i), currentGroup, ...prev.slice(i + 1)]
-  })
 }
 
 function getBags(tbl) {
