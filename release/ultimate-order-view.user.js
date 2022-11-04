@@ -119,9 +119,8 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
       .then((res) => res.text())
       .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
       .then((html) => html.querySelector(completionTimeSelector).textContent)
-      .then((content) => content.trim().replace('AM', ' AM').replace('PM', ' PM'))
-      .then((timeStr) => new Date(timeStr))
-      .then((date) => setCompletionTime(formatTime(date)))
+      .then((content) => content.trim().trim().split(' ')[1])
+      .then((timeStr) => setCompletionTime(timeStr))
       .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
     return () => abortController.abort()
   }, [])
@@ -144,15 +143,6 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
 
   const classVal = [isTarget ? 'target-bag' : '', isRelated ? 'related-bag' : ''].join(' ').trim()
   return e('tr', { className: classVal }, rowCells)
-}
-
-function formatTime(date) {
-  if (Number.isNaN(date.getHours())) {
-    return '-'
-  }
-  const hh = `0${date.getHours()}`.slice(-2)
-  const mm = `0${date.getMinutes()}`.slice(-2)
-  return `${hh}:${mm}`
 }
 
 function isTargetBag(bag, searchTerm) {
