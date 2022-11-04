@@ -171,8 +171,8 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
     ? '/picklist/view_picklist_history?picklist_id='
     : '/wms/view_picklist_history?picklist_id='
   const statusSelector = isAftlitePortal ? 'div.a-row:nth-child(6)' : 'table:nth-child(6) tr:nth-child(2)'
-  const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10)' : 'tr:nth-child(6)'
-  const cptSelector = isAftlitePortal ? 'div.a-row:nth-child(12)' : 'tr:nth-child(8)'
+  const completionTimeSelector = isAftlitePortal ? 'div.a-row:nth-child(10) h5' : 'tr:nth-child(6) > td:nth-child(2)'
+  const cptSelector = isAftlitePortal ? 'div.a-row:nth-child(12) h5' : 'tr:nth-child(8) > td:nth-child(2)'
   const orderIdSelector = isAftlitePortal ? 'div.a-row:nth-child(2)' : 'tr:nth-child(2)'
   // define re
   const statusRe = /\(([\w-]+)\)/
@@ -185,10 +185,10 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
     const packageInfo = []
 
     // extract completion time
-    const completionTime = convertToMilitaryTime(html.querySelector(completionTimeSelector).textContent)
+    const completionTime = html.querySelector(completionTimeSelector).textContent.trim().split(' ')[1]
     packageInfo[0] = completionTime
     // extract CPT
-    const cpt = convertToMilitaryTime(html.querySelector(cptSelector).textContent)
+    const cpt = html.querySelector(cptSelector).textContent.trim().split(' ')[1]
     packageInfo[1] = cpt
     // extract status
     const status = html.querySelector(statusSelector).textContent.match(statusRe)
@@ -201,16 +201,6 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
     console.log('[getPackgeInfo]Fetch error: ', err)
     return Array(4).fill('-')
   }
-}
-
-function convertToMilitaryTime(timeStr) {
-  const dt = new Date(timeStr.trim().split(/\s+/).slice(-2).join(' ').replace('AM', ' AM').replace('PM', ' PM'))
-
-  if (Number.isNaN(dt.getHours())) return '-' // invalid date object
-
-  const hh = `0${dt.getHours()}`.slice(-2)
-  const mm = `0${dt.getMinutes()}`.slice(-2)
-  return `${hh}:${mm}`
 }
 
 function getTimeStyle(timeStamp, cpt, currentTime) {
