@@ -46,7 +46,7 @@ if (isPortal) {
   SELECTOR.OLD_TABLE = '#picklist_group_list'
   SELECTOR.VIEW_PICKLIST_CPT = 'body > table > tbody > tr:nth-child(4) > td:nth-child(2)'
   SELECTOR.PICKLIST_GROUP_TR = '#picklist_group > tbody > tr'
-  SELECTOR.GROUP_LIST_TR = 'table#picklist_group_list > tbody > tr'
+  SELECTOR.GROUP_LIST_TR = 'tbody > tr'
 }
 
 const ACTIONS = {
@@ -190,7 +190,7 @@ function getBags(tbl) {
     .map((x) => [...x.querySelectorAll('td')])
     .map((x) => ({
       gID: x[0].textContent.trim(),
-      picker: x[1].textContent.trim(),
+      picker: x[1].textContent.trim().split(' ')[0],
       completedAt: x[3].textContent
         ? x[3].textContent.replace('AM', ' AM').replace('PM', ' PM').replace(' on', '').trim()
         : 'In progress',
