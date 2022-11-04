@@ -135,12 +135,11 @@ function App({ oldTbl }) {
 }
 
 async function getBagPullTime(pID, signal) {
-  const cptSelector = SELECTOR.VIEW_PICKLIST_CPT
   try {
     const res = await fetch(`${URL.VIEW_PICKLIST}${pID}`, { signal })
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
-    const content = html.querySelector(cptSelector).textContent
+    const content = html.querySelector(SELECTOR.VIEW_PICKLIST_CPT).textContent
     const timeStr = content
       .split(/\s+/)
       .slice(0, -2)
@@ -317,7 +316,9 @@ GM_addStyle(`
     box-sizing: border-box !important;
   }
 
-  #dashboard th, #dashboard td {
+  #dashboard, 
+  #dashboard th,
+  #dashboard td {
     border-collapse: collapse;
     border: 1px solid #e8e8e8;
     text-align: center;
