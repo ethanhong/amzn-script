@@ -96,7 +96,7 @@ function App({ oldTbl }) {
 async function getBagPullTime(pID, signal) {
   const cptSelector = SELECTOR.VIEW_PICKLIST_CPT
   try {
-    const res = await fetch(`${URL.VIEW_PICKLIST}${pID}`, signal)
+    const res = await fetch(`${URL.VIEW_PICKLIST}${pID}`, { signal })
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
     const content = html.querySelector(cptSelector).textContent
@@ -126,7 +126,7 @@ function setBagPullTime(pullTime, gID, setGroups) {
 async function getGroupInfo(gID, signal) {
   const trSelector = SELECTOR.PICKLIST_GROUP_TR
   try {
-    const res = await fetch(`${URL.PICKLIST_GROUP}${gID}`, signal)
+    const res = await fetch(`${URL.PICKLIST_GROUP}${gID}`, { signal })
     const txt = await res.text()
     const html = new DOMParser().parseFromString(txt, 'text/html')
     const rows = [...html.querySelectorAll(trSelector)]
