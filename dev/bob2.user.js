@@ -5,7 +5,7 @@
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
-// @match        https://aftlite-na.amazon.com/OutboundDashboard
+// @match        https://aftlite-na.amazon.com/outbound_dashboard/index
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // ==/UserScript==
 

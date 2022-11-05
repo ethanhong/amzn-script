@@ -7,7 +7,7 @@
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
-// @match        https://aftlite-na.amazon.com/OutboundDashboard
+// @match        https://aftlite-na.amazon.com/outbound_dashboard/index
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
