@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         bob2
+// @name         bob1
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
 // @version      1.0.0
 // @description  A better outbound dashboard
