@@ -77,7 +77,7 @@ function doRefresh() {
   })
 }
 
-const diffMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
+const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
 
 function getTargetCells(withZone = false) {
   if (isPortal) {
@@ -134,7 +134,7 @@ function setData(data, state) {
       pullTime.setHours(timeTable[timeIdx])
       pullTime.setMinutes(15)
       pullTime.setSeconds(0)
-      let timeDiff = diffMin(pullTime, NOW)
+      let timeDiff = timeDiffInMin(pullTime, NOW)
       timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
       timeFrames[j] = `${Math.max(timeDiff - 60, 0)},${timeDiff}`
     }
@@ -142,7 +142,7 @@ function setData(data, state) {
     const row = rows[i]
     row.forEach((cell, j) => {
       cell.removeChild(cell.firstChild)
-      cell.append(content[j] ? aTag(content[j], zone, state, timeFrames[j]) : content[j])
+      cell.append(content[j] ? createLink(content[j], zone, state, timeFrames[j]) : content[j])
       if (cell.textContent !== '0') {
         cell.classList.remove('obd-alt-bg')
         cell.classList.add(`obd-data-${state}`)
@@ -154,9 +154,9 @@ function setData(data, state) {
   }
 }
 
-function aTag(content, zone, state, timeFrame) {
+function createLink(content, zone, state, timeFrame) {
   const elm = document.createElement('a')
-  elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&type=&cpt=${timeFrame}`)
+  elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&cpt=${timeFrame}`)
   elm.setAttribute('target', '_obd')
   elm.textContent = content
   return elm
