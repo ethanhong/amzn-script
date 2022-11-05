@@ -7,6 +7,7 @@
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
+// @match        https://aftlite-na.amazon.com/OutboundDashboard
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
@@ -22,11 +23,10 @@ if (isPortal) {
   SELECTOR.TIME_TH = 'tbody:nth-child(1) > tr > th'
   SELECTOR.DASHBOARD_TR = 'table > tbody:nth-child(2) > tr:not(tr:first-child)'
 } else {
-  // TODO: na URL, SELECTOR
   URL.PICKLIST_BY_STATE = '/wms/view_picklists?state='
   SELECTOR.PICKLIST_TR = '#wms_orders_in_state > tbody > tr'
   SELECTOR.TIME_TH = '#cpt_table > thead > tr > th'
-  SELECTOR.DASHBOARD_TR = ''
+  SELECTOR.DASHBOARD_TR = '#cpt_table > tbody:nth-child(2) > tr'
 }
 
 const STATE = {
@@ -79,26 +79,27 @@ function doRefresh() {
 
 const diffMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
 
-function dimCells() {
-  ;[...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
-    .map((row) => [...row.children].slice(2, 5))
-    .map((row) => row.map((cell) => cell.classList.add('obd-dim')))
-}
-
-function unDimCells() {
-  ;[...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
-    .map((row) => [...row.children].slice(2, 5))
-    .map((row) => row.map((cell) => cell.classList.remove('obd-dim')))
+function getTargetCells(withZone = false) {
+  if (isPortal) {
+    return withZone
+      ? [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)].map((row) => [...row.children].slice(1, 5))
+      : [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)].map((row) => [...row.children].slice(2, 5))
+  }
+  return withZone
+    ? [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)].map((row) => [...row.children].slice(1, 5))
+    : [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)].map((row) => [...row.children].slice(2, 5))
 }
 
 function flashCells() {
+  const dimCells = () => getTargetCells().map((row) => row.map((cell) => cell.classList.add('obd-dim')))
+  const unDimCells = () => getTargetCells().map((row) => row.map((cell) => cell.classList.remove('obd-dim')))
+
   dimCells()
   setTimeout(() => unDimCells(), 500)
 }
 
 function setData(data, state) {
-  const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
-    .map((row) => [...row.children].slice(1, 5))
+  const rows = getTargetCells(true)
     .filter((row) => [...row[0].classList].join().includes(state))
     .map((row) => row.slice(1))
 
@@ -155,7 +156,7 @@ function setData(data, state) {
 
 function aTag(content, zone, state, timeFrame) {
   const elm = document.createElement('a')
-  elm.setAttribute('href', `/list_picklist/view_picklists?zone=${zone}&type=&state=${state}&cpt=${timeFrame}`)
+  elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&type=&cpt=${timeFrame}`)
   elm.setAttribute('target', '_obd')
   elm.textContent = content
   return elm
