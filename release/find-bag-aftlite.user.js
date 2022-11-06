@@ -164,6 +164,20 @@ function TableHeader({ titles }) {
   return e('tr', null, tableHeaders)
 }
 
+function toMilitaryFormat(str) {
+  let hh = parseInt(str.slice(0, 2), 10)
+  const mm = str.slice(3, 5)
+  const ampm = str.slice(-2)
+  if (!['AM', 'PM'].includes(ampm)) return str
+
+  if (hh === 12) hh = 0
+  if (ampm === 'PM') hh += 12
+
+  hh = `0${hh.toString()}`.slice(-2)
+
+  return `${hh}:${mm}`
+}
+
 async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
   if (!pickListId) return Array(4).fill('')
   // url and selectors
@@ -186,10 +200,10 @@ async function getPackageInfo(pickListId, isAftlitePortal, abortController) {
 
     // extract completion time
     const completionTime = html.querySelector(completionTimeSelector).textContent.trim().split(' ')[1]
-    packageInfo[0] = completionTime
+    packageInfo[0] = toMilitaryFormat(completionTime)
     // extract CPT
     const cpt = html.querySelector(cptSelector).textContent.trim().split(' ')[1]
-    packageInfo[1] = cpt
+    packageInfo[1] = toMilitaryFormat(cpt)
     // extract status
     const status = html.querySelector(statusSelector).textContent.match(statusRe)
     packageInfo[2] = status ? status[1] : '-'
