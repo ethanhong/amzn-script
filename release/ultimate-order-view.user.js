@@ -96,6 +96,20 @@ function getBagTotalItem(spoo, isAftlitePortal) {
   return contents[0] || '-'
 }
 
+function toMilitaryFormat(str) {
+  let hh = parseInt(str.slice(0, 2), 10)
+  const mm = str.slice(3, 5)
+  const ampm = str.slice(-2)
+  if (!['AM', 'PM'].includes(ampm)) return str
+
+  if (hh === 12) hh = 0
+  if (ampm === 'PM') hh += 12
+
+  hh = `0${hh.toString()}`.slice(-2)
+
+  return `${hh}:${mm}`
+}
+
 function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
   const [completionTime, setCompletionTime] = React.useState('-')
 
@@ -120,7 +134,8 @@ function BagRow({ bag, isTarget, isRelated, setQRCodeContent }) {
       .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
       .then((html) => html.querySelector(completionTimeSelector).textContent)
       .then((content) => content.trim().trim().split(' ')[1])
-      .then((timeStr) => setCompletionTime(timeStr))
+      .then((timeStr) => toMilitaryFormat(timeStr))
+      .then((militaryTime) => setCompletionTime(militaryTime))
       .catch((err) => console.log('[Completion Time Fetch Fail]\n', err))
     return () => abortController.abort()
   }, [])
