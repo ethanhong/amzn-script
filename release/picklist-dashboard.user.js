@@ -229,7 +229,13 @@ function createGroups(bags) {
 function Dashboard({ groups }) {
   return e('table', { className: 'sortable', id: 'dashboard' }, [
     e('thead', null, e(Header)),
-    e('tbody', null, [...groups.map((group) => e(GroupRow, { group, key: group.gId })), e(TotalRow, { groups })]),
+    e(
+      'tbody',
+      null,
+      groups.map((group) => e(GroupRow, { group, key: group.gId }))
+    ),
+    // e('tbody', null, [...groups.map((group) => e(GroupRow, { group, key: group.gId })), e(TotalRow, { groups })]),
+    e('tfoot', null, e(TotalRow, { groups })),
   ])
 }
 
@@ -323,28 +329,28 @@ GM_addStyle(`
     border: 1px solid #e8e8e8;
     text-align: center;
     vertical-align: middle;
+    padding: 0.5rem;
   }
 
   #dashboard th {
-    background-color: #f0f0f0;
-    padding: 0.5rem;
+    background-color: #f0f0f0 !important;
   }
 
-  #dashboard td {
-    padding: 0.5rem;
+  #dashboard tr {
+    background-color: #fffffc !important;
   }
 
   #dashboard tr:hover {
-    background-color: #f8f8f8;
+    background-color: #f8f8f8 !important;
   }
 
   #dashboard td.skipped {
-    background-color: pink;
+    background-color: pink !important;
   }
 
   #dashboard a.skipped {
-    background-color: pink;
-    color: red;
+    background-color: pink !important;
+    color: red !important;
   }
 
   tr#total-row {
