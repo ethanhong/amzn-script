@@ -1,6 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 // ==UserScript==
-// @name         Better Outbound Dashboard
+// @name         Better Outbound Dashboard [na]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
 // @version      1.0.1
 // @description  A better outbound dashboard
