@@ -9,18 +9,12 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // ==/UserScript==
 
-const TIME_TH = '#cpt_table > thead > tr > th'
-const DASHBOARD_TR = '#cpt_table > tbody:nth-child(2) > tr' // na
+const LAST_CELL = 'table#cpt_table > tbody > tr:nth-child(6) > td.pickers-col'
+const DASHBOARD_TR = '#cpt_table > tbody > tr'
 
-// const TIME_TH = 'tbody:nth-child(1) > tr > th'
-// const DASHBOARD_TR = 'table > tbody:nth-child(2) > tr:not(tr:first-child)' // portal
-
-function getTargetCells(withZone = false) {
-  // ------------- check code below
-  return withZone
-    ? [...document.querySelectorAll(DASHBOARD_TR)].map((row) => [...row.children].slice(1, 5))
-    : [...document.querySelectorAll(DASHBOARD_TR)].map((row) => [...row.children].slice(2, 5))
-  // ------------- check code above
+function getTargetCells() {
+  const rows = [...document.querySelectorAll(DASHBOARD_TR)]
+  return rows.map((row) => [...row.children].slice(1, 6))
 }
 
 function waitForElm(selector) {
@@ -42,18 +36,25 @@ function waitForElm(selector) {
 }
 
 function test() {
-  getTargetCells()
   const rows = getTargetCells()
-  const rowsWithTitle = getTargetCells(true)
-  console.log(rows)
-  console.log(rowsWithTitle)
-  console.log([...rowsWithTitle[0][0].classList])
-  console.log([...rowsWithTitle[1][0].classList])
-  console.log([...rowsWithTitle[2][0].classList])
-  console.log([...rowsWithTitle[3][0].classList])
-  console.log([...rowsWithTitle[4][0].classList])
-  console.log([...rowsWithTitle[5][0].classList])
-  console.log([...rowsWithTitle[6][0].classList])
+  console.log('Rows with cell 1-5', rows)
+
+  let filteredRows = rows.filter((row) => row[0].textContent.includes('dropped')).map((row) => row.slice(2))
+  console.log('Filtered: [dropped]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('assigned')).map((row) => row.slice(2))
+  console.log('Filtered: [assigned]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('picking')).map((row) => row.slice(2))
+  console.log('Filtered: [picking]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('packed')).map((row) => row.slice(2))
+  console.log('Filtered: [packed]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('slammed')).map((row) => row.slice(2))
+  console.log('Filtered: [slammed]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('problem-solve')).map((row) => row.slice(2))
+  console.log('Filtered: [problem-solve]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('total')).map((row) => row.slice(2))
+  console.log('Filtered: [total]', filteredRows)
+  filteredRows = rows.filter((row) => row[0].textContent.includes('Restricted window')).map((row) => row.slice(2))
+  console.log('Filtered: [Restricted window]', filteredRows)
 }
 
-waitForElm(TIME_TH).then(() => test())
+waitForElm(LAST_CELL).then(() => test())

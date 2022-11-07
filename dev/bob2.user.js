@@ -10,21 +10,23 @@
 // ==/UserScript==
 
 // na
-const TIME_TH = '#cpt_table > thead > tr > th'
+const LAST_CELL = 'table#cpt_table > tbody > tr:nth-child(6) > td.pickers-col'
 const PICKLIST_BY_STATE = '/wms/view_picklists?state='
 
-// portal
-// const TIME_TH = 'tbody:nth-child(1) > tr > th'
-// const PICKLIST_BY_STATE = '/list_picklist/view_picklists?state='
-
-const ANY_CELL_SELECTOR = 'any > cell > selector'
+const ANY_CELL_SELECTOR = '#cpt_table > tbody > tr:nth-child(2) > td:nth-child(4) > '
 
 function aTag(content, zone, state, timeFrame) {
-  const elm = document.createElement('a')
-  elm.setAttribute('href', `${PICKLIST_BY_STATE}${state}&zone=${zone}&type=&cpt=${timeFrame}`)
-  elm.setAttribute('target', '_obd')
-  elm.textContent = content
-  return elm
+  const a = document.createElement('a')
+  a.setAttribute('href', `${PICKLIST_BY_STATE}${state}&zone=${zone}&type=&cpt=${timeFrame}`)
+  a.setAttribute('target', '_obd')
+
+  const div = document.createElement('div')
+  div.setAttribute('class', `status ${state}`)
+  div.textContent = content
+
+  a.append(div)
+
+  return a
 }
 
 function waitForElm(selector) {
@@ -49,9 +51,9 @@ function test() {
   const anyCell = document.querySelector(ANY_CELL_SELECTOR)
 
   // ------------- check code below
-  anyCell.removeChild(anyCell.firstChild)
+  anyCell.innerHTML = ''
   anyCell.append(aTag(123, 'ambient', 'dropped', '64,89'))
   // ------------- check code above
 }
 
-waitForElm(TIME_TH).then(() => test())
+waitForElm(LAST_CELL).then(() => test())
