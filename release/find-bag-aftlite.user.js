@@ -165,6 +165,7 @@ function TableHeader({ titles }) {
 }
 
 function toMilitaryFormat(str) {
+  if (!str) return '-'
   let hh = parseInt(str.slice(0, 2), 10)
   const mm = str.slice(3, 5)
   const ampm = str.slice(-2)
