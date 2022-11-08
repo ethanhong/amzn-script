@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.0.1
+// @version      1.0.2
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -39,44 +39,44 @@ const NOW = new Date()
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
+
 async function betterDashboard() {
+  bindTitleOnClick()
   // init load
   let data = await getAllData()
   setAllData(data)
 
-  // monitor content change
-  const contentObserver = new MutationObserver(() => {
-    contentObserver.disconnect()
-    // await new Promise((r) => setTimeout(r, 1000)) // wait 500 ms
-    setAllData(data)
-    contentObserver.observe(document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE), {
-      childList: true,
-      subtree: true,
-    })
-  })
-  contentObserver.observe(document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE), {
+  // monitor content/attributes change
+  const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
+  const observerOptions = {
+    attributeFilter: ['class'],
     childList: true,
     subtree: true,
-  })
-
-  // monitor style change
-  const styleObserver = new MutationObserver(() => {
-    styleObserver.disconnect()
+  }
+  const contentObserver = new MutationObserver((mutationList) => {
+    contentObserver.disconnect()
+    const mutationTypes = Array.from(new Set(mutationList.map((m) => m.type)))
+    mutationTypes.map((type) => {
+      switch (type) {
+        case 'childList':
+    setAllData(data)
+          break
+        case 'attributes':
     setZeroStyle()
-    styleObserver.observe(document.body, {
-      attributes: true,
-      subtree: true,
+          break
+        default:
+          break
+      }
+      return type
     })
+    contentObserver.observe(elementToObserve, observerOptions)
   })
-  styleObserver.observe(document.body, {
-    attributes: true,
-    subtree: true,
-  })
+  contentObserver.observe(elementToObserve, observerOptions)
 
   // fetch data
   loop(async () => {
     data = await getAllData()
-  }, 3000)
+  }, 5000)
 }
 
 async function loop(f, interval) {
