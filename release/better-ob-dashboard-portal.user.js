@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.0.2
+// @version      1.1.1
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -11,7 +11,8 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // ==/UserScript==
 
-const NUMBER_OF_PULLTIME = 9 // 0-9
+const SAVED_NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10)
+const NUMBER_OF_PULLTIME = Number.isNaN(SAVED_NUMBER_OF_PULLTIME) ? 4 : SAVED_NUMBER_OF_PULLTIME
 
 const URL = {
   PICKLIST_BY_STATE: '/list_picklist/view_picklists?state=',
@@ -39,6 +40,22 @@ const NOW = new Date()
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
+function bindTitleOnClick() {
+  const handleOnClick = (event) => {
+    const { tagName } = event.target // TH or SPAN
+    const reactid = event.target.getAttribute('data-reactid')
+    if (tagName === 'TH') {
+      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-1), 16) - 1)
+    } else if (tagName === 'SPAN') {
+      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-3, -2), 16) - 1)
+    }
+    console.log(localStorage.getItem('numberOfPulltimeCol'))
+    window.location.reload()
+  }
+
+  const titles = [...document.querySelectorAll('th.a-span1')]
+  titles.map((t) => t.addEventListener('dblclick', handleOnClick))
+}
 
 async function betterDashboard() {
   bindTitleOnClick()
@@ -59,10 +76,10 @@ async function betterDashboard() {
     mutationTypes.map((type) => {
       switch (type) {
         case 'childList':
-    setAllData(data)
+          setAllData(data)
           break
         case 'attributes':
-    setZeroStyle()
+          setZeroStyle()
           break
         default:
           break
