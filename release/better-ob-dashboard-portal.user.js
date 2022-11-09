@@ -107,40 +107,26 @@ async function betterDashboard() {
   contentObserver.observe(elementToObserve, observerOptions)
 
   // fetch data in loop
-  loop(async () => {
+  setAsyncInterval(async () => {
     data = await getAllData()
   }, 5000)
 }
 
-async function loop(f, interval) {
+async function setAsyncInterval(f, interval) {
   await new Promise((r) => setTimeout(r, interval)) // ms
   await f()
-  await loop(f, interval)
+  await setAsyncInterval(f, interval)
 }
 
 function getAllData() {
-  // console.log('getAllData')
-  return Promise.all([
-    getData(STATE.DROP),
-    getData(STATE.ASSIGN),
-    getData(STATE.PICK),
-    getData(STATE.PACK),
-    getData(STATE.SLAM),
-    getData(STATE.PSOLVE),
-    getData(STATE.HOLD),
-  ])
+  const states = [STATE.HOLD, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
+  return Promise.all(states.map((state) => getData(state)))
 }
 
 function setAllData(data) {
-  // console.log('setAllData')
-  setData(data[0], STATE.DROP)
-  setData(data[1], STATE.ASSIGN)
-  setData(data[2], STATE.PICK)
-  setData(data[3], STATE.PACK)
-  setData(data[4], STATE.SLAM)
-  setData(data[5], STATE.PSOLVE)
-  setData(data[6], STATE.GENERATED)
-  const totalData = data.reduce((result, x) => result.concat(x), [])
+  const states = [STATE.GENERATED, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
+  states.map((state, i) => setData(data[i], state))
+  const totalData = data.reduce((total, x) => total.concat(x), [])
   setData(totalData, STATE.TOTAL)
 }
 
@@ -173,7 +159,7 @@ function hideColSpanOne() {
 function getPullHours() {
   const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 10, 11, 12]
   const currentHour = new Date().getHours()
-  const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour) + 1
+  const startTimeIdx = timeTable.indexOf(currentHour) + 1
   return timeTable.slice(startTimeIdx, startTimeIdx + NUMBER_OF_PULLTIME)
 }
 
@@ -273,9 +259,8 @@ async function getData(state) {
 
 function setTitles(pullHours) {
   const titles = pullHours.map((h) => `0${h}:00`.slice(-5))
-  const titleThs = [...document.querySelectorAll(SELECTOR.TIME_TH)].splice(2, titles.length)
-  for (let i = 0; i < titleThs.length; i += 1) {
-    titleThs[i].textContent = titles[i]
+  for (let i = 0; i < titles.length; i += 1) {
+    ;[...document.querySelectorAll(SELECTOR.TIME_TH)][2 + i].textContent = titles[i]
   }
 }
 
