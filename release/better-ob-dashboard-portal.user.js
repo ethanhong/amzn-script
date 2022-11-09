@@ -18,6 +18,7 @@ const NUMBER_OF_PULLTIME = Number.isNaN(SAVED_NUMBER_OF_PULLTIME) ? 4 : SAVED_NU
 const URL = {
   PICKLIST_BY_STATE: '/list_picklist/view_picklists?state=',
 }
+
 const SELECTOR = {
   PICKLIST_TR: 'tbody > tr:not(tr:first-child)',
   TIME_TH: 'tbody:nth-child(1) > tr > th',
