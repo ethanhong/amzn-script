@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 const SAVED_NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10)
-const NUMBER_OF_PULLTIME = Number.isNaN(SAVED_NUMBER_OF_PULLTIME) ? 4 : SAVED_NUMBER_OF_PULLTIME
+const NUMBER_OF_PULLTIME = Number.isNaN(SAVED_NUMBER_OF_PULLTIME) ? 4 : SAVED_NUMBER_OF_PULLTIME // 0-8
 
 const URL = {
   PICKLIST_BY_STATE: '/wms/view_picklists?state=',
@@ -20,8 +20,8 @@ const URL = {
 
 const SELECTOR = {
   PICKLIST_TR: '#wms_orders_in_state > tbody > tr',
-  TIME_TH: 'tbody:nth-child(1) > tr > th',
-  DASHBOARD_TR: '#cpt_table > thead > th',
+  TIME_TH: '#cpt_table > thead > th',
+  DASHBOARD_TR: '#cpt_table > tbody > tr:not(tr:first-child)',
   ELEMENT_TO_OBSERVE: '#cpt_table > tbody',
   HEAD: '',
 }
@@ -47,30 +47,108 @@ async function betterDashboard() {
 }
 
 function setAllData(data) {
-  setData(data[0], STATE.DROP)
-  setData(data[1], STATE.ASSIGN)
-  setData(data[2], STATE.PICK)
-  setData(data[3], STATE.PACK)
-  setData(data[4], STATE.SLAM)
-  setData(data[5], STATE.PSOLVE)
-  setData(data[6], STATE.GENERATED)
-  // const totalData = data.reduce((result, x) => result.concat(x), [])
-  // setData(totalData, STATE.TOTAL)
+  setData(data[0], STATE.GENERATED)
+  setData(data[1], STATE.DROP)
+  setData(data[2], STATE.ASSIGN)
+  setData(data[3], STATE.PICK)
+  setData(data[4], STATE.PACK)
+  setData(data[5], STATE.SLAM)
+  setData(data[6], STATE.PSOLVE)
+  const totalData = data.reduce((result, x) => result.concat(x), [])
+  setData(totalData, STATE.TOTAL)
 }
 
 function setData(rawData, state) {
   console.log(state, rawData)
 }
 
+function setDataTemp(rawData, state) {
+  const zones = ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
+  const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
+  if (state === STATE.GENERATED) {
+    zones.splice(0, 2) // remove first 2 elements
+    rows.splice(0, 2) // remove first 2 elements
+  }
+
+  // prepare cells to place data
+  const filteredRows = rows.map(
+    (tr) => [...tr.children].slice(3, 3 + NUMBER_OF_PULLTIME) // remove zone, state, and total
+  )
+
+  // prepare raw data
+  const pullHours = getPullHours()
+  const dataByPullTime = pullHours.map((hr) => rawData.filter((d) => d.pullTime.getHours() === hr))
+
+  for (let i = 0; i < zones.length; i += 1) {
+    const zone = zones[i]
+    const dataByZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
+    const items = dataByZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
+
+    let content = []
+    if (state === STATE.PSOLVE) {
+      content = dataByZone.map((d) => d.length)
+    } else {
+      content = items.map((item, idx) => (item ? `${item} (${dataByZone[idx].length})` : 0))
+    }
+
+    const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
+    const timeFrames = pullHours.map((hr) => {
+      const pullTime = new Date()
+      pullTime.setHours(hr)
+      pullTime.setMinutes(15)
+      pullTime.setSeconds(0)
+      let timeDiff = timeDiffInMin(pullTime, new Date())
+      timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
+      return `${Math.max(timeDiff - 60, 0)},${timeDiff}`
+    })
+
+    filteredRows[i].map((cell, j) => {
+      // remove all elements not from us
+      ;[...cell.childNodes].filter((elm) => !elm.className.includes('bod-node')).map((elm) => elm.remove())
+      // append our elements
+      const newElement =
+        timeFrames[j] === 0 ? createZeroElement() : createLinkElement(content[j], zone, state, timeFrames[j])
+      cell.append(newElement)
+      return cell
+    })
+  }
+}
+
+function createZeroElement() {
+  const div = document.createElement('div')
+  div.classList.add('bod-node')
+  div.classList.add('status')
+  div.textContent = 0
+}
+
+function createLinkElement(content, zone, state, timeFrame) {
+  const a = document.createElement('a')
+  if (state === STATE.GENERATED) {
+    a.setAttribute('href', `${URL.PICKLIST_BY_STATE}${STATE.HOLD}&zone=${zone}&cpt=${timeFrame}`)
+  } else {
+    a.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&cpt=${timeFrame}`)
+  }
+  a.setAttribute('target', '_blank')
+
+  const div = document.createElement('div')
+  div.classList.add('bod-node')
+  div.classList.add('status')
+  div.classList.add('state')
+  div.textContent = content
+
+  a.append(div)
+  return a
+}
+
 async function getAllData() {
   return Promise.all([
+    getData(STATE.HOLD),
     getData(STATE.DROP),
     getData(STATE.ASSIGN),
     getData(STATE.PICK),
     getData(STATE.PACK),
     getData(STATE.SLAM),
     getData(STATE.PSOLVE),
-    getData(STATE.HOLD),
   ])
 }
 
