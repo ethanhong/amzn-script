@@ -1,8 +1,9 @@
+/* eslint-disable no-return-assign */
 /* eslint-disable no-promise-executor-return */
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.1.1
+// @version      1.1.2
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -22,6 +23,7 @@ const SELECTOR = {
   TIME_TH: 'tbody:nth-child(1) > tr > th',
   DASHBOARD_TR: 'table > tbody:nth-child(2) > tr:not(tr:first-child)',
   ELEMENT_TO_OBSERVE: '#orchaJsWebAppCanvas tbody:nth-child(2)',
+  HEAD: '#orchaJsWebAppCanvas > div > div.a-container.a-global-nav-wrapper.nav-bar.no-flex > div > div.a-column.a-span6.a-text-center > span',
 }
 
 const STATE = {
@@ -36,7 +38,7 @@ const STATE = {
   TOTAL: 'total',
 }
 
-const NOW = new Date()
+// const NOW = new Date()
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
@@ -54,16 +56,28 @@ function bindTitleOnClick() {
   }
 
   const titles = [...document.querySelectorAll('th.a-span1')]
-  titles.map((t) => t.addEventListener('dblclick', handleOnClick))
+  titles.map((t) => {
+    t.addEventListener('dblclick', handleOnClick)
+    const { style } = t
+    style.cursor = 'default'
+    return t
+  })
 }
 
 async function betterDashboard() {
+  // init settings
+  const showLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Loading ...')
+  const unshowLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Outbound Dashboard')
+  setTitles(getPullHours())
   bindTitleOnClick()
-  // init load
+
+  // first load
+  showLoadingOnHead()
   let data = await getAllData()
   setAllData(data)
+  unshowLoadingOnHead()
 
-  // monitor content/attributes change
+  // monitor content/attributes change to setData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
     attributeFilter: ['class'],
@@ -76,6 +90,7 @@ async function betterDashboard() {
     mutationTypes.map((type) => {
       switch (type) {
         case 'childList':
+          setTitles(getPullHours())
           setAllData(data)
           break
         case 'attributes':
@@ -90,7 +105,7 @@ async function betterDashboard() {
   })
   contentObserver.observe(elementToObserve, observerOptions)
 
-  // fetch data
+  // fetch data in loop
   loop(async () => {
     data = await getAllData()
   }, 5000)
@@ -117,7 +132,6 @@ function getAllData() {
 
 function setAllData(data) {
   // console.log('setAllData')
-  NOW.setTime(Date.now())
   setData(data[0], STATE.DROP)
   setData(data[1], STATE.ASSIGN)
   setData(data[2], STATE.PICK)
@@ -131,11 +145,9 @@ function setAllData(data) {
 
 const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
 
-function flash(rows) {
-  const dimCells = () => rows.map((row) => row.map((cell) => cell.classList.add('obd-dim')))
-  const unDimCells = () => rows.map((row) => row.map((cell) => cell.classList.remove('obd-dim')))
-  dimCells()
-  setTimeout(() => unDimCells(), 100)
+function flash(cell) {
+  cell.classList.add('obd-dim')
+  setTimeout(() => cell.classList.remove('obd-dim'), 100)
 }
 
 function hideColSpanOne() {
@@ -148,17 +160,23 @@ function hideColSpanOne() {
 
   spanOne.map((elm, i) => {
     if (i % 2) {
+      elm.setAttribute('colspan', 2)
+    } else {
       const elmStyle = elm.style
       elmStyle.display = 'none'
-    } else {
-      elm.setAttribute('colspan', 2)
     }
     return elm
   })
 }
 
-function setData(rawData, state) {
+function getPullHours() {
   const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 10, 11, 12]
+  const currentHour = new Date().getHours()
+  const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour) + 1
+  return timeTable.slice(startTimeIdx, startTimeIdx + NUMBER_OF_PULLTIME)
+}
+
+function setData(rawData, state) {
   const zones =
     state === STATE.GENERATED ? ['chilled', 'frozen', 'produce'] : ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
 
@@ -166,18 +184,13 @@ function setData(rawData, state) {
   const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
     .map((tr) => [...tr.children].slice(1)) // remove zone col
     .map((tr) => tr.filter((elm) => elm.style.display !== 'none')) // skip hidden colspan-1-cells
-
   const filteredRows = rows
     .filter((row) => row[0].className.includes(state))
     .map((row) => row.slice(1, 1 + NUMBER_OF_PULLTIME)) // remove state col
-  flash(filteredRows)
 
-  const currentHour = NOW.getHours()
-  const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour) + 1
-  const pullHours = timeTable.slice(startTimeIdx, startTimeIdx + NUMBER_OF_PULLTIME)
-  setTitles(pullHours)
-
+  const pullHours = getPullHours()
   const dataByPullTime = pullHours.map((hr) => rawData.filter((d) => d.pullTime.getHours() === hr))
+
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
     const dataByZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
@@ -191,11 +204,11 @@ function setData(rawData, state) {
     }
 
     const timeFrames = pullHours.map((hr) => {
-      const pullTime = new Date(NOW)
+      const pullTime = new Date()
       pullTime.setHours(hr)
       pullTime.setMinutes(15)
       pullTime.setSeconds(0)
-      let timeDiff = timeDiffInMin(pullTime, NOW)
+      let timeDiff = timeDiffInMin(pullTime, new Date())
       timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
       return `${Math.max(timeDiff - 60, 0)},${timeDiff}`
     })
@@ -211,28 +224,29 @@ function setData(rawData, state) {
       })
       // add our new nodes
       if (content[j] === 0) {
-        cell.append(createSpan(content[j]))
+        cell.classList.remove('obd-dim') // for last column which is set dim initially
+        cell.append(createSpanElement(content[j]))
         cell.classList.remove(`obd-data-${state}`)
         cell.classList.add('obd-alt-bg')
       } else {
-        cell.append(createLink(content[j], zone, state, timeFrames[j]))
+        flash(cell)
+        cell.append(createLinkElement(content[j], zone, state, timeFrames[j]))
         cell.classList.remove('obd-alt-bg')
         cell.classList.add(`obd-data-${state}`)
       }
-
       return cell
     })
   }
 }
 
-function createSpan(content) {
+function createSpanElement(content) {
   const elm = document.createElement('span')
   elm.classList.add('bod-node')
   elm.textContent = content
   return elm
 }
 
-function createLink(content, zone, state, timeFrame) {
+function createLinkElement(content, zone, state, timeFrame) {
   const elm = document.createElement('a')
   if (state === STATE.GENERATED) {
     elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${STATE.HOLD}&zone=${zone}&cpt=${timeFrame}`)
