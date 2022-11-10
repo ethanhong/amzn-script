@@ -180,14 +180,15 @@ function setData(rawData, state) {
 
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
-    const dataByZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
-    const items = dataByZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
+    const dataOfZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
+    const packages = dataOfZone.map((d) => d.length)
+    const items = dataOfZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
 
     let content = []
     if (state === STATE.PSOLVE) {
-      content = dataByZone.map((d) => d.length)
+      content = packages
     } else {
-      content = items.map((item, idx) => (item ? `${item} (${dataByZone[idx].length})` : 0))
+      content = items.map((item, idx) => (item ? `${item} (${packages[idx]})` : 0))
     }
 
     const timeFrames = pullHours.map((hr) => {
@@ -212,7 +213,7 @@ function setData(rawData, state) {
       // add our new nodes
       if (content[j] === 0) {
         cell.classList.remove('obd-dim') // for last column which is set dim initially
-        cell.append(createSpanElement(content[j]))
+        cell.append(createZeroElement())
         cell.classList.remove(`obd-data-${state}`)
         cell.classList.add('obd-alt-bg')
       } else {
@@ -226,10 +227,10 @@ function setData(rawData, state) {
   }
 }
 
-function createSpanElement(content) {
+function createZeroElement() {
   const elm = document.createElement('span')
   elm.classList.add('bod-node')
-  elm.textContent = content
+  elm.textContent = '0'
   return elm
 }
 
