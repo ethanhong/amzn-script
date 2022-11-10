@@ -273,6 +273,11 @@ function GroupRow({ group }) {
   )
 
   const cells = [
+    e('td', { style: { display: 'none' } }), // avoid affect from picklist-inspector
+    e('td', { style: { display: 'none' } }), // avoid affect from picklist-inspector
+    e('td', { style: { display: 'none' } }), // avoid affect from picklist-inspector
+    e('td', { style: { display: 'none' } }), // avoid affect from picklist-inspector
+    e('td', { style: { display: 'none' } }), // avoid affect from picklist-inspector
     e('td', null, e('a', { href: `${URL.PICKLIST_GROUP}${group.gID}` }, group.gID)),
     e('td', null, group.zone),
     e('td', null, e('a', { href: `${URL.USER_TRACKING}${group.picker}` }, group.picker)),
