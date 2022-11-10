@@ -20,7 +20,7 @@ const URL = {
 
 const SELECTOR = {
   PICKLIST_TR: '#wms_orders_in_state > tbody > tr',
-  TIME_TH: '#cpt_table > thead > th',
+  TIME_TH: '#cpt_table > thead > tr > th',
   DASHBOARD_TR: '#cpt_table > tbody > tr:not(tr:first-child)',
   ELEMENT_TO_OBSERVE: '#cpt_table > tbody',
   HEAD: '',
@@ -44,17 +44,50 @@ async function betterDashboard() {
   setTitles(getPullHours())
   const data = await getAllData()
   setAllData(data)
+
+  // monitor content/attributes change to setData
+  // const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
+  // const observerOptions = {
+  //   // attributeFilter: ['class'],
+  //   childList: true,
+  //   subtree: true,
+  // }
+  // const contentObserver = new MutationObserver((mutationList) => {
+  //   contentObserver.disconnect()
+  //   const mutationTypes = Array.from(new Set(mutationList.map((m) => m.type)))
+  //   mutationTypes.map((type) => {
+  //     switch (type) {
+  //       case 'childList':
+  //         console.log('mutation observer: childlist')
+  //         break
+  //       // case 'attributes':
+  //       //   setZeroStyle()
+  //       //   break
+  //       default:
+  //         break
+  //     }
+  //     return type
+  //   })
+  //   contentObserver.observe(elementToObserve, observerOptions)
+  // })
+  // contentObserver.observe(elementToObserve, observerOptions)
+
+  // fetch data in loop
+  // setAsyncInterval(async () => {
+  //   data = await getAllData()
+  // }, 5000)
+}
+
+async function setAsyncInterval(f, interval) {
+  await new Promise((r) => setTimeout(r, interval)) // ms
+  await f()
+  await setAsyncInterval(f, interval)
 }
 
 function setAllData(data) {
-  setData(data[0], STATE.GENERATED)
-  setData(data[1], STATE.DROP)
-  setData(data[2], STATE.ASSIGN)
-  setData(data[3], STATE.PICK)
-  setData(data[4], STATE.PACK)
-  setData(data[5], STATE.SLAM)
-  setData(data[6], STATE.PSOLVE)
-  const totalData = data.reduce((result, x) => result.concat(x), [])
+  const states = [STATE.GENERATED, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
+  states.map((state, i) => setData(data[i], state))
+  const totalData = data.reduce((total, x) => total.concat(x), [])
   setData(totalData, STATE.TOTAL)
 }
 
@@ -66,8 +99,9 @@ function setDataTemp(rawData, state) {
   const zones = ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
   const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
   if (state === STATE.GENERATED) {
-    zones.splice(0, 2) // remove first 2 elements
-    rows.splice(0, 2) // remove first 2 elements
+    // remove first 2 zones
+    zones.splice(0, 2)
+    rows.splice(0, 2)
   }
 
   // prepare cells to place data
@@ -77,18 +111,19 @@ function setDataTemp(rawData, state) {
 
   // prepare raw data
   const pullHours = getPullHours()
-  const dataByPullTime = pullHours.map((hr) => rawData.filter((d) => d.pullTime.getHours() === hr))
+  const dataFilteredByPullTime = pullHours.map((hr) => rawData.filter((d) => d.pullTime.getHours() === hr))
 
   for (let i = 0; i < zones.length; i += 1) {
     const zone = zones[i]
-    const dataByZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
-    const items = dataByZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
+    const dataOfZone = dataFilteredByPullTime.map((data) => data.filter((d) => d.zone === zone))
+    const packages = dataOfZone.map((d) => d.length)
+    const items = dataOfZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
 
     let content = []
     if (state === STATE.PSOLVE) {
-      content = dataByZone.map((d) => d.length)
+      content = packages
     } else {
-      content = items.map((item, idx) => (item ? `${item} (${dataByZone[idx].length})` : 0))
+      content = items.map((item, idx) => (item ? `${item} (${packages[idx]})` : 0))
     }
 
     const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
@@ -141,15 +176,8 @@ function createLinkElement(content, zone, state, timeFrame) {
 }
 
 async function getAllData() {
-  return Promise.all([
-    getData(STATE.HOLD),
-    getData(STATE.DROP),
-    getData(STATE.ASSIGN),
-    getData(STATE.PICK),
-    getData(STATE.PACK),
-    getData(STATE.SLAM),
-    getData(STATE.PSOLVE),
-  ])
+  const states = [STATE.HOLD, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
+  return Promise.all(states.map((state) => getData(state)))
 }
 
 async function getData(state) {
@@ -165,16 +193,15 @@ async function getData(state) {
 
 function setTitles(pullHours) {
   const titles = pullHours.map((h) => `0${h}:00`.slice(-5))
-  const titleThs = [...document.querySelectorAll(SELECTOR.TIME_TH)].splice(2, titles.length)
-  for (let i = 0; i < titleThs.length; i += 1) {
-    titleThs[i].textContent = titles[i]
+  for (let i = 0; i < titles.length; i += 1) {
+    ;[...document.querySelectorAll(SELECTOR.TIME_TH)][3 + i].textContent = titles[i]
   }
 }
 
 function getPullHours() {
   const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 10, 11, 12]
   const currentHour = new Date().getHours()
-  const startTimeIdx = currentHour > 22 || currentHour < 5 ? 0 : timeTable.indexOf(currentHour) + 1
+  const startTimeIdx = timeTable.indexOf(currentHour) + 1
   return timeTable.slice(startTimeIdx, startTimeIdx + NUMBER_OF_PULLTIME)
 }
 
