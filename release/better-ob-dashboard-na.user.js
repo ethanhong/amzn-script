@@ -105,9 +105,9 @@ function setDataTemp(rawData, state) {
   }
 
   // prepare cells to place data
-  const filteredRows = rows.map(
-    (tr) => [...tr.children].slice(3, 3 + NUMBER_OF_PULLTIME) // remove zone, state, and total
-  )
+  const filteredRows = rows
+    .filter((tr) => tr.getAttribute('hidden') !== 'true')
+    .map((tr) => [...tr.children].slice(3, 3 + NUMBER_OF_PULLTIME)) // remove zone, state, and total
 
   // prepare raw data
   const pullHours = getPullHours()
@@ -137,14 +137,16 @@ function setDataTemp(rawData, state) {
       return `${Math.max(timeDiff - 60, 0)},${timeDiff}`
     })
 
-    filteredRows[i].map((cell, j) => {
+    filteredRows[i].map((td, j) => {
       // remove all elements not from us
-      ;[...cell.childNodes].filter((elm) => !elm.className.includes('bod-node')).map((elm) => elm.remove())
+      // ;[...td.childNodes].filter((elm) => !elm.className.includes('bod-node')).map((elm) => elm.remove())
+      td.querySelectorAll('a:not(a.bod-node)').map((elm) => elm.remove())
+      td.querySelectorAll('div:not(div.bod-node)').map((elm) => elm.remove())
       // append our elements
       const newElement =
         timeFrames[j] === 0 ? createZeroElement() : createLinkElement(content[j], zone, state, timeFrames[j])
-      cell.append(newElement)
-      return cell
+      td.append(newElement)
+      return td
     })
   }
 }
@@ -164,9 +166,9 @@ function createLinkElement(content, zone, state, timeFrame) {
     a.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&cpt=${timeFrame}`)
   }
   a.setAttribute('target', '_blank')
+  a.classList.add('bod-node')
 
   const div = document.createElement('div')
-  div.classList.add('bod-node')
   div.classList.add('status')
   div.classList.add('state')
   div.textContent = content
