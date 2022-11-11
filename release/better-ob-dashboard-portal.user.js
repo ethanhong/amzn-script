@@ -3,7 +3,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.1.2
+// @version      1.1.3
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -52,7 +52,6 @@ function bindTitleOnClick() {
     } else if (tagName === 'SPAN') {
       localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-3, -2), 16) - 1)
     }
-    console.log(localStorage.getItem('numberOfPulltimeCol'))
     window.location.reload()
   }
 
@@ -69,11 +68,11 @@ async function betterDashboard() {
   // init settings
   const showLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Loading ...')
   const unshowLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Outbound Dashboard')
-  setTitles(getPullHours())
   bindTitleOnClick()
 
   // first load
   showLoadingOnHead()
+  setTitles(getPullHours())
   let data = await getAllData()
   setAllData(data)
   unshowLoadingOnHead()
