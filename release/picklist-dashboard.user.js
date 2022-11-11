@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Picklist Dashboard
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.6.1
+// @version      1.6.2
 // @description  Picklist dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/picklist_group
@@ -244,9 +244,9 @@ function Header() {
     'Picklist Group',
     'Zone',
     'Picker',
+    'Completed at',
     'Remaining Units',
     'Remaining Bins',
-    'Completed at',
     '< 1 Hour',
     '< 2 Hours',
     '< 3 Hours',
@@ -281,9 +281,9 @@ function GroupRow({ group }) {
     e('td', null, e('a', { href: `${URL.PICKLIST_GROUP}${group.gID}` }, group.gID)),
     e('td', null, group.zone),
     e('td', null, e('a', { href: `${URL.USER_TRACKING}${group.picker}` }, group.picker)),
+    e('td', null, group.completedAt),
     e('td', null, group.remainUnit),
     e('td', null, group.remainBin),
-    e('td', null, group.completedAt),
     e('td', null, minFromNow.filter((x) => x < 60).length),
     e('td', null, minFromNow.filter((x) => x >= 60 && x < 120).length),
     e('td', null, minFromNow.filter((x) => x >= 120 && x < 180).length),
