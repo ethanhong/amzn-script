@@ -139,9 +139,13 @@ function setDataTemp(rawData, state) {
 
     filteredRows[i].map((td, j) => {
       // remove all elements not from us
-      // ;[...td.childNodes].filter((elm) => !elm.className.includes('bod-node')).map((elm) => elm.remove())
-      td.querySelectorAll('a:not(a.bod-node)').map((elm) => elm.remove())
-      td.querySelectorAll('div:not(div.bod-node)').map((elm) => elm.remove())
+      function hideElement(elm) {
+        const elmStyle = elm.style
+        elmStyle.display = 'none'
+      }
+      ;[...td.childNodes].filter((elm) => !elm.className.includes('bod-node')).map((elm) => hideElement(elm))
+      // td.querySelectorAll('a:not(a.bod-node)').map((elm) => hideElement(elm))
+      // td.querySelectorAll('div:not(div.bod-node)').map((elm) => elm.remove())
       // append our elements
       const newElement =
         timeFrames[j] === 0 ? createZeroElement() : createLinkElement(content[j], zone, state, timeFrames[j])
