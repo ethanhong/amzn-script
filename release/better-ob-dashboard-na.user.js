@@ -193,7 +193,7 @@ async function getData(state) {
   const picklists = [...html.querySelectorAll(SELECTOR.PICKLIST_TR)]
   return picklists
     .map((pl) => [...pl.querySelectorAll('td')])
-    .map((pl) => pl.map((td) => td.textContent))
+    .map((pl) => pl.map((td) => td.textContent.trim()))
     .map((pl) => ({ zone: pl[3], items: pl[6], pullTime: new Date(pl[8]) }))
 }
 
