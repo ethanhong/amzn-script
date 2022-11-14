@@ -9,6 +9,7 @@
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-portal.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-portal.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
+// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
 const DEFAULT_NUMBER_OF_PULLTIME = 3
@@ -30,7 +31,13 @@ const SELECTOR = {
   ELEMENT_TO_OBSERVE: '#orchaJsWebAppCanvas tbody:nth-child(2)',
 }
 
-waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
+// eslint-disable-next-line camelcase, no-undef
+const scriptMeta = GM_info.script
+
+// eslint-disable-next-line no-undef
+if (isValid(scriptMeta.name, scriptMeta.version)) {
+  waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
+}
 
 async function betterDashboard() {
   bindTitleOnClick()
