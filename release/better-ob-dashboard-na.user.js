@@ -29,7 +29,13 @@ const SELECTOR = {
   DASHBOARD_TR: '#cpt_table > tbody > tr',
 }
 
-waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
+// eslint-disable-next-line camelcase, no-undef
+const scriptMeta = GM_info.script
+
+// eslint-disable-next-line no-undef
+if (isValid(scriptMeta.name, scriptMeta.version)) {
+  waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
+}
 
 function getFakeData() {
   return JSON.parse(
