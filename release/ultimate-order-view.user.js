@@ -47,8 +47,9 @@ function getBags() {
     : [...document.querySelectorAll('#picklists_table > tbody > tr')]
   picklistsTableRows.shift() // drop header row
 
-  const rowContents = picklistsTableRows.map((row) => row.outerText.trim().split(/\s+/))
+  const rowContents = picklistsTableRows.map((row) => row.outerText.trim().split(/[\t\n]+/))
   return rowContents.map((content) => {
+    if (content.length === 7) content.splice(4, 0, '-') // add item when picker is not exist
     const bag = {}
     ;[bag.id, bag.zone, bag.status, bag.spoo, bag.pickerLogin] = content
     bag.pickerUrl = `/labor_tracking/lookup_history?user_name=${bag.pickerLogin}`
