@@ -10,6 +10,7 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
+// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
 /* global React */
@@ -18,7 +19,13 @@
 
 const e = React.createElement
 
-startBagFinder()
+// eslint-disable-next-line camelcase, no-undef
+const scriptMeta = GM_info.script
+
+// eslint-disable-next-line no-undef
+if (isValid(scriptMeta.name, scriptMeta.version)) {
+  startBagFinder()
+}
 
 function getCSS() {
   const style = `

@@ -18,6 +18,7 @@
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // @require      https://www.kryogenix.org/code/browser/sorttable/sorttable.js
+// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // @grant        GM_addStyle
 // ==/UserScript==
 
@@ -54,7 +55,13 @@ const ACTIONS = {
   ADD_PULLTIME: 'add-pulltime',
 }
 
-showDashboard()
+// eslint-disable-next-line camelcase, no-undef
+const scriptMeta = GM_info.script
+
+// eslint-disable-next-line no-undef
+if (isValid(scriptMeta.name, scriptMeta.version)) {
+  showDashboard()
+}
 
 // eslint-disable-next-line no-unused-vars
 async function showDashboard() {

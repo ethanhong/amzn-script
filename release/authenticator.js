@@ -4,7 +4,6 @@ const lists = [
   { app: 'Better Outbound Dashboard [portal]', blckList: [] },
   { app: 'Better Outbound Dashboard [na]', blckList: [] },
   { app: 'Ultimate Order View', blckList: [] },
-  { app: 'Smart Labor Track', blckList: [] },
   { app: 'Picklist Dashboard', blckList: [] },
   { app: 'Find Bags [como]', blckList: [] },
   { app: 'Find Bags [aftlite]', blckList: [] },

@@ -9,6 +9,7 @@
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-na.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-na.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
+// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
 const DEFAULT_NUMBER_OF_PULLTIME = 3 // 1-8
