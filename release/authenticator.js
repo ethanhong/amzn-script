@@ -1,19 +1,43 @@
+/* eslint-disable no-unused-vars */
 const lists = [
-  { app: 'ultimate-order-view', blckList: [] },
-  { app: 'picklist-dashboard', blckList: [] },
-  { app: 'find-bag-aftlite', blckList: [] },
-  { app: 'find-bag-como', blckList: [] },
-  { app: 'better-ob-dashboard-portal', blckList: [] },
-  { app: 'better-ob-dashboard-na', blckList: [] },
+  { app: 'Better Outbound Dashboard [dev]', blckList: [] },
+  { app: 'Better Outbound Dashboard [portal]', blckList: [] },
+  { app: 'Better Outbound Dashboard [na]', blckList: [] },
+  { app: 'Ultimate Order View', blckList: [] },
+  { app: 'Smart Labor Track', blckList: [] },
+  { app: 'Picklist Dashboard', blckList: [] },
+  { app: 'Find Bags [como]', blckList: [] },
+  { app: 'Find Bags [aftlite]', blckList: [] },
 ]
 
-function isValid(user, app) {
-  const { blackList } = lists.find((list) => list.app === app)
-  console.log('User: ', user)
-  console.log('App: ', app)
+const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
 
-  if (blackList.includes(user)) {
+async function isValid(scriptName, scriptVersion) {
+  const appObj = lists.find((list) => list.app === scriptName)
+  if (!appObj) {
+    console.log('Script name is not exist.', scriptName)
     return false
   }
+
+  const userName = isAftlitePortal ? await getPortalUser() : await getNaUser()
+
+  console.log('User: ', userName)
+  console.log('Script: ', scriptName)
+  console.log('Version: ', scriptVersion)
+
   return true
+}
+
+async function getPortalUser() {
+  const res = await fetch('/home')
+  const txt = await res.text()
+  const html = new DOMParser().parseFromString(txt, 'text/html')
+  return html.querySelector('h2').textContent.split(/\s/).slice(-1)[0].trim()
+}
+
+async function getNaUser() {
+  const res = await fetch('/indirect_action/signin_indirect_action')
+  const txt = await res.text()
+  const html = new DOMParser().parseFromString(txt, 'text/html')
+  return html.getElementsByTagName('span')[0].innerHTML.match(/\(([^)]+)\)/)[1]
 }
