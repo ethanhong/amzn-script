@@ -56,15 +56,16 @@ const ACTIONS = {
 }
 
 // eslint-disable-next-line camelcase, no-undef
-const scriptMeta = GM_info.script
+const SCRIPT_META = GM_info.script
 
-// eslint-disable-next-line no-undef
-if (isValid(scriptMeta.name, scriptMeta.version)) {
-  showDashboard()
-}
+showDashboard()
 
 // eslint-disable-next-line no-unused-vars
 async function showDashboard() {
+  // eslint-disable-next-line no-undef
+  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  if (!isCheckValid) return
+
   const oldTbl = document.querySelector(SELECTOR.OLD_TABLE)
   // mount app
   const rootDiv = document.createElement('div')
