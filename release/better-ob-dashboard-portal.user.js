@@ -1,9 +1,8 @@
-/* eslint-disable no-return-assign */
 /* eslint-disable no-promise-executor-return */
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      1.1.3
+// @version      2.0.1
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -12,70 +11,44 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // ==/UserScript==
 
-const SAVED_NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10)
-const NUMBER_OF_PULLTIME = Number.isNaN(SAVED_NUMBER_OF_PULLTIME) ? 4 : SAVED_NUMBER_OF_PULLTIME
+const DEFAULT_NUMBER_OF_PULLTIME = 3
+const NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10) || DEFAULT_NUMBER_OF_PULLTIME
+
+const ZONES = ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
+const GET_STATES = ['hold', 'dropped', 'assigned', 'picking', 'packed', 'slammed', 'problem-solve', 'total']
+const SET_STATES = ['generated', 'dropped', 'assigned', 'picking', 'packed', 'slammed', 'problem-solve', 'total']
 
 const URL = {
   PICKLIST_BY_STATE: '/list_picklist/view_picklists?state=',
+  PICKLIST_ALL_STATE: `/list_picklist/view_picklists?state=${GET_STATES.join()}`,
 }
 
 const SELECTOR = {
-  PICKLIST_TR: 'tbody > tr:not(tr:first-child)',
   TIME_TH: 'tbody:nth-child(1) > tr > th',
   DASHBOARD_TR: 'table > tbody:nth-child(2) > tr:not(tr:first-child)',
+  PICKLIST_TR: 'tbody > tr:not(tr:first-child)',
   ELEMENT_TO_OBSERVE: '#orchaJsWebAppCanvas tbody:nth-child(2)',
-  HEAD: '#orchaJsWebAppCanvas > div > div.a-container.a-global-nav-wrapper.nav-bar.no-flex > div > div.a-column.a-span6.a-text-center > span',
 }
-
-const STATE = {
-  DROP: 'dropped',
-  ASSIGN: 'assigned',
-  PICK: 'picking',
-  PACK: 'packed',
-  SLAM: 'slammed',
-  PSOLVE: 'problem-solve',
-  HOLD: 'generated,hold',
-  GENERATED: 'generated',
-  TOTAL: 'total',
-}
-
-// const NOW = new Date()
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
-function bindTitleOnClick() {
-  const handleOnClick = (event) => {
-    const { tagName } = event.target // TH or SPAN
-    const reactid = event.target.getAttribute('data-reactid')
-    if (tagName === 'TH') {
-      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-1), 16) - 1)
-    } else if (tagName === 'SPAN') {
-      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-3, -2), 16) - 1)
-    }
-    window.location.reload()
-  }
-
-  const titles = [...document.querySelectorAll('th.a-span1')]
-  titles.map((t) => {
-    t.addEventListener('dblclick', handleOnClick)
-    const { style } = t
-    style.cursor = 'default'
-    return t
-  })
-}
-
 async function betterDashboard() {
-  // init settings
-  const showLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Loading ...')
-  const unshowLoadingOnHead = () => (document.querySelector(SELECTOR.HEAD).textContent = 'Outbound Dashboard')
   bindTitleOnClick()
 
   // first load
-  showLoadingOnHead()
   setTitles(getPullHours())
-  let data = await getAllData()
-  setAllData(data)
-  unshowLoadingOnHead()
+  let data = await getData()
+  hideColSpanOne()
+  setData(data)
+
+  // fetch data in loop
+  setAsyncInterval(async () => {
+    try {
+      data = await getData()
+    } catch (error) {
+      console.log(error)
+    }
+  }, 5000)
 
   // monitor content/attributes change to setData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
@@ -91,7 +64,8 @@ async function betterDashboard() {
       switch (type) {
         case 'childList':
           setTitles(getPullHours())
-          setAllData(data)
+          hideColSpanOne()
+          setData(data)
           break
         case 'attributes':
           setZeroStyle()
@@ -104,36 +78,12 @@ async function betterDashboard() {
     contentObserver.observe(elementToObserve, observerOptions)
   })
   contentObserver.observe(elementToObserve, observerOptions)
-
-  // fetch data in loop
-  setAsyncInterval(async () => {
-    data = await getAllData()
-  }, 5000)
 }
 
 async function setAsyncInterval(f, interval) {
   await new Promise((r) => setTimeout(r, interval)) // ms
   await f()
   await setAsyncInterval(f, interval)
-}
-
-function getAllData() {
-  const states = [STATE.HOLD, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
-  return Promise.all(states.map((state) => getData(state)))
-}
-
-function setAllData(data) {
-  const states = [STATE.GENERATED, STATE.DROP, STATE.ASSIGN, STATE.PICK, STATE.PACK, STATE.SLAM, STATE.PSOLVE]
-  states.map((state, i) => setData(data[i], state))
-  const totalData = data.reduce((total, x) => total.concat(x), [])
-  setData(totalData, STATE.TOTAL)
-}
-
-const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
-
-function flash(cell) {
-  cell.classList.add('obd-dim')
-  setTimeout(() => cell.classList.remove('obd-dim'), 100)
 }
 
 function hideColSpanOne() {
@@ -143,16 +93,74 @@ function hideColSpanOne() {
     const filtered = allSpanOne.filter((elm) => elm.getAttribute('data-reactid').includes(`:$${i}`))
     spanOne = spanOne.concat(filtered)
   }
-
-  spanOne.map((elm, i) => {
+  for (let i = 0; i < spanOne.length; i += 1) {
     if (i % 2) {
-      elm.setAttribute('colspan', 2)
+      spanOne[i].setAttribute('colspan', 2)
     } else {
-      const elmStyle = elm.style
-      elmStyle.display = 'none'
+      spanOne[i].style.display = 'none'
     }
-    return elm
+  }
+}
+
+function setTitles(pullHours) {
+  const titles = pullHours.map((h) => `0${h}:00`.slice(-5))
+  for (let i = 0; i < titles.length; i += 1) {
+    ;[...document.querySelectorAll(SELECTOR.TIME_TH)][2 + i].textContent = titles[i]
+  }
+}
+
+function setData(data) {
+  const zoneStartEndIndex = { ambient: [0, 7], bigs: [7, 14], chilled: [14, 22], frozen: [22, 30], produce: [30, 38] }
+  ZONES.forEach((zone) => {
+    // prepare cells
+    const [start, end] = zoneStartEndIndex[zone]
+    const cells = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
+      .slice(start, end)
+      .map((row) => [...row.querySelectorAll('.obd-data-cell')].filter((child) => child.style.display !== 'none')) // skip hidden colspan-1-cells
+      .map((row) => row.slice(1, 1 + NUMBER_OF_PULLTIME))
+
+    // prepare values
+    const states = [...SET_STATES]
+    const { values } = data.find((d) => d.zone === zone)
+    if (zone === 'ambient' || zone === 'bigs') {
+      states.shift()
+      values.shift()
+    }
+
+    const timeFrames = getPullHours().map((hr) => getTimeFrame(hr, false))
+    for (let i = 0; i < states.length; i += 1) {
+      const state = states[i]
+      for (let j = 0; j < NUMBER_OF_PULLTIME; j += 1) {
+        const cell = cells[i][j]
+        const [itmeCnt, bagCnt] = values[i][j]
+        const timeFrame = timeFrames[j]
+        // remove previous nodes we added
+        ;[...cell.querySelectorAll('.bod-node')].forEach((elm) => elm.remove())
+        // hide original nodes
+        ;[...cell.children].forEach((elm) => {
+          const elmStyle = elm.style
+          elmStyle.display = 'none'
+        })
+        // add our new nodes
+        if (itmeCnt === 0) {
+          cell.append(createZeroElement())
+          cell.classList.remove('obd-dim') // for last column which is set dim initially
+          cell.classList.remove(`obd-data-${state}`)
+          cell.classList.add('obd-alt-bg')
+        } else {
+          flash(cell)
+          cell.append(createLinkElement(itmeCnt, bagCnt, zone, state, timeFrame))
+          cell.classList.remove('obd-alt-bg')
+          cell.classList.add(`obd-data-${state}`)
+        }
+      }
+    }
   })
+}
+
+function flash(cell) {
+  cell.classList.add('obd-dim')
+  setTimeout(() => cell.classList.remove('obd-dim'), 100)
 }
 
 function getPullHours() {
@@ -162,70 +170,6 @@ function getPullHours() {
   return timeTable.slice(startTimeIdx, startTimeIdx + NUMBER_OF_PULLTIME)
 }
 
-function setData(rawData, state) {
-  const zones =
-    state === STATE.GENERATED ? ['chilled', 'frozen', 'produce'] : ['ambient', 'bigs', 'chilled', 'frozen', 'produce']
-
-  hideColSpanOne()
-  const rows = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)]
-    .map((tr) => [...tr.children].slice(1)) // remove zone col
-    .map((tr) => tr.filter((elm) => elm.style.display !== 'none')) // skip hidden colspan-1-cells
-  const filteredRows = rows
-    .filter((row) => row[0].className.includes(state))
-    .map((row) => row.slice(1, 1 + NUMBER_OF_PULLTIME)) // remove state col
-
-  const pullHours = getPullHours()
-  const dataByPullTime = pullHours.map((hr) => rawData.filter((d) => d.pullTime.getHours() === hr))
-
-  for (let i = 0; i < zones.length; i += 1) {
-    const zone = zones[i]
-    const dataOfZone = dataByPullTime.map((data) => data.filter((d) => d.zone === zone))
-    const packages = dataOfZone.map((d) => d.length)
-    const items = dataOfZone.map((d) => d.reduce((acc, x) => acc + parseInt(x.items, 10), 0))
-
-    let content = []
-    if (state === STATE.PSOLVE) {
-      content = packages
-    } else {
-      content = items.map((item, idx) => (item ? `${item} (${packages[idx]})` : 0))
-    }
-
-    const timeFrames = pullHours.map((hr) => {
-      const pullTime = new Date()
-      pullTime.setHours(hr)
-      pullTime.setMinutes(15)
-      pullTime.setSeconds(0)
-      let timeDiff = timeDiffInMin(pullTime, new Date())
-      timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
-      return `${Math.max(timeDiff - 60, 0)},${timeDiff}`
-    })
-
-    filteredRows[i].map((cell, j) => {
-      // remove previous nodes we added
-      ;[...cell.querySelectorAll('.bod-node')].map((elm) => elm.remove())
-      // hide other nodes
-      ;[...cell.querySelectorAll(':not(.bod-node)')].map((elm) => {
-        const elmStyle = elm.style
-        elmStyle.display = 'none'
-        return elm
-      })
-      // add our new nodes
-      if (content[j] === 0) {
-        cell.classList.remove('obd-dim') // for last column which is set dim initially
-        cell.append(createZeroElement())
-        cell.classList.remove(`obd-data-${state}`)
-        cell.classList.add('obd-alt-bg')
-      } else {
-        flash(cell)
-        cell.append(createLinkElement(content[j], zone, state, timeFrames[j]))
-        cell.classList.remove('obd-alt-bg')
-        cell.classList.add(`obd-data-${state}`)
-      }
-      return cell
-    })
-  }
-}
-
 function createZeroElement() {
   const elm = document.createElement('span')
   elm.classList.add('bod-node')
@@ -233,34 +177,109 @@ function createZeroElement() {
   return elm
 }
 
-function createLinkElement(content, zone, state, timeFrame) {
+function createLinkElement(items, bags, zone, state, timeFrame = '') {
   const elm = document.createElement('a')
-  if (state === STATE.GENERATED) {
-    elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${STATE.HOLD}&zone=${zone}&cpt=${timeFrame}`)
+  if (state === 'generated') {
+    elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}generated,hold&zone=${zone}&cpt=${timeFrame}`)
   } else {
     elm.setAttribute('href', `${URL.PICKLIST_BY_STATE}${state}&zone=${zone}&cpt=${timeFrame}`)
   }
   elm.setAttribute('target', '_blank')
   elm.classList.add('bod-node')
-  elm.textContent = content
+  if (state === 'problem-solve') {
+    elm.textContent = `${bags}`
+  } else {
+    elm.textContent = `${items} (${bags})`
+  }
   return elm
 }
 
-async function getData(state) {
-  const res = await fetch(URL.PICKLIST_BY_STATE + state)
-  const txt = await res.text()
-  const html = new DOMParser().parseFromString(txt, 'text/html')
-  const picklists = [...html.querySelectorAll(SELECTOR.PICKLIST_TR)]
-  return picklists
-    .map((pl) => [...pl.querySelectorAll('td')])
-    .map((pl) => pl.map((td) => td.textContent))
-    .map((pl) => ({ zone: pl[3], items: pl[5], pullTime: new Date(pl[7]) }))
+function getTimeFrame(pullHour, allWindow = false) {
+  const timeDiffInMin = (t1, t2) => Math.ceil((t1 - t2) / 60000)
+  const pullTime = new Date()
+  pullTime.setHours(pullHour)
+  pullTime.setMinutes(15)
+  pullTime.setSeconds(0)
+  let timeDiff = timeDiffInMin(pullTime, new Date())
+  timeDiff = timeDiff > 0 ? timeDiff : timeDiff + 24 * 60
+
+  const buffer = 15
+  return allWindow ? `0,${timeDiff + buffer}` : `${Math.max(0, timeDiff - buffer)},${timeDiff + buffer}`
 }
 
-function setTitles(pullHours) {
-  const titles = pullHours.map((h) => `0${h}:00`.slice(-5))
-  for (let i = 0; i < titles.length; i += 1) {
-    ;[...document.querySelectorAll(SELECTOR.TIME_TH)][2 + i].textContent = titles[i]
+async function getData() {
+  const pullHours = getPullHours(NUMBER_OF_PULLTIME)
+  const timeFrame = getTimeFrame(pullHours.slice(-1), true)
+  const finalData = await Promise.all(
+    ZONES.map((zone) =>
+      fetch(`${URL.PICKLIST_ALL_STATE}&zone=${zone}&cpt=${timeFrame}`)
+        .then((res) => res.text())
+        .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
+        .then((html) => [...html.querySelectorAll(SELECTOR.PICKLIST_TR)])
+        .then((trs) => trs.map((tr) => [...tr.querySelectorAll('td')]))
+        .then((trs) => trs.map((tr) => tr.map((td) => td.textContent.trim())))
+        .then((trs) =>
+          trs.reduce(
+            (data, tr) => {
+              const newValues = [...data.values]
+
+              // update value by state
+              const stateIndex = GET_STATES.indexOf(tr[2])
+              const pullTimeIdx = Math.max(0, pullHours.indexOf(new Date(tr[7]).getHours()))
+              const [prevItems, prevBags] = newValues[stateIndex][pullTimeIdx]
+              const newItems = prevItems + parseInt(tr[5], 10)
+              const newBags = prevBags + 1
+              newValues[stateIndex][pullTimeIdx] = [newItems, newBags]
+
+              // update total value
+              const totalIndex = GET_STATES.indexOf('total')
+              const [prevTotalItems, prevTotalBags] = newValues[totalIndex][pullTimeIdx]
+              const newTotalItems = prevTotalItems + parseInt(tr[5], 10)
+              const newTotalBags = prevTotalBags + 1
+              newValues[totalIndex][pullTimeIdx] = [newTotalItems, newTotalBags]
+
+              return { ...data, values: newValues }
+            },
+            {
+              zone,
+              values: makeArray(NUMBER_OF_PULLTIME, GET_STATES.length, [0, 0]),
+            }
+          )
+        )
+    )
+  )
+  return finalData
+}
+
+function makeArray(x, y, val) {
+  const arr = []
+  for (let i = 0; i < y; i += 1) {
+    arr[i] = []
+    for (let j = 0; j < x; j += 1) {
+      arr[i][j] = val
+    }
+  }
+  return arr
+}
+
+function bindTitleOnClick() {
+  const handleOnClick = (event) => {
+    const { tagName } = event.target // TH or SPAN
+    const reactid = event.target.getAttribute('data-reactid')
+    if (tagName === 'TH') {
+      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-1), 16) - 1)
+    } else if (tagName === 'SPAN') {
+      localStorage.setItem('numberOfPulltimeCol', parseInt(reactid.slice(-3, -2), 16) - 1)
+    }
+    window.location.reload()
+  }
+
+  const titles = [...document.querySelectorAll('th.a-span1')]
+  for (let i = 1; i < titles.length; i += 1) {
+    // loop index must start from 1 to skip the status column
+    const title = titles[i]
+    title.addEventListener('dblclick', handleOnClick)
+    title.style.cursor = 'default'
   }
 }
 
