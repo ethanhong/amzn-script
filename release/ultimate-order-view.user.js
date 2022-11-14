@@ -23,12 +23,12 @@ const e = React.createElement
 
 // eslint-disable-next-line camelcase, no-undef
 const scriptMeta = GM_info.script
-// eslint-disable-next-line no-use-before-define
-const isValid = isValid(scriptMeta.name, scriptMeta.version)
 
 // eslint-disable-next-line no-unused-vars
 ;(function ultimateOrderView() {
-  if (!isValid) return
+  // eslint-disable-next-line no-undef
+  if (!isValid(scriptMeta.name, scriptMeta.version)) return
+
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
   const rootDiv = document.createElement('div')
   if (isAftlitePortal) {
