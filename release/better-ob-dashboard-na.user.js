@@ -31,7 +31,7 @@ const SELECTOR = {
 }
 
 // eslint-disable-next-line camelcase, no-undef
-const SCRIPT_META = GM_info.script
+const SCRIPT_INFO = GM_info
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
@@ -43,7 +43,7 @@ function getFakeData() {
 
 async function betterDashboard() {
   // eslint-disable-next-line no-undef
-  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  const isCheckValid = await isValid(SCRIPT_INFO)
   if (!isCheckValid) return
 
   bindTitleOnClick()

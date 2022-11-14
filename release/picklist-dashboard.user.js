@@ -56,14 +56,14 @@ const ACTIONS = {
 }
 
 // eslint-disable-next-line camelcase, no-undef
-const SCRIPT_META = GM_info.script
+const SCRIPT_INFO = GM_info
 
 showDashboard()
 
 // eslint-disable-next-line no-unused-vars
 async function showDashboard() {
   // eslint-disable-next-line no-undef
-  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  const isCheckValid = await isValid(SCRIPT_INFO)
   if (!isCheckValid) return
 
   const oldTbl = document.querySelector(SELECTOR.OLD_TABLE)

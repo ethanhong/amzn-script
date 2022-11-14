@@ -11,7 +11,10 @@ const lists = [
 
 const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
 
-async function isValid(scriptName, scriptVersion) {
+async function isValid(scriptInfo) {
+  const scriptName = scriptInfo.script.name
+  const scriptVersion = scriptInfo.script.version
+
   const appObj = lists.find((list) => list.app === scriptName)
   if (!appObj) {
     console.log('Script name is not exist.', scriptName)

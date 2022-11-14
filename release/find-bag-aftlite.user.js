@@ -22,7 +22,7 @@
 const e = React.createElement
 
 // eslint-disable-next-line camelcase, no-undef
-const SCRIPT_META = GM_info.script
+const SCRIPT_INFO = GM_info
 
 startBagFinder()
 
@@ -481,7 +481,7 @@ function App({ oldTable, isAftlitePortal }) {
 // eslint-disable-next-line no-unused-vars
 async function startBagFinder() {
   // eslint-disable-next-line no-undef
-  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  const isCheckValid = await isValid(SCRIPT_INFO)
   if (!isCheckValid) return
 
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
