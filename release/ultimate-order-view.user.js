@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ultimate Order View
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.1
+// @version      2.2.2
 // @description  Show an integrated and functional table in order view page
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/wms/view_order*
@@ -12,6 +12,7 @@
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js
+// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
 /* global React */
@@ -20,8 +21,14 @@
 
 const e = React.createElement
 
+// eslint-disable-next-line camelcase, no-undef
+const scriptMeta = GM_info.script
+// eslint-disable-next-line no-use-before-define
+const isValid = isValid(scriptMeta.name, scriptMeta.version)
+
 // eslint-disable-next-line no-unused-vars
 ;(function ultimateOrderView() {
+  if (!isValid) return
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
   const rootDiv = document.createElement('div')
   if (isAftlitePortal) {
