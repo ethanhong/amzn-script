@@ -20,12 +20,9 @@
 const e = React.createElement
 
 // eslint-disable-next-line camelcase, no-undef
-const scriptMeta = GM_info.script
+const SCRIPT_META = GM_info.script
 
-// eslint-disable-next-line no-undef
-if (isValid(scriptMeta.name, scriptMeta.version)) {
-  startBagFinder()
-}
+startBagFinder()
 
 function getCSS() {
   const style = `
@@ -96,7 +93,11 @@ function App() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function startBagFinder() {
+async function startBagFinder() {
+  // eslint-disable-next-line no-undef
+  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  if (!isCheckValid) return
+
   // add stylesheet
   const styleSheet = document.createElement('style')
   styleSheet.innerText = getCSS()

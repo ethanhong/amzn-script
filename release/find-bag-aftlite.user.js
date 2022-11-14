@@ -22,12 +22,9 @@
 const e = React.createElement
 
 // eslint-disable-next-line camelcase, no-undef
-const scriptMeta = GM_info.script
+const SCRIPT_META = GM_info.script
 
-// eslint-disable-next-line no-undef
-if (isValid(scriptMeta.name, scriptMeta.version)) {
-  startBagFinder()
-}
+startBagFinder()
 
 function getCSS(isAftlitePortal) {
   const styleNA = `
@@ -482,7 +479,11 @@ function App({ oldTable, isAftlitePortal }) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function startBagFinder() {
+async function startBagFinder() {
+  // eslint-disable-next-line no-undef
+  const isCheckValid = await isValid(SCRIPT_META.name, SCRIPT_META.version)
+  if (!isCheckValid) return
+
   const isAftlitePortal = window.location.hostname === 'aftlite-portal.amazon.com'
 
   // add stylesheet
