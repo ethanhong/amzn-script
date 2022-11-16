@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.0.1
+// @version      2.1.1
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -11,6 +11,9 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
+
+// eslint-disable-next-line camelcase, no-undef
+const SCRIPT_INFO = GM_info
 
 const DEFAULT_NUMBER_OF_PULLTIME = 3
 const NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10) || DEFAULT_NUMBER_OF_PULLTIME
@@ -31,9 +34,6 @@ const SELECTOR = {
   ELEMENT_TO_OBSERVE: '#orchaJsWebAppCanvas tbody:nth-child(2)',
 }
 
-// eslint-disable-next-line camelcase, no-undef
-const SCRIPT_INFO = GM_info
-
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
 async function betterDashboard() {
@@ -41,22 +41,45 @@ async function betterDashboard() {
   const isCheckValid = await isValid(SCRIPT_INFO)
   if (!isCheckValid) return
 
+  const controller = new AbortController()
+  const { signal } = controller
+
   bindTitleOnClick()
 
   // first load
   setTitles(getPullHours())
-  let data = await getData()
+  let data = await getData(signal)
   hideColSpanOne()
   setData(data)
 
+  // set listener
+  window.addEventListener('offline', () => {
+    console.log('Offline')
+    controller.abort()
+  })
+  window.addEventListener('online', () => {
+    console.log('Online')
+    window.location.reload()
+  })
+
   // fetch data in loop
-  setAsyncInterval(async () => {
-    try {
-      data = await getData()
-    } catch (error) {
-      console.log(error)
-    }
-  }, 5000)
+  let prevTime = Date.now()
+  setAsyncInterval(
+    async () => {
+      if (Date.now() - prevTime > 60 * 1000) {
+        console.log('Recover from sleep, reload page.')
+        window.location.reload()
+      }
+      try {
+        data = await getData(signal)
+      } catch (error) {
+        console.log(error)
+      }
+      prevTime = Date.now()
+    },
+    5000,
+    signal
+  )
 
   // monitor content/attributes change to setData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
@@ -88,10 +111,14 @@ async function betterDashboard() {
   contentObserver.observe(elementToObserve, observerOptions)
 }
 
-async function setAsyncInterval(f, interval) {
+async function setAsyncInterval(f, interval, signal) {
+  if (signal.aborted) {
+    console.log('setAsyncInterval: aborted!')
+    return
+  }
   await new Promise((r) => setTimeout(r, interval)) // ms
   await f()
-  await setAsyncInterval(f, interval)
+  await setAsyncInterval(f, interval, signal)
 }
 
 function hideColSpanOne() {
@@ -215,12 +242,12 @@ function getTimeFrame(pullHour, allWindow = false) {
   return allWindow ? `0,${timeDiff + buffer}` : `${Math.max(0, timeDiff - buffer)},${timeDiff + buffer}`
 }
 
-async function getData() {
+async function getData(signal) {
   const pullHours = getPullHours(NUMBER_OF_PULLTIME)
   const timeFrame = getTimeFrame(pullHours.slice(-1), true)
   const finalData = await Promise.all(
     ZONES.map((zone) =>
-      fetch(`${URL.PICKLIST_ALL_STATE}&zone=${zone}&cpt=${timeFrame}`)
+      fetch(`${URL.PICKLIST_ALL_STATE}&zone=${zone}&cpt=${timeFrame}`, { signal })
         .then((res) => res.text())
         .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
         .then((html) => [...html.querySelectorAll(SELECTOR.PICKLIST_TR)])
