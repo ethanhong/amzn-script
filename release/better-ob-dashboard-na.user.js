@@ -12,6 +12,9 @@
 // @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
+// eslint-disable-next-line camelcase, no-undef
+const SCRIPT_INFO = GM_info
+
 const DEFAULT_NUMBER_OF_PULLTIME = 3 // 1-8
 const NUMBER_OF_PULLTIME = parseInt(localStorage.getItem('numberOfPulltimeCol'), 10) || DEFAULT_NUMBER_OF_PULLTIME
 
@@ -29,9 +32,6 @@ const SELECTOR = {
   PICKLIST_TR: '#wms_orders_in_state > tbody > tr',
   DASHBOARD_TR: '#cpt_table > tbody > tr',
 }
-
-// eslint-disable-next-line camelcase, no-undef
-const SCRIPT_INFO = GM_info
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
 
@@ -52,6 +52,7 @@ async function betterDashboard() {
   setTitles(getPullHours())
   // const data = await getData()
   const data = await getFakeData()
+  console.log(data)
   clearCells()
   setData(data)
 
