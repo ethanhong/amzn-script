@@ -31,59 +31,80 @@ const SELECTOR = {
   TIME_TH: '#cpt_table > thead > tr > th',
   PICKLIST_TR: '#wms_orders_in_state > tbody > tr',
   DASHBOARD_TR: '#cpt_table > tbody > tr',
+  ELEMENT_TO_OBSERVE: '#cpt_table > tbody',
 }
 
 waitForElm(SELECTOR.TIME_TH).then(() => betterDashboard())
-
-function getFakeData() {
-  return JSON.parse(
-    '[{"zone":"ambient","values":[[[0,0],[0,0],[0,0]],[[4,1],[90,11],[0,0]],[[1,1],[0,0],[0,0]],[[1,1],[0,0],[0,0]],[[1,1],[0,0],[0,0]],[[1,1],[0,0],[0,0]],[[1,1],[0,0],[0,0]],[[4,1],[90,11],[0,0]]]},{"zone":"bigs","values":[[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]]]},{"zone":"chilled","values":[[[1,1],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[1,1],[0,0],[0,0]]]},{"zone":"frozen","values":[[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]]]},{"zone":"produce","values":[[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]],[[0,0],[0,0],[0,0]]]}]'
-  )
-}
 
 async function betterDashboard() {
   // eslint-disable-next-line no-undef
   const isCheckValid = await isValid(SCRIPT_INFO)
   if (!isCheckValid) return
 
+  const controller = new AbortController()
+  const { signal } = controller
+
   bindTitleOnClick()
 
   // first load
   setTitles(getPullHours())
-  // const data = await getData()
-  const data = await getFakeData()
-  console.log(data)
+  let data = await getData(signal)
   clearCells()
   setData(data)
 
-  // // fetch data in loop
-  // setAsyncInterval(async () => {
-  //   try {
-  //     data = await getData()
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }, 5000)
+  // set listener
+  window.addEventListener('offline', () => {
+    console.log('Offline')
+    controller.abort()
+  })
+  window.addEventListener('online', () => {
+    console.log('Online')
+    window.location.reload()
+  })
 
-  // // monitor content/attributes change to setData
-  // const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
-  // const observerOptions = {
-  //   childList: true,
-  //   subtree: true,
-  // }
-  // const contentObserver = new MutationObserver(() => {
-  //   contentObserver.disconnect()
-  //   setTitles(getPullHours())
-  //   setData(data)
-  //   contentObserver.observe(elementToObserve, observerOptions)
-  // })
-  // contentObserver.observe(elementToObserve, observerOptions)
+  // fetch data in loop
+  let prevTime = Date.now()
+  setAsyncInterval(
+    async () => {
+      if (Date.now() - prevTime > 60 * 1000) {
+        console.log('Recover from sleep, reload page.')
+        window.location.reload()
+      }
+      try {
+        data = await getData(signal)
+      } catch (error) {
+        console.log(error)
+      }
+      prevTime = Date.now()
+    },
+    5000,
+    signal
+  )
+
+  // monitor content/attributes change to setData
+  const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
+  const observerOptions = {
+    childList: true,
+    subtree: true,
+  }
+  const contentObserver = new MutationObserver(() => {
+    contentObserver.disconnect()
+    setTitles(getPullHours())
+    clearCells()
+    setData(data)
+    contentObserver.observe(elementToObserve, observerOptions)
+  })
+  contentObserver.observe(elementToObserve, observerOptions)
 }
 
-async function setAsyncInterval(f, interval) {
+async function setAsyncInterval(f, interval, signal) {
+  if (signal.aborted) {
+    console.log('setAsyncInterval: aborted!')
+    return
+  }
   await new Promise((r) => setTimeout(r, interval)) // ms
   await f()
-  await setAsyncInterval(f, interval)
+  await setAsyncInterval(f, interval, signal)
 }
 
 function clearCells() {
@@ -139,9 +160,9 @@ function createLinkElement(items, bags, zone, state, timeFrame = '') {
   }
   elm.setAttribute('target', '_blank')
   if (state === 'problem-solve') {
-    elm.innerHTML = `<div class="status">${bags}</div>`
+    elm.innerHTML = `<div class="status ${state}" style="white-space: nowrap">${bags}</div>`
   } else {
-    elm.innerHTML = `<div class="status ${state}">${items} (${bags})</div>`
+    elm.innerHTML = `<div class="status ${state}" style="white-space: nowrap">${items} (${bags})</div>`
   }
   return elm
 }
@@ -177,13 +198,13 @@ function makeArray(x, y, val) {
   return arr
 }
 
-async function getData() {
+async function getData(signal) {
   const pullHours = getPullHours(NUMBER_OF_PULLTIME)
   const timeFrame = getTimeFrame(pullHours.slice(-1), true)
 
   const rawData = await Promise.all(
     ZONES.map((zone) =>
-      fetch(`${URL.PICKLIST_ALL_STATE}&zone=${zone}&cpt=${timeFrame}`)
+      fetch(`${URL.PICKLIST_ALL_STATE}&zone=${zone}&cpt=${timeFrame}`, { signal })
         .then((res) => res.text())
         .then((txt) => new DOMParser().parseFromString(txt, 'text/html'))
         .then((html) => [...html.querySelectorAll(SELECTOR.PICKLIST_TR)])
