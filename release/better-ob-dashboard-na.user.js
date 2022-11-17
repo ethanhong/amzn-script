@@ -50,7 +50,7 @@ async function betterDashboard() {
   setTitles(getPullHours())
   let data = await getData(signal)
   clearCells()
-  setData(data)
+  showData(data)
 
   // set listener
   window.addEventListener('offline', () => {
@@ -81,7 +81,7 @@ async function betterDashboard() {
     signal
   )
 
-  // monitor content/attributes change to setData
+  // monitor content/attributes change to showData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
     childList: true,
@@ -91,7 +91,7 @@ async function betterDashboard() {
     contentObserver.disconnect()
     setTitles(getPullHours())
     clearCells()
-    setData(data)
+    showData(data)
     contentObserver.observe(elementToObserve, observerOptions)
   })
   contentObserver.observe(elementToObserve, observerOptions)
@@ -118,7 +118,7 @@ function clearCells() {
   }
 }
 
-function setData(data) {
+function showData(data) {
   ZONES.forEach((zone, idx) => {
     // prepare cells
     const trOfZone = [...document.querySelectorAll(SELECTOR.DASHBOARD_TR)].filter(

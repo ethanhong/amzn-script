@@ -50,7 +50,7 @@ async function betterDashboard() {
   setTitles(getPullHours())
   let data = await getData(signal)
   hideColSpanOne()
-  setData(data)
+  showData(data)
 
   // set listener
   window.addEventListener('offline', () => {
@@ -81,7 +81,7 @@ async function betterDashboard() {
     signal
   )
 
-  // monitor content/attributes change to setData
+  // monitor content/attributes change to showData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
     attributeFilter: ['class'],
@@ -96,7 +96,7 @@ async function betterDashboard() {
         case 'childList':
           setTitles(getPullHours())
           hideColSpanOne()
-          setData(data)
+          showData(data)
           break
         case 'attributes':
           setZeroStyle()
@@ -144,7 +144,7 @@ function setTitles(pullHours) {
   }
 }
 
-function setData(data) {
+function showData(data) {
   const zoneStartEndIndex = { ambient: [0, 7], bigs: [7, 14], chilled: [14, 22], frozen: [22, 30], produce: [30, 38] }
   ZONES.forEach((zone) => {
     // prepare cells
