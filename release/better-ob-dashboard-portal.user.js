@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.1
+// @version      2.1.2
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -155,8 +155,8 @@ function setData(data) {
       .map((row) => row.slice(1, 1 + NUMBER_OF_PULLTIME))
 
     // prepare values
-    const states = [...SET_STATES]
-    const { values } = data.find((d) => d.zone === zone)
+    const states = structuredClone(SET_STATES)
+    const { values } = structuredClone(data.find((d) => d.zone === zone))
     if (zone === 'ambient' || zone === 'bigs') {
       states.shift()
       values.shift()
