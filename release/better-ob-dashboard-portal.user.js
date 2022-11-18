@@ -128,8 +128,9 @@ async function setAsyncInterval(f, interval, signal) {
     console.log('setAsyncInterval: aborted!')
     return
   }
-  await new Promise((r) => setTimeout(r, interval)) // ms
-  await f()
+  const sleepPromise = new Promise((r) => setTimeout(r, interval)) // ms
+  const functionPromise = f()
+  await Promise.all([sleepPromise, functionPromise])
   await setAsyncInterval(f, interval, signal)
 }
 
