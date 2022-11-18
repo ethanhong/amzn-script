@@ -43,12 +43,13 @@ async function betterDashboard() {
 
   const controller = new AbortController()
   const { signal } = controller
+  let lastMutationTime = Date.now()
 
   bindTitleOnClick()
 
   // first load
-  setTitles(getPullHours())
   let data = await getData(signal)
+  setTitles(getPullHours())
   clearCells()
   showData(data)
 
@@ -63,33 +64,44 @@ async function betterDashboard() {
   })
 
   // fetch data in loop
-  let prevTime = Date.now()
   setAsyncInterval(
     async () => {
-      if (Date.now() - prevTime > 60 * 1000) {
-        console.log('Recover from sleep, reload page.')
-        window.location.reload()
-      }
       try {
         data = await getData(signal)
+        setTitles(getPullHours())
+        clearCells()
+        showData(data)
       } catch (error) {
         console.log(error)
       }
-      prevTime = Date.now()
     },
     5000,
     signal
   )
 
-  // monitor content/attributes change to showData
+  // monitor mutation period
+  // if there is no mutation happen over 30 seconds means something went wrong
+  setAsyncInterval(
+    () => {
+      if (Date.now() - lastMutationTime > 35 * 1000) {
+        console.log('Mutation stopped, reload page.')
+        controller.abort()
+        window.location.reload()
+      }
+    },
+    1000,
+    signal
+  )
+
+  // monitor content change to showData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
     childList: true,
     subtree: true,
   }
   const contentObserver = new MutationObserver(() => {
+    lastMutationTime = Date.now()
     contentObserver.disconnect()
-    setTitles(getPullHours())
     clearCells()
     showData(data)
     contentObserver.observe(elementToObserve, observerOptions)

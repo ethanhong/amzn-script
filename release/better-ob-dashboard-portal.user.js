@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [portal]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.2
+// @version      2.1.3
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-portal.amazon.com/ojs/OrchaJSFaaSTCoreProcess/OutboundDashboard
@@ -43,6 +43,7 @@ async function betterDashboard() {
 
   const controller = new AbortController()
   const { signal } = controller
+  let lastMutationTime = Date.now()
 
   bindTitleOnClick()
 
@@ -63,21 +64,32 @@ async function betterDashboard() {
   })
 
   // fetch data in loop
-  let prevTime = Date.now()
   setAsyncInterval(
     async () => {
-      if (Date.now() - prevTime > 60 * 1000) {
-        console.log('Recover from sleep, reload page.')
-        window.location.reload()
-      }
       try {
         data = await getData(signal)
+        setTitles(getPullHours())
+        hideColSpanOne()
+        showData(data)
       } catch (error) {
         console.log(error)
       }
-      prevTime = Date.now()
     },
     5000,
+    signal
+  )
+
+  // monitor mutation period
+  // if there is no mutation happen over 30 seconds means something went wrong
+  setAsyncInterval(
+    () => {
+      if (Date.now() - lastMutationTime > 35 * 1000) {
+        console.log('Mutation stopped, reload page.')
+        controller.abort()
+        window.location.reload()
+      }
+    },
+    1000,
     signal
   )
 
@@ -89,12 +101,12 @@ async function betterDashboard() {
     subtree: true,
   }
   const contentObserver = new MutationObserver((mutationList) => {
+    lastMutationTime = Date.now()
     contentObserver.disconnect()
     const mutationTypes = Array.from(new Set(mutationList.map((m) => m.type)))
     mutationTypes.map((type) => {
       switch (type) {
         case 'childList':
-          setTitles(getPullHours())
           hideColSpanOne()
           showData(data)
           break
@@ -183,7 +195,7 @@ function showData(data) {
           cell.classList.remove(`obd-data-${state}`)
           cell.classList.add('obd-alt-bg')
         } else {
-          flash(cell)
+          // flash(cell)
           cell.append(createLinkElement(itmeCnt, bagCnt, zone, state, timeFrame))
           cell.classList.remove('obd-alt-bg')
           cell.classList.add(`obd-data-${state}`)
@@ -193,10 +205,10 @@ function showData(data) {
   })
 }
 
-function flash(cell) {
-  cell.classList.add('obd-dim')
-  setTimeout(() => cell.classList.remove('obd-dim'), 100)
-}
+// function flash(cell) {
+//   cell.classList.add('obd-dim')
+//   setTimeout(() => cell.classList.remove('obd-dim'), 100)
+// }
 
 function getPullHours() {
   const timeTable = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 5, 6, 7, 8, 9, 10, 11, 12]
