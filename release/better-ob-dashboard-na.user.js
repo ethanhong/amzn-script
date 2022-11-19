@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [na]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.1
+// @version      2.2.1
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/outbound_dashboard/index
@@ -43,15 +43,9 @@ async function betterDashboard() {
 
   const controller = new AbortController()
   const { signal } = controller
-  let lastMutationTime = Date.now()
+  let data
 
   bindTitleOnClick()
-
-  // first load
-  let data = await getData(signal)
-  setTitles(getPullHours())
-  clearCells()
-  showData(data)
 
   // set listener
   window.addEventListener('offline', () => {
@@ -63,36 +57,6 @@ async function betterDashboard() {
     window.location.reload()
   })
 
-  // fetch data in loop
-  setAsyncInterval(
-    async () => {
-      try {
-        data = await getData(signal)
-        setTitles(getPullHours())
-        clearCells()
-        showData(data)
-      } catch (error) {
-        console.log(error)
-      }
-    },
-    5000,
-    signal
-  )
-
-  // monitor mutation period
-  // if there is no mutation happen over 30 seconds means something went wrong
-  setAsyncInterval(
-    () => {
-      if (Date.now() - lastMutationTime > 35 * 1000) {
-        console.log('Mutation stopped, reload page.')
-        controller.abort()
-        window.location.reload()
-      }
-    },
-    1000,
-    signal
-  )
-
   // monitor content change to showData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
@@ -100,13 +64,44 @@ async function betterDashboard() {
     subtree: true,
   }
   const contentObserver = new MutationObserver(() => {
-    lastMutationTime = Date.now()
     contentObserver.disconnect()
     clearCells()
     showData(data)
     contentObserver.observe(elementToObserve, observerOptions)
   })
-  contentObserver.observe(elementToObserve, observerOptions)
+
+  async function updateContent() {
+    if (document.visibilityState === 'hidden') {
+      return
+    }
+    data = await getData(signal)
+    contentObserver.disconnect()
+    setTitles(getPullHours())
+    clearCells()
+    showData(data)
+    contentObserver.observe(elementToObserve, observerOptions)
+  }
+
+  // fetch data in loop
+  setAsyncInterval(updateContent, 5000, signal)
+
+  let hiddenTimer = Date.now()
+  document.addEventListener('visibilitychange', () => {
+    switch (document.visibilityState) {
+      case 'visible':
+        if (Date.now() - hiddenTimer > 5 * 1000) {
+          updateContent()
+        }
+        break
+
+      case 'hidden':
+        hiddenTimer = Date.now()
+        break
+
+      default:
+        break
+    }
+  })
 }
 
 async function setAsyncInterval(f, interval, signal) {
