@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [na]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.1
+// @version      2.2.2
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/outbound_dashboard/index
@@ -43,7 +43,8 @@ async function betterDashboard() {
 
   const controller = new AbortController()
   const { signal } = controller
-  let data
+  let isUpdating = false
+  let data = []
 
   bindTitleOnClick()
 
@@ -71,15 +72,18 @@ async function betterDashboard() {
   })
 
   async function updateContent() {
-    if (document.visibilityState === 'hidden') {
+    if (isUpdating || document.visibilityState === 'hidden') {
       return
     }
+
+    isUpdating = true
     data = await getData(signal)
     contentObserver.disconnect()
     setTitles(getPullHours())
     clearCells()
     showData(data)
     contentObserver.observe(elementToObserve, observerOptions)
+    isUpdating = false
   }
 
   // fetch data in loop

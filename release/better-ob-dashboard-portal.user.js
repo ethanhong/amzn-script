@@ -43,15 +43,10 @@ async function betterDashboard() {
 
   const controller = new AbortController()
   const { signal } = controller
-  let lastMutationTime = Date.now()
+  let isUpdating = false
+  let data = []
 
   bindTitleOnClick()
-
-  // first load
-  setTitles(getPullHours())
-  let data = await getData(signal)
-  hideColSpanOne()
-  showData(data)
 
   // set listener
   window.addEventListener('offline', () => {
@@ -63,36 +58,6 @@ async function betterDashboard() {
     window.location.reload()
   })
 
-  // fetch data in loop
-  setAsyncInterval(
-    async () => {
-      try {
-        data = await getData(signal)
-        setTitles(getPullHours())
-        hideColSpanOne()
-        showData(data)
-      } catch (error) {
-        console.log(error)
-      }
-    },
-    5000,
-    signal
-  )
-
-  // monitor mutation period
-  // if there is no mutation happen over 30 seconds means something went wrong
-  setAsyncInterval(
-    () => {
-      if (Date.now() - lastMutationTime > 35 * 1000) {
-        console.log('Mutation stopped, reload page.')
-        controller.abort()
-        window.location.reload()
-      }
-    },
-    1000,
-    signal
-  )
-
   // monitor content/attributes change to showData
   const elementToObserve = document.querySelector(SELECTOR.ELEMENT_TO_OBSERVE)
   const observerOptions = {
@@ -101,7 +66,6 @@ async function betterDashboard() {
     subtree: true,
   }
   const contentObserver = new MutationObserver((mutationList) => {
-    lastMutationTime = Date.now()
     contentObserver.disconnect()
     const mutationTypes = Array.from(new Set(mutationList.map((m) => m.type)))
     mutationTypes.map((type) => {
@@ -120,7 +84,42 @@ async function betterDashboard() {
     })
     contentObserver.observe(elementToObserve, observerOptions)
   })
-  contentObserver.observe(elementToObserve, observerOptions)
+
+  async function updateContent() {
+    if (isUpdating || document.visibilityState === 'hidden') {
+      return
+    }
+
+    isUpdating = true
+    data = await getData(signal)
+    contentObserver.disconnect()
+    setTitles(getPullHours())
+    hideColSpanOne()
+    showData(data)
+    contentObserver.observe(elementToObserve, observerOptions)
+    isUpdating = false
+  }
+
+  // fetch data in loop
+  setAsyncInterval(updateContent, 5000, signal)
+
+  let hiddenTimer = Date.now()
+  document.addEventListener('visibilitychange', () => {
+    switch (document.visibilityState) {
+      case 'visible':
+        if (Date.now() - hiddenTimer > 5 * 1000) {
+          updateContent()
+        }
+        break
+
+      case 'hidden':
+        hiddenTimer = Date.now()
+        break
+
+      default:
+        break
+    }
+  })
 }
 
 async function setAsyncInterval(f, interval, signal) {
