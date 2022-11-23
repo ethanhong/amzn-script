@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Find Bags [como]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.1.0
+// @version      2.1.1
 // @description  Return stage locations for given scannable codes
 // @author       Pei
 // @match        https://como-operations-dashboard-iad.iad.proxy.amazon.com/store/*
@@ -10,7 +10,6 @@
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
 // @require      https://unpkg.com/react@18/umd/react.production.min.js
 // @require      https://unpkg.com/react-dom@18/umd/react-dom.production.min.js
-// @require      https://ethanhong.github.io/amzn-tools/release/authenticator.js
 // ==/UserScript==
 
 /* global React */
@@ -18,9 +17,6 @@
 /* eslint-disable prefer-destructuring */
 
 const e = React.createElement
-
-// eslint-disable-next-line camelcase, no-undef
-const SCRIPT_INFO = GM_info
 
 startBagFinder()
 
@@ -94,10 +90,6 @@ function App() {
 
 // eslint-disable-next-line no-unused-vars
 async function startBagFinder() {
-  // eslint-disable-next-line no-undef
-  const isCheckValid = await isValid(SCRIPT_INFO)
-  if (!isCheckValid) return
-
   // add stylesheet
   const styleSheet = document.createElement('style')
   styleSheet.innerText = getCSS()
