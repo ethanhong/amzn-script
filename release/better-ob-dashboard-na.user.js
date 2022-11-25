@@ -2,10 +2,11 @@
 // ==UserScript==
 // @name         Better Outbound Dashboard [na]
 // @namespace    https://github.com/ethanhong/amzn-tools/tree/main/release
-// @version      2.2.2
+// @version      2.2.3
 // @description  A better outbound dashboard
 // @author       Pei
 // @match        https://aftlite-na.amazon.com/outbound_dashboard/index
+// @match        https://aftlite-na.amazon.com/outbound_dashboard*
 // @updateURL    https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-na.user.js
 // @downloadURL  https://ethanhong.github.io/amzn-tools/release/better-ob-dashboard-na.user.js
 // @supportURL   https://github.com/ethanhong/amzn-tools/issues
